@@ -1,0 +1,72 @@
+<!doctype html>
+<!-- Královské stezky — webová hra. Podává ji bot (složka www/). API je stejné jako pro mobilní aplikaci.
+     Když stránku nahraješ jinam (např. libricivitatis.eu vedle stezky-api.php), nastav data-api="stezky-api.php".
+     data-img = adresa úložiště obrázků (GitHub Pages repozitáře kralovske-stezky-grafika); prázdné = složka img/.
+     data-zvuk = adresa složky se zvuky a hudbou (repo grafiky, zvuk/); prázdné = vedle obrázků. -->
+<html lang="cs" data-api="https://libricivitatis.eu/stezky-api.php" data-img="https://novakpa92-cz.github.io/kralovske-stezky-grafika/img/" data-zvuk="https://novakpa92-cz.github.io/kralovske-stezky-grafika/zvuk/">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16110b">
+<meta name="description" content="Královské stezky — tahová hra z Kutnohorska 15. století. Stejná postava jako na Discordu.">
+<title>Královské stezky</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="hra.css">
+</head>
+<body>
+<div id="app">
+  <!-- přihlášení -->
+  <section id="login" class="screen login" hidden>
+    <div class="login-card">
+      <div class="crest" aria-hidden="true">⚔️</div>
+      <h1 data-t="app_title">Královské stezky</h1>
+      <p class="sub" data-t="app_sub">Tahová hra z českého středověku</p>
+      <ol class="steps">
+        <li data-t="login_1">Na Discordu napiš příkaz <b>/aplikace</b></li>
+        <li data-t="login_2">Bot ti soukromě pošle šestimístný kód</li>
+        <li data-t="login_3">Kód opiš sem</li>
+      </ol>
+      <form id="login-form" autocomplete="off">
+        <label for="code" class="lbl" data-t="code">Kód z Discordu</label>
+        <input id="code" name="code" maxlength="8" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="ABC123" required>
+        <button class="btn primary big" type="submit" data-t="login">Přihlásit</button>
+        <p id="login-msg" class="msg" role="alert"></p>
+      </form>
+      <div class="lang-row">
+        <button type="button" class="link" data-lang="cs">Čeština</button> ·
+        <button type="button" class="link" data-lang="en">English</button>
+      </div>
+      <p class="fine" data-t="login_note">Hraješ se stejnou postavou jako na Discordu — co uděláš tady, uvidíš i tam.</p>
+    </div>
+  </section>
+
+  <!-- hra -->
+  <section id="game" class="screen" hidden>
+    <header class="topbar">
+      <div class="brand"><span aria-hidden="true">⚔️</span> <span data-t="app_title">Královské stezky</span></div>
+      <div class="who">
+        <span id="tb-name" class="tb-name"></span>
+        <span id="tb-level" class="pill"></span>
+        <span id="tb-coins" class="pill gold"></span>
+        <span id="tb-clock" class="tb-clock"></span>
+        <span id="tb-sky" class="tb-clock"></span>
+      </div>
+    </header>
+    <nav class="tabs" aria-label="Menu">
+      <button data-tab="mesto"><span aria-hidden="true">🏰</span><b data-t="nav_town">Město</b></button>
+      <button data-tab="hero"><span aria-hidden="true">🛡️</span><b data-t="nav_hero">Postava</b></button>
+      <button data-tab="bag"><span aria-hidden="true">🎒</span><b data-t="nav_bag">Batoh</b></button>
+      <button data-tab="more"><span aria-hidden="true">☰</span><b data-t="nav_more">Více</b></button>
+    </nav>
+    <main id="view" tabindex="-1"></main>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="busy" class="busy" hidden><span></span></div>
+</div>
+<script src="scena.js"></script>
+<script src="postava.js"></script>
+<script src="zvuk.js"></script>
+<script src="hra.js"></script>
+</body>
+</html>
