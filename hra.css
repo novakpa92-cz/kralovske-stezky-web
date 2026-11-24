@@ -2324,11 +2324,11 @@ html:fullscreen,html:fullscreen body,:fullscreen{cursor:var(--k-zaklad)}
 .login .steps{text-align:left;padding-left:1.4em;margin:12px 0}
 .login .steps li{margin:0 0 10px;line-height:1.45;font-size:.95rem}
 .krok-pozor{display:block;margin-top:4px;padding:5px 8px;border-left:3px solid #c0503a;background:#c0503a1a;color:#ffcfb5;font-size:.84rem}
-.dc-ukazka{margin:4px 0 14px;padding:10px;border-radius:8px;background:#313338;text-align:left;font-family:system-ui,sans-serif;font-size:13px}
-.dc-nabidka{padding:6px;border-radius:6px;background:#2b2d31;margin-bottom:8px}
+.dc-ukazka{margin:8px 0 4px;padding:10px;border-radius:8px;background:#313338;text-align:left;font-family:system-ui,sans-serif;font-size:13px}
+.dc-nabidka{padding:6px;border-radius:6px;background:#2b2d31}
 .dc-nabidka small{display:block;color:#949ba4;font-size:11px;font-weight:700;margin:0 0 4px 4px}
 .dc-prikaz{display:flex;align-items:center;gap:8px;padding:6px;border-radius:4px;background:#404249;animation:dc-svit 2.4s ease-in-out infinite}
-.dc-ik{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#7a1f14;color:#ffe9b0;font-size:9px;font-weight:700}
+.dc-ik{width:24px;height:24px;border-radius:50%;background:#000;object-fit:contain}
 .dc-prikaz b{color:#f2f3f5}.dc-prikaz em{color:#b5bac1;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dc-pole{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:#383a40;color:#dbdee1}
 .dc-plus{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#b5bac1;color:#383a40;font-weight:700}

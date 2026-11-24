@@ -35,13 +35,12 @@
       <p class="sub" data-t="app_sub">Tahová hra z českého středověku</p>
       <ol class="steps">
         <li data-t="login_1">Na Discordu napiš příkaz <b>/aplikace</b></li>
-        <li data-t="login_2">Bot ti soukromě pošle šestimístný kód</li>
+        <li><span data-t="login_2">Bot ti soukromě pošle šestimístný kód</span>
+          <div class="dc-ukazka" aria-hidden="true">
+            <div class="dc-nabidka"><small>PŘÍKAZY</small><div class="dc-prikaz"><img class="dc-ik" src="logo-ks.png" alt=""><b>/aplikace</b><em>Kód pro přihlášení na webu…</em></div></div>
+          </div></li>
         <li data-t="login_3">Kód opiš sem</li>
       </ol>
-      <div class="dc-ukazka" aria-hidden="true">
-        <div class="dc-nabidka"><small>PŘÍKAZY</small><div class="dc-prikaz"><span class="dc-ik">KS</span><b>/aplikace</b><em>Kód pro přihlášení na webu…</em></div></div>
-        <div class="dc-pole"><span class="dc-plus">+</span><span class="dc-text">/aplikace<i class="dc-kurzor"></i></span></div>
-      </div>
       <form id="login-form" autocomplete="off">
         <label for="code" class="lbl" data-t="code">Kód z Discordu</label>
         <input id="code" name="code" maxlength="8" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="ABC123" required>
