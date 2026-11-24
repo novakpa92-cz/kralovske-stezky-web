@@ -1087,9 +1087,28 @@ async function hospodaKresli() {
   const box = document.getElementById("hospoda-reci");
   if (!box || S.tab !== "misto" || S.arg !== "hostinec") { clearInterval(HOSPODA.timer); return; }
   let r; try { r = await call("chat", { room: "hostinec" }, true); } catch { return; }
-  if (!chatRebuild(box, chatHtml("hostinec", r.chat), { hostinec: r.chat })) return;
+  if (!chatRebuild(box, chatHtml("hostinec", r.chat), { hostinec: r.chat })) { hospodaVyska(); return; }
+  hospodaVyska();
   wireChat(box, hospodaKresli);
 }
+/** r27-21: hospodské řeči mají pevnou výšku — spodek okna lícuje se spodkem obrazu hostince, zprávy se posouvají uvnitř. */
+function hospodaVyska() {
+  const box = document.getElementById("hospoda-reci"), list = box && box.querySelector(".chat-list");
+  if (!list) return;
+  const sc = document.querySelector("#view .scene"), chat = box.querySelector(".chat");
+  const vedle = sc && window.innerWidth >= 1100 && !document.documentElement.classList.contains("mobil")
+    && sc.getBoundingClientRect().right <= chat.getBoundingClientRect().left + 2;   // obraz vlevo, volby a řeči vpravo
+  let v = Math.min(240, Math.round(window.innerHeight * 0.3));   // telefon a úzké okno: pevně, bez natahování
+  if (vedle) {
+    const spodek = sc.getBoundingClientRect().bottom, top = list.getBoundingClientRect().top;
+    const zbytek = chat.getBoundingClientRect().bottom - list.getBoundingClientRect().bottom;   // formulář a okraj pod seznamem
+    v = Math.round(spodek - top - zbytek);
+  }
+  v = Math.max(120, v);
+  if (list.style.height !== v + "px") { const dole = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
+    list.style.height = list.style.maxHeight = list.style.minHeight = v + "px"; if (dole) list.scrollTop = list.scrollHeight; }
+}
+window.addEventListener("resize", () => { if (S.tab === "misto" && S.arg === "hostinec") hospodaVyska(); });
 function wireChat(box, after) {
   box.querySelectorAll(".chat").forEach((c) => {
     const room = c.dataset.room, inp = c.querySelector("input"), list = c.querySelector(".chat-list");

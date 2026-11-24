@@ -3026,3 +3026,6 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 .prebarvit .pb-vec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;margin:0 0 8px;border:1px solid #8a6a3c66;border-radius:6px;background:#ffffff06}
 .prebarvit .pb-vec .nm{font:700 1.05rem var(--serif);color:#f0e2c0}
 .prebarvit .pb-vec .meta{color:#cbb994;font-size:.9rem}
+/* r27-21: hospodské řeči — pevná výška (nastaví hospodaVyska), zprávy se posouvají uvnitř */
+.chat.hospoda .chat-list{display:block;overflow-y:auto;overscroll-behavior:contain}
+.chat.hospoda .chat-list li{margin:0 0 3px}
