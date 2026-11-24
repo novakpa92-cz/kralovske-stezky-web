@@ -890,7 +890,7 @@ VIEWS.bag = (view) => {
     const db = barva ? ` data-barva="${esc(barva)}"` : "";
     return `<div class="item">${icon(id)}
       <div><div class="nm">${esc(i.name)}${q > 1 ? ` <span class="muted">× ${esc(q)}</span>` : ""}${barvaStitek(barva, hx)}</div>
-      <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.merchant_name ? " · " + esc(t("sell_to", i.merchant_name)) : ""}</div>${opotrebeni(i)}</div>
+      <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.merchant_name ? " · " + esc(t("sell_to", i.merchant_name)) : ""}</div>${statyHtml(i)}${opotrebeni(i)}</div>
       <div class="acts">
         ${i.use ? `<button class="btn small" data-use="${esc(id)}">${esc(t("use"))}</button>` : ""}
         ${i.equip ? `<button class="btn small" data-equip="${esc(id)}"${db}>${esc(t("equip"))}</button>` : ""}
@@ -907,7 +907,7 @@ VIEWS.bag = (view) => {
     <div class="grid g2 batoh${jeMobil() ? " m-jen-" + BZ : ""}" style="align-items:start">
       <div class="grid">
         ${blok(t("equipped"), "", m.equipped.length ? m.equipped.map((e) => `<div class="item eq">${icon(e.id)}
-          <div><div class="nm">${esc(e.name)}${e.enh ? ` <span class="muted">+${e.enh}</span>` : ""}${barvaStitek(e.color_name, e.color)}</div><div class="meta">${esc(e.slot_name)}</div>${opotrebeni(e)}</div>
+          <div><div class="nm">${esc(e.name)}${e.enh ? ` <span class="muted">+${e.enh}</span>` : ""}${barvaStitek(e.color_name, e.color)}</div><div class="meta">${esc(e.slot_name)}</div>${statyHtml(e)}${opotrebeni(e)}</div>
           <div class="acts"><button class="btn small" data-unequip="${esc(e.slot)}">${esc(t("unequip"))}</button></div></div>`).join("")
           : `<div class="empty">${esc(L(["Pěsti a obyčejný oděv.", "Fists and plain clothes."]))}</div>`)}
         ${blok(L(["Na opasku", "On the belt"]) + (N.belt_name ? " · " + N.belt_name : ""), N.belt.length + " / " + N.belt_max,
@@ -1791,6 +1791,13 @@ function postavNaZem(wrap) {
     i.src = img.currentSrc || img.src;
   };
   if (img.complete && img.naturalWidth) mer(); else img.addEventListener("load", mer, { once: true });
+}
+/** r27-20: staty výbavy (zbraně, zbroje, přilby, štíty, oblečení) jako štítky pod názvem. */
+function statyHtml(i) {
+  const s = (i && i.staty) || [];
+  if (!s.length) return "";
+  const tr = (x) => /^OČ \+|^zranění/.test(x) ? " hl" : /\d\+$/.test(x) ? " pozor" : /^hřeje/.test(x) ? " teplo" : "";
+  return `<div class="staty">${s.map(([x, d]) => `<span class="stat${tr(x)}" title="${esc(d || "")}">${esc(x)}</span>`).join("")}</div>`;
 }
 VIEWS.pet = (view) => {
   const Z = S.me.zvirata || [], A = Z.find((z) => z.active) || Z[0];
@@ -3352,7 +3359,7 @@ VIEWS.obchod = async (view) => {
     const ik = hxv ? `<span class="ikona-barva${/zbroj|štít|stit/i.test(i.slot_name || "") ? " kov" : ""}" style="--b:${hxv};--m:url('${IMG_BASE}predmety/ikony/${Postava.slug(i.id)}.webp')">${icon(i.id)}<i></i></span>` : icon(i.id);
     return `<div class="item">${ik}
       <div><div class="nm">${esc(i.name)}${i.level > lvl ? `<span class="tag lock">${esc(t("from_level", i.level))}</span>` : ""}</div>
-      <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.count ? " · " + esc(t("have", i.count)) : ""}</div></div>
+      <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.count ? " · " + esc(t("have", i.count)) : ""}</div>${statyHtml(i)}</div>
       <div class="acts">${mnoz(mx, cena(i))}<span class="price" data-cena-txt>${esc(t("coins", cena(i)))}</span>
         <button class="btn small primary" data-buy="${esc(i.id)}"${i.colors ? ` data-barva="${esc(zvol[i.id] || "Přírodní")}"` : ""}${i.level > lvl || cena(i) > S.me.coins ? " disabled" : ""}>${esc(t("buy"))}</button></div>
       ${i.colors ? (() => { const c = zvol[i.id] || "Přírodní", hx = i.colors[c];
@@ -3403,10 +3410,12 @@ VIEWS.obchod = async (view) => {
       <span>${esc(L(["Měšec: ", "Purse: "]) + t("coins", S.me.coins))}</span>${data.smuggler ? `<span class="dim">${esc(data.night ? L(["Každou noc jiné zboží · vykupuje jen cennosti a trofeje", "New goods every night · buys only valuables and trophies"]) : L([`Pašerák tu není — přijde v noci (21–5), asi za ${Math.floor(data.opens_min / 60)} h ${data.opens_min % 60} min.`, "The smuggler comes at night (9 pm–5 am)."]))}</span>` : `<span class="dim">🔄 ${esc(t("restock", left))}</span>`}</div>
       <div class="row">${DILNA[shopId] !== undefined ? `<button class="btn" id="oprava" title="${esc(L(["Opotřebená výbava zpět na 100 %, zušlechtění nasazené", "Worn gear back to 100 %, improve what you wear"]))}">${esc(L(["Opravit a zušlechtit", "Repair and improve"]))}</button>` : ""}
       <input class="search" id="shop-q" type="search" placeholder="${esc(t("search"))}"></div></div>
-    <div class="obchod-prepinac" role="tablist">
-      <button class="${S.shopStrana !== "prodat" ? "on" : ""}" data-strana="koupit">${esc(L(["Koupit", "Buy"]))}</button>
-      <button class="${S.shopStrana === "prodat" ? "on" : ""}" data-strana="prodat">${esc(L(["Prodat", "Sell"]))} <span id="mine-n2"></span></button></div>
-    <div class="grid g2 truhla-sloupce obchod-sloupce strana-${S.shopStrana === "prodat" ? "prodat" : "koupit"}" style="align-items:start">
+    <div class="obchod-prepinac${data.prebarvit ? " tri" : ""}" role="tablist">
+      <button class="${S.shopStrana !== "prodat" && !(data.prebarvit && S.shopStrana === "barvit") ? "on" : ""}" data-strana="koupit">${esc(L(["Koupit", "Buy"]))}</button>
+      <button class="${S.shopStrana === "prodat" ? "on" : ""}" data-strana="prodat">${esc(L(["Prodat", "Sell"]))} <span id="mine-n2"></span></button>
+      ${data.prebarvit ? `<button class="${S.shopStrana === "barvit" ? "on" : ""}" data-strana="barvit">${esc(L(["Přebarvit", "Recolor"]))}</button>` : ""}</div>
+    ${data.prebarvit ? `<div class="panel prebarvit"${S.shopStrana === "barvit" ? "" : " hidden"} id="prebarvit"></div>` : ""}
+    <div class="grid g2 truhla-sloupce obchod-sloupce strana-${S.shopStrana === "prodat" ? "prodat" : "koupit"}" style="align-items:start"${data.prebarvit && S.shopStrana === "barvit" ? " hidden" : ""}>
       <div class="panel"><div class="spread"><h3>${esc(L(["Zboží", "For sale"]))}</h3><span class="pill">${data.items.length}</span></div>
         <div class="filter shop-kat" id="shop-kat"></div><div class="items" id="shop-items"></div></div>
       <div class="panel"><div class="spread"><h3>${esc(L(["Tvoje věci — prodej", "Your things — sell"]))}</h3><span class="pill" id="mine-n"></span></div>
@@ -3417,7 +3426,26 @@ VIEWS.obchod = async (view) => {
     S.shopStrana = b.dataset.strana;
     box.querySelectorAll("[data-strana]").forEach((x) => x.classList.toggle("on", x === b));
     const sl = box.querySelector(".obchod-sloupce"); sl.classList.toggle("strana-prodat", S.shopStrana === "prodat"); sl.classList.toggle("strana-koupit", S.shopStrana !== "prodat");
+    const pb = $("#prebarvit"); if (pb) { pb.hidden = S.shopStrana !== "barvit"; sl.hidden = S.shopStrana === "barvit"; }
   });
+  // r27-20: krejčí přebarví nasazené oblečení, pláště, kožené zbroje a štíty — poplatek podle barviva, nejméně 20 gr.
+  const PB = { vyb: {} };
+  const drawPrebarvit = () => {
+    const el = $("#prebarvit"); if (!el) return;
+    const P2 = data.prebarvit || [];
+    el.innerHTML = `<div class="spread"><h3>${esc(L(["Přebarvit, co máš na sobě", "Recolor what you wear"]))}</h3></div>
+      <p class="muted small">${esc(L(["Krejčí přebarví látku i kůži. Cena podle barviva, nejméně 20 gr. Kov tu nepřebarví.", "The tailor dyes cloth and leather. Price by dye, at least 20 gr."]))}</p>
+      ${P2.length ? P2.map((it) => { const v = PB.vyb[it.id], o = it.options.find((x) => x.color === v);
+        return `<div class="pb-vec"><div><div class="nm">${esc(it.name)}${barvaStitek(it.color, it.hex)}</div>
+          <div class="pb-barvy">${it.options.map((x) => `<button type="button" class="pb-barva${x.color === v ? " on" : ""}" data-pbi="${esc(it.id)}" data-pbc="${esc(x.color)}" title="${esc(x.color + " · " + x.price + " gr.")}"><i${x.hex ? ` style="--b:${x.hex}"` : ` class="prirodni"`}></i></button>`).join("")}</div>
+          <div class="meta">${o ? esc(L(["Nová barva: ", "New color: "]) + o.color.toLowerCase()) : esc(L(["Vyber barvu", "Pick a color"]))}</div></div>
+          <div class="acts"><button class="btn small primary" data-pbgo="${esc(it.id)}"${o && o.price <= S.me.coins ? "" : " disabled"}>${esc(L(["Přebarvit", "Recolor"]))}${o ? " · " + o.price + " gr." : ""}</button></div></div>`; }).join("")
+      : `<div class="empty">${esc(L(["Nemáš na sobě nic, co by krejčí přebarvil.", "Nothing to recolor."]))}</div>`}`;
+    el.querySelectorAll("[data-pbc]").forEach((b) => b.onclick = () => { PB.vyb[b.dataset.pbi] = b.dataset.pbc; drawPrebarvit(); });
+    el.querySelectorAll("[data-pbgo]").forEach((b) => b.onclick = () => { const id = b.dataset.pbgo; b.disabled = true;
+      call("prebarvit", { item: id, color: PB.vyb[id] }).then((r) => { Zvuk.sfx("mince"); toast(L([`Přebarveno za ${r.price} gr.`, `Recolored for ${r.price} gr.`])); delete PB.vyb[id]; render(); }).catch(() => { b.disabled = false; }); });
+  };
+  drawPrebarvit();
   const millBtn = $("#mill");
   if (millBtn) millBtn.onclick = () => call("mill").then((r) => { Zvuk.sfx("mince"); toast(L([`Semleto: ${r.milled}× mouka za ${r.paid} gr.`, `Ground: ${r.milled}× flour for ${r.paid} gr.`])); render(); }).catch(() => {});
   const opr = $("#oprava");   // r27-4: oprava a zušlechtění = panel obchodníka jako na Discordu (výběr „Opravit výbavu“ a „Zušlechtit“)
