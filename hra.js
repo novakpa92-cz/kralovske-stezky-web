@@ -617,7 +617,8 @@ VIEWS.hero = (view) => {
       <div class="hh-uroven" title="${esc(t("level_long", m.level))}"><small>${esc(L(["úroveň", "level"]))}</small><b>${esc(m.level)}</b></div>
       <div class="hh-jmeno"><h1>${esc(m.name)}</h1>
         <p>${esc(m.origin_name)}${P.role ? " · " + esc(noEmoji(P.role)) : ""}${P.titles && P.titles.length ? " · " + esc(P.titles.join(" · ")) : ""}</p>
-        <div class="hh-zk"><i style="width:${xpPct}%"></i><span>${esc(t("xp"))} ${esc(m.xp)} / ${esc(m.xp_next)}</span></div></div>
+        <div class="hh-zk"><i style="width:${xpPct}%"></i><span>${esc(t("xp"))} ${esc(m.xp)} / ${esc(m.xp_next)}</span></div>
+        ${m.na_kutnohorsku ? `<p class="hh-pobyt">${esc(L(["Na Kutnohorsku ", "In the Kutná Hora region for "]) + m.na_kutnohorsku)}</p>` : ""}</div>
       <div class="hh-cas">${esc(m.clock)}</div>
     </header>
     ${m.unspent ? `<p class="upozorneni">${esc(t("unspent", m.unspent))}</p>` : ""}

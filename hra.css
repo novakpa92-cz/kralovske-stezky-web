@@ -2975,3 +2975,4 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 .pet-fig-obal{position:relative;min-width:0}
 /* r27-15: obrázek situace na telefonu vlevo dole, ať nezakrývá ukazatele */
 @media (max-width:760px){.vyp.v2 .vsit{right:auto;left:3%;top:auto;bottom:24%;width:38%}}
+.hero-hlava .hh-pobyt{margin:6px 0 0!important;font:italic .9rem var(--serif)!important;letter-spacing:.02em!important;text-transform:none!important;color:#e9d6a8!important}
