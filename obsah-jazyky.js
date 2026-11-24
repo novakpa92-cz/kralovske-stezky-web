@@ -1,0 +1,133 @@
+/* r27-5: slovenština a polština i v obsahu hry — texty ze serveru (panely jako na Discordu, průběh výpravy,
+   předměty, místa) přicházejí česky a tady se překládají po slovech a ustálených spojeních.
+   Je to slovník, ne strojový překlad: gramatika zůstává česká, ale nejčastější slova a názvy jsou v jazyce hráče.
+   Co ve slovníku chybí, zůstane česky (Slovák i Polák českému textu většinou rozumí). */
+const OBSAH_SLOVNIK = {
+  sk: {
+    // spojení (překládají se dřív než jednotlivá slova)
+    "na výpravu": "na výpravu", "do vesnice": "do dediny", "zpět do města": "späť do mesta", "není co": "nie je čo",
+    "herní den": "herný deň", "herní čas": "herný čas", "měšťanský dům": "mešťiansky dom", "měšťanské právo": "mešťianske právo",
+    // slova
+    "a": "a", "ale": "ale", "ani": "ani", "až": "až", "bez": "bez", "by": "by", "být": "byť", "byl": "bol", "byla": "bola", "bylo": "bolo", "byli": "boli",
+    "co": "čo", "což": "čo", "ještě": "ešte", "jen": "len", "jenom": "len", "již": "už", "jsem": "som", "jsi": "si", "je": "je", "jsou": "sú", "jste": "ste",
+    "kde": "kde", "kdo": "kto", "když": "keď", "kam": "kam", "kolik": "koľko", "který": "ktorý", "která": "ktorá", "které": "ktoré", "kteří": "ktorí",
+    "mezi": "medzi", "můžeš": "môžeš", "může": "môže", "musíš": "musíš", "nebo": "alebo", "než": "než", "nic": "nič", "nikdo": "nikto", "není": "nie je",
+    "nejsi": "nie si", "nemáš": "nemáš", "nemá": "nemá", "nelze": "nedá sa", "nejde": "nejde", "o": "o", "od": "od", "pak": "potom", "po": "po", "pod": "pod",
+    "pro": "pre", "proti": "proti", "před": "pred", "přes": "cez", "při": "pri", "s": "s", "se": "sa", "si": "si", "sám": "sám", "sama": "sama",
+    "také": "tiež", "taky": "tiež", "tady": "tu", "tam": "tam", "teď": "teraz", "ten": "ten", "ta": "tá", "to": "to", "tohle": "toto", "tahle": "táto",
+    "tenhle": "tento", "tuhle": "túto", "tvůj": "tvoj", "tvá": "tvoja", "tvoje": "tvoje", "tvou": "tvoju", "u": "u", "už": "už", "v": "v", "ve": "vo",
+    "více": "viac", "víc": "viac", "však": "však", "všechno": "všetko", "všechny": "všetky", "všichni": "všetci", "z": "z", "za": "za", "ze": "zo",
+    "zatím": "zatiaľ", "znovu": "znova", "zpět": "späť", "že": "že", "dnes": "dnes", "zítra": "zajtra", "včera": "včera", "hned": "hneď", "dost": "dosť",
+    "nejdřív": "najprv", "nejvýš": "najviac", "příště": "nabudúce", "právě": "práve", "pořád": "stále", "jinak": "inak", "kdykoli": "kedykoľvek",
+    "něco": "niečo", "někdo": "niekto", "nějaký": "nejaký", "každý": "každý", "každé": "každé", "každou": "každú", "jeden": "jeden", "jedna": "jedna",
+    "dva": "dva", "dvě": "dve", "tři": "tri", "čtyři": "štyri", "pět": "päť", "první": "prvý", "druhý": "druhý", "poslední": "posledný", "další": "ďalší",
+    "dál": "ďalej", "dále": "ďalej", "hodně": "veľa", "málo": "málo", "trochu": "trochu", "velký": "veľký", "velká": "veľká", "malý": "malý", "malá": "malá",
+    "nový": "nový", "nová": "nová", "starý": "starý", "stará": "stará", "dobrý": "dobrý", "špatný": "zlý", "těžký": "ťažký", "těžká": "ťažká", "lehký": "ľahký", "lehká": "ľahká",
+    "střední": "stredná", "dlouhý": "dlhý", "krátký": "krátky", "silný": "silný", "rychlý": "rýchly", "volný": "voľný", "plný": "plný", "prázdný": "prázdny",
+    "máš": "máš", "mám": "mám", "má": "má", "mají": "majú", "chceš": "chceš", "chce": "chce", "jde": "ide", "jdeš": "ideš", "jdou": "idú", "šel": "išiel",
+    "vrátit": "vrátiť", "vrať": "vráť", "vrátí": "vráti", "vybrat": "vybrať", "vyber": "vyber", "vybral": "vybral", "koupit": "kúpiť", "koupíš": "kúpiš", "kup": "kúp",
+    "prodat": "predať", "prodej": "predaj", "prodá": "predá", "prodává": "predáva", "zaplatit": "zaplatiť", "zaplať": "zaplať", "platí": "platí", "stojí": "stojí",
+    "použít": "použiť", "použij": "použi", "použil": "použil", "nasadit": "nasadiť", "sundat": "zložiť", "vzít": "vziať", "vezmi": "vezmi", "dát": "dať", "dej": "daj",
+    "napít": "napiť", "napij": "napi", "najíst": "najesť", "spát": "spať", "odpočinout": "odpočinúť", "bojovat": "bojovať", "utéct": "utiecť", "uteč": "utekaj",
+    "zaútočit": "zaútočiť", "zaútoč": "zaútoč", "útočí": "útočí", "zasáhl": "zasiahol", "minul": "minul", "uhnul": "uhol", "padl": "padol", "zemřel": "zomrel",
+    "najdeš": "nájdeš", "našel": "našiel", "našla": "našla", "hledat": "hľadať", "prozkoumat": "preskúmať", "prozkoumej": "preskúmaj", "prozkoumáno": "preskúmané",
+    "pokračovat": "pokračovať", "pokračuj": "pokračuj", "počkat": "počkať", "počkej": "počkaj", "zkusit": "skúsiť", "zkus": "skús", "otevřít": "otvoriť", "zavřít": "zavrieť",
+    "čeká": "čaká", "čekat": "čakať", "běží": "beží", "skončil": "skončil", "skončila": "skončila", "začne": "začne", "zmizí": "zmizne", "zůstane": "zostane", "zůstává": "zostáva",
+    "nalezeno": "nájdené", "věcí": "vecí", "věci": "veci", "věc": "vec",
+    // svět
+    "město": "mesto", "města": "mesta", "městě": "meste", "vesnice": "dedina", "vesnici": "dedinu", "hrad": "hrad", "les": "les", "lesa": "lesa", "lesy": "lesy", "lesů": "lesov",
+    "cesta": "cesta", "cestu": "cestu", "cesty": "cesty", "cestou": "cestou", "hlavní": "hlavná", "hlavní cestě": "hlavnej ceste", "zkratkou": "skratkou", "mýtinu": "čistinu", "mýtina": "čistina",
+    "okraj": "okraj", "brána": "brána", "brány": "brány", "most": "most", "řeka": "rieka", "důl": "baňa", "doly": "bane", "štoly": "štôlne", "jeskyně": "jaskyňa",
+    "hostinec": "hostinec", "hostinci": "hostinci", "hostinský": "krčmár", "hostinského": "krčmára", "tržiště": "trhovisko", "tržišti": "trhovisku", "radnice": "radnica", "radnici": "radnici",
+    "chrám": "chrám", "kaple": "kaplnka", "hřbitov": "cintorín", "zvěřinec": "zverinec", "lazebník": "kúpeľník", "kolbiště": "kolbisko", "kolbišti": "kolbisku", "mlýn": "mlyn",
+    "chalupy": "chalupy", "dům": "dom", "domů": "domov", "doma": "doma", "pokoj": "izba", "truhla": "truhlica", "truhlu": "truhlicu", "truhly": "truhlice", "truhle": "truhlici",
+    "den": "deň", "dne": "dňa", "dní": "dní", "dny": "dni", "noc": "noc", "noci": "noci", "ráno": "ráno", "večer": "večer", "podvečer": "podvečer", "poledne": "poludnie",
+    "hodina": "hodina", "hodin": "hodín", "minut": "minút", "týden": "týždeň", "rok": "rok", "jaro": "jar", "léto": "leto", "podzim": "jeseň", "zima": "zima",
+    "počasí": "počasie", "déšť": "dážď", "sníh": "sneh", "mlha": "hmla", "vítr": "vietor", "jasno": "jasno", "zataženo": "zamračené", "bouřka": "búrka", "bláto": "blato", "chůze": "chôdza",
+    "vzduch": "vzduch", "unavuje": "unavuje", "horkem": "horúčavou", "padá": "padá", "zkouškám": "skúškam", "zkoušky": "skúšky", "zkouška": "skúška",
+    // postava a boj
+    "postava": "postava", "postavu": "postavu", "postavy": "postavy", "hráč": "hráč", "hráči": "hráči", "hráče": "hráča", "hrdina": "hrdina", "družina": "družina", "družiny": "družiny",
+    "výprava": "výprava", "výpravy": "výpravy", "výpravu": "výpravu", "výpravě": "výprave", "výprav": "výprav", "vyrážíte": "vyrážate", "lehká výprava": "ľahká výprava",
+    "úroveň": "úroveň", "úrovně": "úrovne", "zkušenosti": "skúsenosti", "životy": "životy", "života": "života", "zdraví": "zdravie", "výdrž": "výdrž", "odpočatost": "oddýchnutosť",
+    "nasycení": "nasýtenie", "napojení": "napojenie", "hlad": "hlad", "žízeň": "smäd", "únava": "únava", "opilost": "opitosť",
+    "síla": "sila", "obratnost": "obratnosť", "odolnost": "odolnosť", "všímavost": "všímavosť", "učenost": "učenosť", "výřečnost": "výrečnosť",
+    "boj": "boj", "boje": "boja", "souboj": "súboj", "nepřítel": "nepriateľ", "nepřítele": "nepriateľa", "útok": "útok", "útoku": "útoku", "obrana": "obrana", "obraně": "obrane",
+    "zranění": "zranenie", "rána": "rana", "ránu": "ranu", "zásah": "zásah", "kritický": "kritický", "úder": "úder", "silný úder": "silný úder", "krytí": "kryt", "úhyb": "úhyb",
+    "kořist": "korisť", "odměna": "odmena", "odměnu": "odmenu", "groše": "groše", "grošů": "grošov", "groš": "groš", "peníze": "peniaze", "měšec": "mešec", "dluh": "dlh",
+    "zbraň": "zbraň", "zbraně": "zbrane", "zbroj": "zbroj", "štít": "štít", "přilba": "prilba", "meč": "meč", "luk": "luk", "kuše": "kuša", "sekera": "sekera", "dýka": "dýka", "nůž": "nôž",
+    "šíp": "šíp", "šípy": "šípy", "batoh": "batoh", "batohu": "batohu", "kapsy": "vrecká", "kapsách": "vreckách", "opasek": "opasok", "plášť": "plášť", "oděv": "odev", "boty": "čižmy",
+    "předmět": "predmet", "předměty": "predmety", "výbava": "výbava", "výbavu": "výbavu", "jídlo": "jedlo", "pití": "pitie", "voda": "voda", "vodu": "vodu", "chléb": "chlieb",
+    "pivo": "pivo", "víno": "víno", "medovina": "medovina", "kořalka": "pálenka", "maso": "mäso", "sýr": "syr", "klobása": "klobása", "polévka": "polievka", "koláč": "koláč",
+    "obvaz": "obväz", "mast": "masť", "odvar": "odvar", "lektvar": "elixír", "byliny": "byliny", "louč": "fakľa", "mapa": "mapa", "mapu": "mapu", "mapy": "mapy",
+    "kůže": "koža", "kožešina": "kožušina", "kel": "kel", "kly": "kly", "trofej": "trofej", "ruda": "ruda", "dřevo": "drevo", "kámen": "kameň", "železo": "železo",
+    "zvíře": "zviera", "zvířata": "zvieratá", "mládě": "mláďa", "pes": "pes", "kočka": "mačka", "myš": "myš", "havran": "havran", "liška": "líška", "vlk": "vlk", "medvěd": "medveď", "kanec": "diviak",
+    "lapka": "zbojník", "lapkové": "zbojníci", "lapků": "zbojníkov", "strážný": "strážnik", "stráž": "stráž", "rytíř": "rytier", "kovář": "kováč", "kováře": "kováča",
+    "krejčí": "krajčír", "písař": "pisár", "zbrojíř": "zbrojár", "střelmistr": "lukostrelec", "apatykář": "lekárnik", "vetešník": "starinár", "mlynář": "mlynár", "pašerák": "pašerák",
+    "rychtář": "richtár", "purkmistr": "purkmister", "kněz": "kňaz", "sedlák": "sedliak", "lovčí": "poľovník", "obchodník": "obchodník", "obchodníka": "obchodníka",
+    "zakázka": "zákazka", "zakázky": "zákazky", "zakázku": "zákazku", "úkol": "úloha", "úkoly": "úlohy", "nástěnka": "nástenka", "nováčky": "nováčikov",
+    "hra": "hra", "hry": "hry", "kostky": "kocky", "karty": "karty", "šipky": "šípky", "sázka": "stávka", "sázky": "stávky", "vyhrál": "vyhral", "prohrál": "prehral", "výhra": "výhra",
+    "kudy": "kade", "vyber cestu": "vyber cestu", "prozkoumej místo": "preskúmaj miesto", "místo": "miesto", "místa": "miesta", "místě": "mieste",
+    "zády": "chrbtom", "zůstávají": "zostávajú", "poslední": "posledné", "zvedá": "dvíha", "temná": "temná", "stěna": "stena", "neseš": "nesieš", "se vším": "so všetkým",
+  },
+  pl: {
+    "do vesnice": "do wsi", "se vším": "ze wszystkim", "vrať se": "wróć", "se vrať": "wróć", "se vrátit": "wrócić", "vrátit se": "wrócić", "vrátí se": "wróci", "podívat se": "rozejrzeć się",
+    "tebou": "tobą", "ti": "ci", "tě": "cię", "tobě": "tobie", "mě": "mnie", "mu": "mu", "jeho": "jego", "její": "jej", "jejich": "ich", "vás": "was", "vám": "wam", "nás": "nas", "zpět do města": "z powrotem do miasta", "herní den": "dzień gry", "měšťanský dům": "dom mieszczański",
+    "a": "i", "ale": "ale", "ani": "ani", "až": "aż", "bez": "bez", "by": "by", "být": "być", "byl": "był", "byla": "była", "bylo": "było",
+    "co": "co", "ještě": "jeszcze", "jen": "tylko", "jsem": "jestem", "jsi": "jesteś", "je": "jest", "jsou": "są", "jste": "jesteście",
+    "kde": "gdzie", "kdo": "kto", "když": "kiedy", "kam": "dokąd", "kolik": "ile", "který": "który", "která": "która", "které": "które",
+    "mezi": "między", "můžeš": "możesz", "může": "może", "nebo": "albo", "než": "niż", "nic": "nic", "nikdo": "nikt", "není": "nie ma", "nemáš": "nie masz",
+    "nemá": "nie ma", "nelze": "nie można", "nejde": "nie da się", "od": "od", "pak": "potem", "po": "po", "pod": "pod", "pro": "dla", "proti": "przeciw",
+    "před": "przed", "přes": "przez", "při": "przy", "s": "z", "se": "się", "si": "sobie", "sám": "sam", "také": "też", "taky": "też", "tady": "tutaj", "tam": "tam",
+    "teď": "teraz", "ten": "ten", "to": "to", "tohle": "to", "tvůj": "twój", "tvá": "twoja", "tvoje": "twoje", "u": "u", "už": "już", "v": "w", "ve": "we",
+    "více": "więcej", "víc": "więcej", "však": "jednak", "všechno": "wszystko", "všechny": "wszystkie", "z": "z", "za": "za", "ze": "ze", "zatím": "na razie",
+    "znovu": "znowu", "zpět": "wstecz", "že": "że", "dnes": "dziś", "zítra": "jutro", "hned": "od razu", "dost": "dość", "nejdřív": "najpierw", "nejvýš": "najwyżej",
+    "příště": "następnym razem", "něco": "coś", "někdo": "ktoś", "každý": "każdy", "jeden": "jeden", "dva": "dwa", "dvě": "dwie", "tři": "trzy", "první": "pierwszy",
+    "poslední": "ostatni", "další": "następny", "dál": "dalej", "velký": "duży", "velká": "duża", "malý": "mały", "nový": "nowy", "starý": "stary", "dobrý": "dobry",
+    "těžký": "ciężki", "těžká": "ciężka", "lehký": "lekki", "lehká": "lekka", "střední": "średnia", "dlouhý": "długi", "krátký": "krótki", "silný": "silny",
+    "máš": "masz", "má": "ma", "chceš": "chcesz", "jde": "idzie", "vrátit": "wrócić", "vrať": "wróć", "vybrat": "wybrać", "vyber": "wybierz", "koupit": "kupić",
+    "koupíš": "kupisz", "prodat": "sprzedać", "prodej": "sprzedaż", "zaplatit": "zapłacić", "platí": "płaci", "stojí": "kosztuje", "použít": "użyć", "nasadit": "założyć",
+    "sundat": "zdjąć", "vzít": "wziąć", "dát": "dać", "napít": "napić", "najíst": "zjeść", "spát": "spać", "bojovat": "walczyć", "utéct": "uciec",
+    "zaútočit": "zaatakować", "útočí": "atakuje", "zasáhl": "trafił", "minul": "chybił", "uhnul": "uniknął", "padl": "padł", "najdeš": "znajdziesz", "našel": "znalazł",
+    "prozkoumat": "zbadać", "prozkoumej": "zbadaj", "prozkoumáno": "zbadano", "pokračovat": "kontynuować", "počkej": "poczekaj", "zkus": "spróbuj", "čeká": "czeka",
+    "nalezeno": "znaleziono", "věcí": "rzeczy", "věci": "rzeczy", "věc": "rzecz",
+    "město": "miasto", "města": "miasta", "městě": "mieście", "vesnice": "wieś", "hrad": "zamek", "les": "las", "lesa": "lasu", "lesy": "lasy", "lesů": "lasów",
+    "cesta": "droga", "cestu": "drogę", "cesty": "drogi", "hlavní": "główna", "zkratkou": "na skróty", "mýtinu": "polanę", "okraj": "skraj", "brána": "brama",
+    "most": "most", "řeka": "rzeka", "důl": "kopalnia", "doly": "kopalnie", "jeskyně": "jaskinia", "hostinec": "karczma", "hostinci": "karczmie", "hostinský": "karczmarz",
+    "tržiště": "targ", "radnice": "ratusz", "chrám": "kościół", "kaple": "kaplica", "hřbitov": "cmentarz", "zvěřinec": "zwierzyniec", "kolbiště": "szranki", "mlýn": "młyn",
+    "dům": "dom", "domů": "do domu", "pokoj": "pokój", "truhla": "skrzynia", "truhlu": "skrzynię",
+    "den": "dzień", "dní": "dni", "noc": "noc", "ráno": "rano", "večer": "wieczór", "podvečer": "przedwieczór", "hodin": "godzin", "minut": "minut", "týden": "tydzień",
+    "jaro": "wiosna", "léto": "lato", "podzim": "jesień", "zima": "zima", "počasí": "pogoda", "déšť": "deszcz", "sníh": "śnieg", "mlha": "mgła", "vítr": "wiatr", "bláto": "błoto",
+    "chůze": "chód", "vzduch": "powietrze", "zkouškám": "testom", "zkoušky": "testy",
+    "postava": "postać", "postavu": "postać", "hráč": "gracz", "hráči": "gracze", "hrdina": "bohater", "družina": "drużyna", "výprava": "wyprawa", "výpravy": "wyprawy",
+    "výpravu": "wyprawę", "vyrážíte": "wyruszacie", "úroveň": "poziom", "zkušenosti": "doświadczenie", "životy": "życie", "zdraví": "zdrowie", "výdrž": "wytrzymałość",
+    "odpočatost": "wypoczęcie", "nasycení": "sytość", "napojení": "nawodnienie", "hlad": "głód", "žízeň": "pragnienie", "únava": "zmęczenie", "opilost": "upojenie",
+    "síla": "siła", "obratnost": "zręczność", "odolnost": "odporność", "všímavost": "spostrzegawczość", "učenost": "wiedza", "výřečnost": "wymowa",
+    "boj": "walka", "souboj": "pojedynek", "nepřítel": "wróg", "útok": "atak", "obrana": "obrona", "zranění": "obrażenia", "rána": "cios", "zásah": "trafienie", "úder": "cios",
+    "kořist": "łup", "odměna": "nagroda", "groše": "grosze", "grošů": "groszy", "peníze": "pieniądze", "měšec": "sakiewka", "dluh": "dług",
+    "zbraň": "broń", "zbroj": "zbroja", "štít": "tarcza", "přilba": "hełm", "meč": "miecz", "luk": "łuk", "kuše": "kusza", "sekera": "topór", "dýka": "sztylet", "nůž": "nóż",
+    "šíp": "strzała", "batoh": "plecak", "kapsy": "kieszenie", "opasek": "pas", "plášť": "płaszcz", "předmět": "przedmiot", "výbava": "ekwipunek", "jídlo": "jedzenie",
+    "pití": "picie", "voda": "woda", "chléb": "chleb", "pivo": "piwo", "víno": "wino", "medovina": "miód pitny", "kořalka": "gorzałka", "maso": "mięso", "sýr": "ser",
+    "klobása": "kiełbasa", "polévka": "zupa", "obvaz": "bandaż", "mast": "maść", "odvar": "wywar", "lektvar": "eliksir", "byliny": "zioła", "louč": "pochodnia", "mapa": "mapa",
+    "kůže": "skóra", "kožešina": "futro", "ruda": "ruda", "dřevo": "drewno", "kámen": "kamień", "železo": "żelazo",
+    "zvíře": "zwierzę", "zvířata": "zwierzęta", "mládě": "młode", "pes": "pies", "kočka": "kot", "myš": "mysz", "havran": "kruk", "liška": "lis", "vlk": "wilk", "medvěd": "niedźwiedź", "kanec": "dzik",
+    "lapka": "zbójnik", "strážný": "strażnik", "rytíř": "rycerz", "kovář": "kowal", "krejčí": "krawiec", "písař": "pisarz", "zbrojíř": "płatnerz", "střelmistr": "łuczarz",
+    "apatykář": "aptekarz", "vetešník": "handlarz starzyzną", "mlynář": "młynarz", "pašerák": "przemytnik", "rychtář": "wójt", "kněz": "ksiądz", "sedlák": "chłop", "lovčí": "łowczy",
+    "zakázka": "zlecenie", "zakázky": "zlecenia", "úkol": "zadanie", "nástěnka": "tablica", "nováčky": "nowicjuszy",
+    "hra": "gra", "hry": "gry", "kostky": "kości", "karty": "karty", "šipky": "rzutki", "sázka": "zakład", "vyhrál": "wygrał", "prohrál": "przegrał",
+    "kudy": "którędy", "místo": "miejsce", "místa": "miejsca", "zády": "plecami", "zůstávají": "zostają", "zvedá": "wznosi", "temná": "ciemna", "stěna": "ściana", "neseš": "niesiesz",
+  },
+};
+const _OBSAH_RE = {};
+function obsahJazyk(text) {
+  const lang = typeof S !== "undefined" ? S.lang : "cs";
+  const D = OBSAH_SLOVNIK[lang];
+  if (!D || !text) return text;
+  if (!_OBSAH_RE[lang]) {
+    const fraze = Object.keys(D).filter((k) => k.includes(" ")).sort((a, b) => b.length - a.length);
+    _OBSAH_RE[lang] = { fraze: fraze.length ? new RegExp("(^|[^\\p{L}])(" + fraze.map((f) => f.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")(?=$|[^\\p{L}])", "giu") : null };
+  }
+  const kap = (src, dst) => src === src.toUpperCase() && src.length > 1 ? dst.toUpperCase() : src[0] === src[0].toUpperCase() ? dst.charAt(0).toUpperCase() + dst.slice(1) : dst;
+  let out = String(text);
+  if (_OBSAH_RE[lang].fraze) out = out.replace(_OBSAH_RE[lang].fraze, (m, pre, f) => pre + kap(f, D[f.toLowerCase()]));
+  return out.replace(/\p{L}+/gu, (w) => { const d = D[w.toLowerCase()]; return d === undefined ? w : kap(w, d); });
+}

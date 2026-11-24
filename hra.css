@@ -1355,3 +1355,102 @@ main[data-tab="prirucka"]{max-width:1280px}
 .mesto-mapa .townmap .stage .pic>img.bg{filter:drop-shadow(0 10px 22px #000c)}
 .mesto-mapa .townmap .stage .overlay,.mesto-mapa .townmap .stage .night,.mesto-mapa .townmap .stage .frost{-webkit-mask:var(--maska) center/contain no-repeat;mask:var(--maska) center/contain no-repeat}
 .mesto-mapa .townmap .stage .vig{display:none}
+/* r27-4: prší */
+.prsi-karta{background:none;border:0;padding:0;cursor:pointer;transition:transform .15s;filter:brightness(.72)}
+.prsi-karta.hratelna{filter:none;transform:translateY(-10px)}
+.prsi-karta.hratelna:hover{transform:translateY(-18px)}
+.prsi-karta[disabled]{cursor:default}
+.prsi-stred{display:flex;gap:28px;align-items:center;justify-content:center}
+.prsi-stred .balicek{position:relative}
+.prsi-pocet{position:absolute;right:-8px;bottom:-8px;background:#1b140ce0;color:var(--gold2);border:1px solid var(--gold);border-radius:10px;padding:0 7px;font:700 .8rem var(--serif)}
+.prsi-vrch{position:relative}
+.prsi-barva{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);white-space:nowrap;background:#1b140ce0;color:#f3e2b8;border:1px solid var(--gold);border-radius:10px;padding:1px 8px;font-size:.85rem}
+.prsi-volba{margin-top:12px}
+.prsi-volba .btn{font-size:1.4rem;min-width:52px}
+.prsi-volba .btn.cervena{color:#c4382a}
+.prsi .ruka .prsi-karta{flex:0 1 15%;min-width:0;display:block}
+.prsi .ruka .prsi-karta .karta{width:100%}
+.prsi .ruka>.karta{flex:0 1 12%;width:auto}
+.prsi-stred{width:100%}
+.prsi-stred .balicek{width:11%;margin:0;justify-self:auto}
+.prsi-vrch{width:12%;aspect-ratio:2/3}
+.prsi-vrch .karta{width:100%}
+.karty-plocha.prsi{grid-template-rows:1fr 1fr 1fr;padding:3% 4% 5%}
+.prsi .ruka{min-height:0;height:100%}
+.prsi .ruka.hrac .prsi-karta,.prsi .ruka.hostinsky>.karta{flex:0 1 13%}
+.prsi-barva{left:108%;bottom:auto;top:42%;transform:none}
+/* r27-5: mazlíček stojí v popředí před postavou (blíž k divákovi, překrývá nohy) */
+.hero-fig>.hero-pet{z-index:6;left:14%;bottom:-3%;width:calc(34% * var(--vel,1))}
+.hero-fig>.hero-pet img{filter:drop-shadow(0 10px 8px #000d) brightness(1.04)}
+.hero-fig>.hero-pet::before{content:"";position:absolute;left:12%;right:12%;bottom:6%;height:9%;border-radius:50%;background:radial-gradient(#000a,#0000 70%);z-index:-1}
+/* r27-5: znaky boje — kulaté pečeti, hodnota přesně uprostřed */
+.znak-obr{width:104px;height:104px}
+.znak-obr b{padding-top:14px;font-size:36px;color:#fff6e0!important;text-shadow:0 2px 4px #000c!important;line-height:1}
+.znak:nth-child(4) .znak-obr b{font-size:22px}
+/* r27-5: opilost */
+.potreba.drunk .kruh{--c:#8a3a7a}
+.potreby.velke{grid-template-columns:repeat(5,1fr)}
+.opilost-txt{margin:6px 0 0;font-size:14px;color:#4a3420}
+.opilost-txt.zle b{color:#8e1b14}
+.tag.nasoska{background:#5a1a3a;color:#f3d6e6;border:1px solid #8a3a7a;border-radius:8px;padding:1px 8px;font-size:12px}
+.opil-bar{position:relative;height:10px;border-radius:6px;background:#2a1a12;border:1px solid #8a6a3c;margin-top:8px;overflow:hidden}
+.opil-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#c9a55a,#a0402a 60%,#6a1a4a)}
+.opil-bar s{position:absolute;top:0;bottom:0;width:1px;background:#f0d79a66}
+.ikona-napoj{font-size:28px;width:44px;text-align:center}
+.hoste{display:flex;flex-wrap:wrap;gap:6px;max-height:260px;overflow:auto}
+.hoste .chip small{opacity:.6;margin-left:4px}
+.pozvani{margin:4px 0 0;padding-left:18px}
+.napoje .truhla-stav{flex-wrap:wrap}.napoje .opil-bar{flex-basis:100%}
+/* r27-5: zvíře stojí na zemi (dole), jen lehce dýchá; potřeby zvířete */
+.pet-zvire{transform:translateY(18%)}
+.pet-zvire img{margin-bottom:0;animation:dechz 3.6s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes dechz{50%{transform:scale(1.006,1.014)}}
+.pet-zvire::after{content:"";position:absolute;left:24%;right:24%;bottom:19%;height:5%;border-radius:50%;background:radial-gradient(#000b,#0000 70%);z-index:-1}
+.fill.food{background:linear-gradient(90deg,#a0702a,#d6a24a)}
+.fill.mood{background:linear-gradient(90deg,#8a3a5a,#d0708a)}
+.fill.nizko{background:#8e1b14}
+.pet-akce{flex-wrap:wrap;gap:8px;margin-top:10px}
+/* r27-5: zvěřinec */
+.zver-mriz{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.zver-karta{background:linear-gradient(#f4e8cc,#e6d3a8);border:1px solid #8a6a3c;border-radius:6px;padding:12px;display:flex;flex-direction:column;color:#2a1a0c;box-shadow:0 6px 16px #0007}
+.zver-karta .zk-obr{height:170px;display:flex;align-items:flex-end;justify-content:center;background:radial-gradient(ellipse at 50% 90%,#0003,#0000 60%)}
+.zver-karta .zk-obr img{max-height:100%;max-width:90%;object-fit:contain;filter:drop-shadow(0 8px 8px #0006);animation:dechz 3.6s ease-in-out infinite;transform-origin:50% 100%}
+.zver-karta h3{margin:8px 0 2px;color:#7a1a10}
+.zver-karta .zk-pop{font-size:14px;margin:0 0 6px;flex:1}
+.zver-karta .zk-bonus{font-size:13px;margin:0 0 8px;color:#5a3a1a}
+.zver-karta .zk-bonus small{font-family:Cinzel,serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.zver-karta .zk-dole{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.zver-karta.zamceno{opacity:.6}.zver-karta.zamceno .zk-obr img{filter:grayscale(.8) brightness(.8)}
+.zver-karta.vybrane{outline:2px solid #c9a55a}
+.zk-jmeno{display:flex;gap:6px;width:100%}.zk-jmeno input{flex:1;min-width:0}
+.zk-povoz{margin-top:14px;display:flex;gap:12px;align-items:center}
+.zver-karta .zk-obr{overflow:hidden}.zver-karta .zk-obr picture{height:100%;display:flex;align-items:flex-end;justify-content:center}.zver-karta .zk-obr img{height:100%;width:auto;max-width:100%}
+/* r27-5: stav opotřebení a posuvník množství */
+.opotreb{position:relative;height:14px;margin-top:4px;border-radius:7px;background:#2a1a1244;border:1px solid #8a6a3c66;overflow:hidden;max-width:220px}
+.opotreb i{position:absolute;inset:0 auto 0 0;background:#5a7a32}
+.opotreb.stredni i{background:#a0802a}.opotreb.zle i{background:#a04a2a}.opotreb.rozbite i{background:#6a1a10}
+.opotreb span{position:relative;font-size:10.5px;line-height:13px;padding-left:6px;color:#fff;text-shadow:0 1px 2px #000}
+.mnoz{display:inline-flex;align-items:center;gap:4px;margin-right:4px}
+.mnoz input{width:84px;accent-color:#a0402a}
+.mnoz b{font-size:12px;min-width:26px}
+.truhla-stav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.opotreb{height:17px}
+.opotreb span{position:absolute;inset:0;line-height:15px;font-size:11px;padding-left:7px;white-space:nowrap}
+/* r27-5: tlačítka výpravy — hlavní volby jako karty, pomocné akce v liště */
+.vyp-ctl{display:block}
+.vyp-hlavni{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.vyp-hlavni.jedna{grid-template-columns:1fr}
+.vyp-ctl .vyp-karta{position:relative;min-height:58px;padding:10px 40px 10px 16px;text-align:left;justify-content:flex-start;align-items:center;font-size:1.02rem;line-height:1.25;border-radius:4px;
+  box-shadow:inset 0 0 0 1px #fff3c855,0 3px 0 #6a4a1a,0 6px 12px #0006;transition:transform .12s,box-shadow .12s}
+.vyp-ctl .vyp-karta::after{content:"";position:absolute;right:14px;top:50%;width:10px;height:10px;border-top:2px solid currentColor;border-right:2px solid currentColor;transform:translateY(-50%) rotate(45deg);opacity:.6}
+.vyp-ctl .vyp-karta:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px #fff3c877,0 5px 0 #6a4a1a,0 10px 16px #0007}
+.vyp-ctl .vyp-karta:active{transform:translateY(2px);box-shadow:inset 0 0 0 1px #fff3c855,0 1px 0 #6a4a1a}
+.vyp-ctl .vyp-karta.danger::after{border-color:#fff3dc}
+.vyp-lista{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed #8a6a3c66}
+.vyp-ctl .vyp-mala{flex:0 1 auto;min-width:0;padding:6px 14px;font-size:.88rem;background:#2a1c11;border:1px solid #8a6a3c;color:#f1e2bd;border-radius:14px;text-align:center;justify-content:center}
+.vyp-ctl .vyp-mala:hover{background:#3a2816;border-color:#c9a45c}
+/* r27-5: zapíchnutá šipka nebrání zamíření do zóny; šance v % */
+.terc-zony.klik{z-index:6}
+.terc img:not(.terc-obr),.terc .sipka-svg,.terc .sipka-obr,.terc [class*="sipka"]{pointer-events:none}
+.sipky-legenda .sance{font-style:normal;font-weight:700;color:#c9a55a;margin-left:6px}
+.terc .zabodnuta{pointer-events:none}
