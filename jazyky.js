@@ -6,7 +6,7 @@ const T2 = {
   pl: {
     app_title: "Královské stezky",
     app_sub: "Turowa gra ze średniowiecznych Czech",
-    login_1: "Na Discordzie wpisz komendę <b>/aplikace</b>", login_2: "Bot prywatnie wyśle ci sześcioznakowy kod", login_3: "Wpisz kod tutaj",
+    login_1: "Otwórz <b>nasz serwer Discord</b> Królewskie szlaki.", login_2: "W polu wiadomości wpisz <b>/</b>, potem <b>aplikace</b> i kliknij komendę <b>/aplikace</b> w menu. Wyślij Enterem.<span class=\"krok-pozor\">Samo słowo jako wiadomość nie zadziała — wybierz komendę z menu. Jeśli menu się nie pojawi, otwórz kanał <b>#webové-stránky</b> i kliknij <b>Kód pro přihlášení do hry</b>.</span>", login_3: "Bot odpowie wiadomością widoczną <b>tylko dla ciebie</b> z 6-znakowym kodem, np. <b>ABC123</b>. Wpisz go poniżej.",
     home_icon: "Dodaj ikonę gry na ekran główny",
     home_safe_login: "Ikona tylko otwiera tę stronę, nic się nie instaluje. Kod działa raz, przez 10 minut — nikomu go nie dawaj.",
     login_note: "Grasz tą samą postacią co na Discordzie — co zrobisz tutaj, zobaczysz też tam.",
@@ -40,7 +40,7 @@ const T2 = {
   sk: {
     app_title: "Královské stezky",
     app_sub: "Ťahová hra z českého stredoveku",
-    login_1: "Na Discorde napíš príkaz <b>/aplikace</b>", login_2: "Bot ti súkromne pošle šesťmiestny kód", login_3: "Kód opíš sem",
+    login_1: "Otvor <b>náš Discord server</b> Kráľovské chodníky.", login_2: "Do poľa pre správu napíš <b>lomku /</b>, potom <b>aplikace</b> a v ponuke klikni na príkaz <b>/aplikace</b>. Odošli Enterom.<span class=\"krok-pozor\">Nestačí napísať slovo ako správu — musí to byť príkaz z ponuky. Ak sa ponuka neukáže, otvor kanál <b>#webové-stránky</b> a klikni na <b>Kód pro přihlášení do hry</b>.</span>", login_3: "Bot ti odpovie správou, ktorú <b>vidíš len ty</b>, s kódom zo 6 znakov, napr. <b>ABC123</b>. Opíš ho sem.",
     home_icon: "Pridať ikonu hry na plochu",
     home_safe_login: "Ikona len otvorí túto stránku, nič sa neinštaluje. Kód platí 10 minút a len raz — nikomu ho nedávaj.",
     login_note: "Hráš s rovnakou postavou ako na Discorde — čo urobíš tu, uvidíš aj tam.",

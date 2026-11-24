@@ -38,6 +38,10 @@
         <li data-t="login_2">Bot ti soukromě pošle šestimístný kód</li>
         <li data-t="login_3">Kód opiš sem</li>
       </ol>
+      <div class="dc-ukazka" aria-hidden="true">
+        <div class="dc-nabidka"><small>PŘÍKAZY</small><div class="dc-prikaz"><span class="dc-ik">KS</span><b>/aplikace</b><em>Kód pro přihlášení na webu…</em></div></div>
+        <div class="dc-pole"><span class="dc-plus">+</span><span class="dc-text">/aplikace<i class="dc-kurzor"></i></span></div>
+      </div>
       <form id="login-form" autocomplete="off">
         <label for="code" class="lbl" data-t="code">Kód z Discordu</label>
         <input id="code" name="code" maxlength="8" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="ABC123" required>
@@ -48,6 +52,10 @@
         <button class="btn primary big" type="submit" data-t="login">Přihlásit</button>
         <p id="login-msg" class="msg" role="alert"></p>
       </form>
+      <div class="login-discord" id="login-discord" hidden>
+        <p><b>Ještě tu nehraješ?</b> Hra tě pozná podle účtu na našem Discordu. Připoj se, založ si postavu a příkazem <b>/aplikace</b> dostaneš kód pro přihlášení.</p>
+        <a class="btn discord" id="login-discord-a" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.3 5.3A17 17 0 0 0 15 4l-.5 1a15.6 15.6 0 0 0-5 0L9 4a17 17 0 0 0-4.3 1.3C2 9.3 1.3 13.2 1.6 17a17.3 17.3 0 0 0 5.3 2.7l1.1-1.8c-.6-.2-1.2-.5-1.8-.9l.4-.3a12.3 12.3 0 0 0 10.8 0l.4.3c-.6.4-1.2.7-1.8.9l1.1 1.8a17.2 17.2 0 0 0 5.3-2.7c.4-4.4-.7-8.2-3.1-11.7zM8.7 14.7c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1zm6.6 0c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1z"/></svg> Přidat se na náš Discord</a>
+      </div>
       <details class="login-heslo" id="login-heslo" hidden><summary>Přihlásit jménem a heslem</summary>
         <form id="login-pw" autocomplete="on">
           <label for="pw-name" class="lbl">Jméno</label>
@@ -94,6 +102,7 @@
       <div class="tb-cas">
         <span id="tb-clock" class="tb-clock"></span>
         <span id="tb-sky" class="tb-clock"></span>
+      <button type="button" id="tb-full" class="tb-full" title="Celá obrazovka (F)" aria-label="Celá obrazovka"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path class="fs-on" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-off" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
       </div>
     </header>
     <nav class="tabs" aria-label="Menu">
