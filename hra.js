@@ -481,7 +481,7 @@ function render() {
     if (S.tab !== "novy") { S.tab = "novy"; document.querySelectorAll(".tabs button[data-tab]").forEach((b) => b.classList.toggle("on", b.dataset.tab === "novy")); }
     zalozitPostavu(view); return; }   // r27-6: postavu si založíš přímo na webu
   document.body.classList.toggle("zkusebni", !!S.me.zkusebni);
-  if ((S.me.pet_umrti || []).length) { const mrtva = S.me.pet_umrti; S.me.pet_umrti = []; setTimeout(() => alert(L([`Tvůj mazlíček ${mrtva.join(", ")} uhynul — dlouho neměl jídlo ani péči.`, `Your pet ${mrtva.join(", ")} died of neglect.`])), 300); }   // r27-6: zkušební režim správce — výrazný pruh nahoře
+  if ((S.me.pet_umrti || []).length) { const mrtva = S.me.pet_umrti; S.me.pet_umrti = []; setTimeout(() => alert(L(["Smutná zpráva z domova:\n\n", "Sad news:\n\n"]) + mrtva.map((x) => "🕯️ " + (String(x).includes(" — ") ? x : x + L([" — zemřelo hladem a bez péče.", " — died of neglect."]))).join("\n") + L(["\n\nNajdeš ho na hřbitově zvířátek.", "\n\nSee the pet cemetery."])), 300); }   // r27-14: vždy s důvodem   // r27-6: zkušební režim správce — výrazný pruh nahoře
   view.dataset.tab = S.tab; view.classList.toggle("kniha", ["hero", "bag", "more", "pet", "denik"].includes(S.tab));   // příručka má vlastní knihu                         // r27-4: vzhled podle záložky (Noc nad městem / Kronika)
   view.classList.toggle("wide", ["mesto", "misto", "obchod", "hra", "vyprava", "panel", "domov", "kohouti", "statek", "hraci", "aukce", "souboje", "hrbitov"].includes(S.tab));
   view.classList.toggle("rozdel", ["misto", "panel", "obchod", "truhla", "napoje", "vydaje", "obyvatele", "dar", "poradi", "zverinec", "dilna", "erb", "povoz", "vyhlasky", "hrbitov", "kroniky", "domov"].includes(S.tab));   // r27-12: na PC obraz vlevo, volby vpravo — bez scrollování
@@ -603,7 +603,7 @@ VIEWS.hero = (view) => {
       return `<p class="muted hk-pozn">${esc(L(["Postava roste až do 30. úrovně. Každých pár úrovní se odemkne něco nového — schopnosti, výbava, majetek.", "Your character grows up to level 30."]))}</p>
         ${dalsi ? `<p class="upozorneni">${esc(L([`Další na úrovni ${dalsi.lvl}: ${dalsi.text}`, `Next at level ${dalsi.lvl}: ${dalsi.text}`]))}</p>` : ""}
         <ol class="cesta">${[...new Set(C.map((c) => c.lvl))].map((l) => `<li class="${l <= lv ? "hotovo" : l === dalsi?.lvl ? "dalsi" : ""}"><b>${l}</b><div>${C.filter((c) => c.lvl === l).map((c) => `<span class="ck ${c.kind}">${esc(c.text)}</span>`).join("")}</div></li>`).join("")}</ol>`; },
-    schop: () => `${P.passive ? `<div class="hk-vlastnost"><small>${esc(L(["Speciální vlastnost původu", "Origin trait"]))}</small><p>${esc(noEmoji(P.passive))}</p></div>` : ""}<ul class="schopnosti">${schop}</ul>`,
+    schop: () => `${P.passive ? `<div class="hk-vlastnost"><span class="hkv-pecet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.3 6.8.5-5.2 4.4 1.6 6.6L12 16.3 6.2 19.8l1.6-6.6L2.6 8.8l6.8-.5z"/></svg></span><div><small>${esc(L(["Speciální vlastnost původu", "Origin trait"]))}${S.me.origin_name ? " · " + esc(S.me.origin_name) : ""}</small><p>${esc(noEmoji(P.passive))}</p></div></div>` : ""}<ul class="schopnosti">${schop}</ul>`,
     dov: () => `<div class="dovednosti dov-mriz">${dov}</div><p class="muted hk-pozn">${esc(L(["Bod přibude, až je praxe plná. Body 1–3 potvrdí lekce u mistra, dál rostou samy — nejvýš o bod za herní den.", "A point comes when practice is full."]))}</p>`,
     uc: () => ucinky,
   };
@@ -915,7 +915,9 @@ VIEWS.truhla = async (view) => {
           ${T.house ? `<button class="btn" data-cid="ks:innchest:move"${C.debt ? " disabled" : ""}>${esc(L(["Přestěhovat domů", "Move home"]))}</button>` : ""}
           ${T.porter ? `<button class="btn primary" data-cid="ks:porter:pay">${esc(L(["Nosič: uložit kořist (", "Porter: store loot ("]) + T.porter + ")")}</button>` : ""}
         </div></div>
-      <div class="grid g2 truhla-sloupce" style="align-items:start">
+      <div class="m-zalozky truhla-zal"><button class="${S.truhlaStrana !== "vzit" ? "on" : ""}" data-tstrana="ulozit">${esc(L(["Uložit", "Store"]))}<small>${esc(L(["u sebe ", "carried "]) + T.carried.length)}</small></button>
+        <button class="${S.truhlaStrana === "vzit" ? "on" : ""}" data-tstrana="vzit">${esc(L(["Vzít", "Take"]))}<small>${esc(L(["v truhle ", "in chest "]) + C.used)}</small></button></div>
+      <div class="grid g2 truhla-sloupce strana-${S.truhlaStrana === "vzit" ? "vzit" : "ulozit"}" style="align-items:start">
         <div class="panel"><div class="spread"><h3>${esc(L(["U sebe", "Carried"]))}</h3><span class="pill">${T.carried.length}</span></div>
           <div class="items">${T.carried.length ? T.carried.map((i) => vec(i, "put", L(["Vložit", "Put in"]), C.debt || (plno && !C.items.some((x) => x.id === i.id)))).join("") : `<div class="empty">${esc(L(["Nic u sebe nemáš.", "Nothing carried."]))}</div>`}</div></div>
         <div class="panel"><div class="spread"><h3>${esc(L(["V truhle", "In the chest"]))}</h3><span class="pill">${C.used} / ${C.slots}</span></div>
@@ -926,6 +928,7 @@ VIEWS.truhla = async (view) => {
         <div class="vp-volby">${T.nabidka.map((n) => [1, 4].map((wk) => `<button class="vp-volba" data-cid="ks:innchest:rent:${n.key}:${wk}"${T.level < n.level || T.coins < n.rent * wk ? " disabled" : ""}>
           <b>${esc(n.name + " · " + wk + L([" týd.", " wk"]))}</b><small>${esc(n.slots + L([" druhů věcí · ", " kinds · "]) + n.rent * wk + " gr." + (n.level > 1 ? L([" · od úrovně ", " · level "]) + n.level : ""))}</small></button>`).join("")).join("")}</div></div>`}
     <p><button class="btn" data-go="misto/hostinec">← ${esc(t("back"))}</button></p>`));
+  view.querySelectorAll("[data-tstrana]").forEach((b) => b.onclick = () => { S.truhlaStrana = b.dataset.tstrana; Zvuk.sfx("klik"); render(); });   // r27-14: telefon — Uložit / Vzít
   mountLive(view);
   view.querySelector("[data-go]").onclick = () => go("misto/hostinec");
   const klik = async (id, values, el) => {
@@ -955,7 +958,7 @@ VIEWS.hrbitov = async (view) => {
     <button class="chip${HRB.sekce === "zvirata" ? " on" : ""}" data-hs="zvirata">${esc(L(["Hřbitov zvířátek", "Pet cemetery"]))} · ${ZV.length}</button></div>`;
   if (HRB.sekce === "zvirata") {
     box.innerHTML = tab + (ZV.length ? `<div class="hroby-zv">${ZV.map((z) => `<article class="hrob zv"><div class="tlapka"></div><h3>${esc(z.name)}</h3>
-        <p class="h-puvod">${esc(z.kind + (z.stage ? " · " + z.stage : ""))}</p><p class="h-napis">${esc(z.line)}</p>
+        <p class="h-puvod">${esc(z.kind + (z.stage ? " · " + z.stage : "") + (z.age ? " · " + L(["věk ", "age "]) + z.age : ""))}</p><p class="h-napis">${esc(z.line)}</p>
         <p class="h-data">${esc(L(["Pán: ", "Owner: "]) + z.owner)}${z.died ? "<br>" + esc(z.died) : ""}</p><p class="h-cisla">${esc(z.runs + L([" výprav", " expeditions"]))}</p></article>`).join("")}</div>`
       : `<div class="panel empty">${esc(L(["Pod lípou za kostelem zatím žádný hrobeček není.", "No little graves yet."]))}</div>`);
     box.querySelectorAll("[data-hs]").forEach((b) => b.onclick = () => { HRB.sekce = b.dataset.hs; VIEWS.hrbitov(view); });
@@ -1405,8 +1408,12 @@ VIEWS.vyhlasky = async (view) => {
     const box = $("#vyh"); if (!box) return;
     const moje = Object.fromEntries(r.moje.map((x) => [x.id, x]));
     box.innerHTML = `${note ? `<div class="panel notice">${dmd(note)}</div>` : ""}
-      <div class="vyh-info muted small">${esc(L([`Nová vyhláška za ${kdy(r.next)} · rozpracované nejvýš ${r.max} · splněno celkem ${r.done}`, `New one in ${kdy(r.next)} · max ${r.max} at once · done ${r.done}`]))}</div>
+      <div class="vyh-info muted small">${esc(L([`Nabídka se mění — další vyhlášky možná za ${kdy(r.next)} · rozpracované nejvýš ${r.max} · splněno celkem ${r.done}`, `Offers change — maybe more in ${kdy(r.next)} · max ${r.max} at once · done ${r.done}`]))}</div>
+      ${r.vyhlasky.length ? "" : `<div class="panel vyh-prazdno"><b>${esc(L(["Dveře radnice jsou teď prázdné.", "The town hall door is bare."]))}</b><p class="muted">${esc(L(["Konšelé zrovna nic nevyvěsili. Zkus to později.", "Nothing posted right now. Try later."]))}</p></div>`}
       <div class="vyh-desky">${r.vyhlasky.map((v) => { const m = moje[v.id];
+        if (v.zamceno) return `<article class="vyh-list ${v.kind} drzi-jiny"><i class="vyh-hreb"></i>
+          <header><span class="vyh-druh">🔒 ${esc(L(["Zamčeno", "Taken"]))}</span><span class="vyh-lvl">${esc(L(["od úr. ", "lvl "]) + v.level)}</span></header>
+          <h3>${esc(v.title)}</h3><p class="vyh-kde">${esc(L(["Zakázku si vzal ", "Taken by "]) + v.kdo + L([". Když ji vzdá, znovu se uvolní.", ". It frees up if they drop it."]))}</p></article>`;
         return `<article class="vyh-list ${v.kind}${m ? " moje" : ""}${v.smi ? "" : " zamceno"}"><i class="vyh-hreb"></i>
           <header><span class="vyh-druh">${IK[v.kind]} ${esc(L(DR[v.kind]))}</span><span class="vyh-lvl">${esc(L(["od úr. ", "lvl "]) + v.level)}</span></header>
           <h3>${esc(v.title)}</h3>${(() => { const [pr, ...po] = String(v.text).split("\n-# ");
@@ -1739,11 +1746,14 @@ VIEWS.pet = (view) => {
   setTimeout(() => postavNaZem(view.querySelector(".pet-zvire")), 0);
   view.replaceChildren(h(`
     <div class="grid pet-grid">
-      <div class="pet-fig live" data-img="mesto-zverinec"><div class="pet-zvire${A.hungry ? " hlad" : ""}">${obr(A)}</div></div>
+      <div class="pet-fig-obal"><div class="pet-fig live" data-img="mesto-zverinec"><div class="pet-zvire${A.hungry ? " hlad" : ""}">${obr(A)}</div></div>
+        ${A.vek ? `<div class="pet-vek${A.stary ? " stary" : ""}"><small>${esc(L(["Věk", "Age"]))}</small><b>${esc(A.vek)}</b>${A.stary ? `<em>${esc(L(["v letech", "old"]))}</em>` : ""}</div>` : ""}</div>
       <div class="grid">
         <div class="panel">
           <div class="spread"><h2>${esc(A.name)}</h2><span class="pill gold">${esc(A.stage_name)}</span></div>
-          <p class="muted">${esc(A.kind)}${A.active ? " · " + L(["chodí s tebou na výpravy", "joins your expeditions"]) : ""}</p>
+          <p class="muted">${esc(A.kind)}${A.vek ? " · " + esc(A.vek) : ""}</p>
+          ${A.active ? `<div class="nast-seg pet-doma"><button class="${A.doma ? "" : "on"}" data-doma="0">${esc(L(["Bere ho na výpravy", "Takes it along"]))}</button><button class="${A.doma ? "on" : ""}" data-doma="1">${esc(L(["Nechá ho doma", "Leaves it home"]))}</button></div>
+            <p class="muted small">${esc(A.doma ? L(["Doma je v bezpečí, ale na výpravě nepomáhá a neroste z výprav.", "Safe at home, but no bonus on expeditions."]) : L(["Na výpravě pomáhá a roste — ale když v boji padneš, může zahynout s tebou.", "Helps and grows on expeditions — but may die if you fall."]))}</p>` : ""}
           ${A.hungry ? `<p class="upozorneni ne">${esc(L(["Hladoví — nezaplacené krmení. Nepomáhá a neroste (Rychtář → Výdaje).", "Hungry — unpaid feed."]))}</p>` : ""}
           <div class="stupne">${stupne.map((w, i) => `<span class="${i <= A.stage ? "on" : ""}${i === A.stage ? " ted" : ""}">${esc(w)}</span>`).join("")}</div>
           ${rust ? `<div class="bar"><div class="spread"><span>${esc(rust.co)}</span><span class="muted">${esc(Math.max(0, rust.a))} / ${esc(rust.b)}</span></div>
@@ -1783,6 +1793,7 @@ VIEWS.pet = (view) => {
         <small>${esc(z.kind + " · " + z.stage_name + " · " + z.bonus)}</small><small class="vzit">${esc(L(["Vzít s sebou", "Take along"]))}</small></button>`).join("")}</div></div>` : ""}`));
   mountLive(view, { still: true });
   const zv = (data, msg) => call("zvire", { kind: A.kind, ...data }).then(() => { Zvuk.sfx("klik"); toast(msg); render(); }).catch(() => {});
+  view.querySelectorAll("[data-doma]").forEach((b) => b.onclick = () => zv({ act: "doma", doma: b.dataset.doma === "1" }, b.dataset.doma === "1" ? L(["Zůstane doma.", "Stays home."]) : L(["Půjde s tebou na výpravy.", "Joins your expeditions."])));
   const pr = view.querySelector("[data-prodat]");
   if (pr) pr.onclick = () => { if (confirm(L([`Opravdu prodat ${A.name} do zvěřince za ${A.prodej} gr.? Zvíře už nevrátíš.`, `Sell ${A.name} for ${A.prodej} gr.?`]))) call("zvire", { kind: A.kind, act: "prodat" }).then((r) => { Zvuk.sfx("mince"); toast(L([`Prodáno za ${r.price} gr.`, `Sold for ${r.price} gr.`])); render(); }).catch(() => {}); };
   view.querySelectorAll("[data-krmit]").forEach((b) => b.onclick = () => { b.disabled = true; zv({ act: "krmit", food: b.dataset.krmit || null }, L([`${A.name} se pustil(a) do jídla.`, `${A.name} eats.`])); });
@@ -2619,7 +2630,8 @@ function zverinecHtml(controls) {
         const lock = /🔒/.test(o.label || "");
         return `<button type="button" class="zvire${lock ? " zamceno" : ""}${o.default ? " vybrano" : ""}" data-sel="${esc(c.id)}" data-zvire="${esc(o.value)}"${lock ? " disabled" : ""}>
           ${IMG(f)}<b>${esc(noEmoji(o.label || o.value).replace(/\s*—.*$/, "").trim())}</b>
-          <small>${esc(noEmoji(buy ? ((o.label || "").split("—")[1] || "").replace(/🔒\s*(\d+)/, (m, n) => L(["· od úrovně ", "· level "]) + n).trim() : (o.desc || "")))}</small></button>`;
+          <small>${esc(noEmoji(buy ? ((o.label || "").split("—")[1] || "").replace(/🔒\s*(\d+)/, (m, n) => L(["· od úrovně ", "· level "]) + n).trim() : (o.desc || "")))}</small>
+          ${buy && /Dožívá se/.test(o.desc || "") ? `<small class="zv-zivot">${esc((/Dožívá se[^.]*/.exec(o.desc) || [""])[0])}</small>` : ""}</button>`;
       }).join("")}</div>`;
   }).join("");
 }
@@ -3215,7 +3227,7 @@ const DILNA = { "Kovář": 0, "Střelmistr": 1, "Zbrojíř": 2, "Krejčí": 6 };
 // r27-5: posuvník množství a stav opotřebení (sdílené obchodem, dílnou i batohem)
 function wireMnoz(box) {
   box.querySelectorAll("[data-mn]").forEach((r) => r.oninput = () => {
-    const it = r.closest(".item"), n = Number(r.value);
+    const it = r.closest(".acts") || r.closest(".item"), n = Number(r.value);   // r27-14: posuvník může být i ve spodním okně (telefon)
     r.nextElementSibling.textContent = "×" + n;
     const c = it.querySelector("[data-cena-txt]"); if (c) c.textContent = t("coins", Number(r.dataset.cena) * n);
   });
@@ -3285,7 +3297,7 @@ VIEWS.obchod = async (view) => {
     $("#mine-n").textContent = (data.mine || []).filter((i) => i.sell).length;
     { const n2 = $("#mine-n2"); if (n2) n2.textContent = "· " + (data.mine || []).filter((i) => i.sell).length; }
     wireMnoz(box);
-    const kolik = (b) => Number(b.closest(".item")?.querySelector("[data-mn]")?.value || 1);
+    const kolik = (b) => Number((b.closest(".acts") || b.closest(".item"))?.querySelector("[data-mn]")?.value || 1);   // r27-14: ve spodním okně telefonu
     box.querySelectorAll("[data-barvit]").forEach((b) => b.onclick = () => { barvi = barvi === b.dataset.barvit ? "" : b.dataset.barvit; drawShop(); });
     box.querySelectorAll("[data-zvol]").forEach((b) => b.onclick = () => { zvol[b.dataset.zvol] = b.dataset.barva; barvi = ""; drawShop(); });
     box.querySelectorAll("[data-buy]").forEach((b) => b.onclick = () => { b.disabled = true; call("buy", { item: b.dataset.buy, count: kolik(b), shop: shopId, color: b.dataset.barva || "" })
@@ -3985,7 +3997,7 @@ function drawRaidSetup(view, st) {
     const ma_tabory = (st.camps || []).some((c) => c.id.split("@")[0] === String(VYP.loc).split("@")[0]); if (camp || !ma_tabory) dal(1); drawRaid(view); });
   view.querySelectorAll("[data-diff]").forEach((b) => b.onclick = () => { VYP.diff = b.dataset.diff; dal(2); drawRaid(view); });
   view.querySelectorAll("[data-tgl]").forEach((b) => b.onclick = () => { VYP[b.dataset.tgl] = !VYP[b.dataset.tgl]; drawRaid(view); });
-  $("#vp-go").onclick = async (ev) => {
+  if ($("#vp-go")) $("#vp-go").onclick = async (ev) => {
     const btn = ev.currentTarget; if (RAID.busy) return;
     RAID.busy = true; btn.disabled = true; Zvuk.sfx("klik");
     try {   // stejné kroky jako tlačítka ve shromaždišti na Discordu
@@ -4021,7 +4033,7 @@ function vypListy(view) {
   const nazvy = [L(["Kdo", "Who"]), L(["Kam", "Where"]), L(["Obtížnost", "Difficulty"]), L(["Služby", "Services"])];
   const zal = document.createElement("div");
   zal.className = "m-zalozky vp-zal";
-  zal.innerHTML = nazvy.map((n, i) => `<button class="${i === VYP.krok ? "on" : ""}" data-vkrok="${i}">${i + 1}. ${esc(n)}<small>${i === 1 && VYP.loc ? "✓" : i === 2 && VYP.diff ? "✓" : "&nbsp;"}</small></button>`).join("");
+  zal.innerHTML = nazvy.map((n, i) => `<button class="${i === VYP.krok ? "on" : ""}${(i === 1 && VYP.loc) || (i === 2 && VYP.diff) ? " hotovo" : ""}" data-vkrok="${i}"><i>${["I", "II", "III", "IV"][i]}.</i><span>${esc(n)}</span></button>`).join("");
   box.prepend(zal);
   box.querySelector("h3")?.remove();
   const start = box.querySelector(".vp-start");
@@ -4294,22 +4306,21 @@ async function farmClick(id, values = [], el = null) {
 // --- více
 VIEWS.more = (view) => {
   const jeAdmin = !(document.querySelector('.tabs [data-tab="admin"]') || {}).hidden;   // r27-11: na mobilu je Admin tady (ne ve spodním menu)
-  view.replaceChildren(h(`${jeAdmin ? `<p class="more-admin"><button class="btn primary" data-go-admin>⚙ ${esc(L(["Správa hry (admin)", "Game admin"]))}</button></p>` : ""}<div class="grid g2" style="align-items:start">
-    <div class="panel"><h3>${esc(t("settings"))}</h3>
-      <div class="row zobr-volba"><span class="muted">${esc(L(["Zobrazení", "Layout"]))}</span>
-        ${[["auto", ["Automaticky", "Automatic"]], ["pc", ["Počítač", "Computer"]], ["tel", ["Telefon", "Phone"]]].map(([k, n]) =>
-          `<button class="chip${ZOBR.pref === k ? " on" : ""}" data-zobr="${k}">${esc(L(n))}</button>`).join("")}</div>
-      <div class="row"><span class="muted">${esc(t("language"))}</span>
-        <button class="chip${S.lang === "cs" ? " on" : ""}" data-l="cs">Čeština</button>
-        <button class="chip${S.lang === "en" ? " on" : ""}" data-l="en">English</button>
-        <button class="chip${S.lang === "sk" ? " on" : ""}" data-l="sk">Slovenčina</button>
-        <button class="chip${S.lang === "pl" ? " on" : ""}" data-l="pl">Polski</button></div>
-      <p style="margin-top:16px" class="row"><button class="btn" id="out">${esc(t("logout"))}</button>
-        <button class="btn" id="out-vse" title="${esc(L(["Ztratil jsi telefon? Odhlásí web i aplikaci na všech zařízeních.", "Lost a phone? Signs out every device."]))}">${esc(L(["Odhlásit všechna zařízení", "Sign out everywhere"]))}</button></p>
-      <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
-      <p class="muted small">${esc(t("delete_help"))}</p>
-      <div class="row"><input class="search" id="del" placeholder="SMAZAT" autocomplete="off" style="max-width:180px">
-        <button class="btn danger" id="delbtn">${esc(t("delete"))}</button></div>
+  view.replaceChildren(h(`${jeAdmin ? `<p class="more-admin"><button class="btn primary" data-go-admin>⚙ ${esc(L(["Správa hry (admin)", "Game admin"]))}</button></p>` : ""}<div class="grid g2 ostatni-mrizka" style="align-items:start">
+    <div class="panel nastaveni-panel"><h3>${esc(t("settings"))}</h3>
+      <div class="nast-skup"><span class="nast-hl">${esc(L(["Zobrazení", "Layout"]))}</span>
+        <div class="nast-seg tri">${[["auto", ["Automaticky", "Automatic"]], ["pc", ["Počítač", "Computer"]], ["tel", ["Telefon", "Phone"]]].map(([k, n]) =>
+          `<button class="${ZOBR.pref === k ? "on" : ""}" data-zobr="${k}">${esc(L(n))}</button>`).join("")}</div></div>
+      <div class="nast-skup"><span class="nast-hl">${esc(t("language"))}</span>
+        <div class="nast-seg ctyri">${[["cs", "Čeština"], ["en", "English"], ["sk", "Slovenčina"], ["pl", "Polski"]].map(([k, n]) =>
+          `<button class="${S.lang === k ? "on" : ""}" data-l="${k}">${n}</button>`).join("")}</div></div>
+      <div class="nast-skup"><span class="nast-hl">${esc(L(["Účet", "Account"]))}</span>
+        <div class="nast-ucet"><button class="btn" id="out">${esc(t("logout"))}</button>
+          <button class="btn" id="out-vse" title="${esc(L(["Ztratil jsi telefon? Odhlásí web i aplikaci na všech zařízeních.", "Lost a phone? Signs out every device."]))}">${esc(L(["Odhlásit všechna zařízení", "Sign out everywhere"]))}</button></div>
+        <details class="nast-smazat"><summary>${esc(L(["Smazat účet a postavu…", "Delete account…"]))}</summary>
+          <p class="muted small">${esc(t("delete_help"))}</p>
+          <div class="row"><input class="search" id="del" placeholder="SMAZAT" autocomplete="off" style="max-width:180px">
+            <button class="btn danger" id="delbtn">${esc(t("delete"))}</button></div></details></div>
     </div>
     ${plochaMobil() ? `<div class="panel plocha-panel"><h3>${esc(L(["Zástupce na ploše", "Home screen shortcut"]))}</h3>
       <button class="plocha-tl" id="plocha-tl"${plochaMa() ? " disabled" : ""}><img src="ikona-192.png" alt="">

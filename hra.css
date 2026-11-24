@@ -2897,3 +2897,79 @@ html.mobil .vyp-druziny{padding:10px 12px}
   html.mobil.bez-menu .vyp.v2:not(.boj) .vb-domu>span{white-space:normal;line-height:1.1;font-size:.82rem;flex:1 1 auto!important;text-align:left}
 }
 .hero-fig>.hero-pet.za{z-index:0}
+html.mobil .vp-zal button{gap:2px;padding:8px 2px}
+html.mobil .vp-zal button i{font:700 1.05rem var(--serif);font-style:normal;color:inherit;opacity:.85}
+html.mobil .vp-zal button span{font:600 .8rem var(--serif)}
+html.mobil .vp-zal button.hotovo:not(.on) i{color:#8fbf5a}
+/* r27-12: mimo boj ukazatele menší a bez podkladu (boj zůstává beze změny) */
+.vyp.v2:not(.boj) .vmem{background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
+.vyp.v2:not(.boj) .vmem>b{display:none}
+.vyp.v2:not(.boj) .vk-rada{gap:4px}
+.vyp.v2:not(.boj) .vk>i{width:30px;height:30px;box-shadow:0 1px 4px #000c}
+.vyp.v2:not(.boj) .vk>i::before{inset:3px;background:#120c08d9}
+.vyp.v2:not(.boj) .vk>i b{font-size:.58rem}
+.vyp.v2:not(.boj) .vk small{font-size:.52rem;color:#f0e4c8;text-shadow:0 1px 3px #000,0 0 4px #000}
+.vyp.v2:not(.boj) .vhud span{padding:2px 8px;font-size:.72rem;background:#120c08b3}
+@media (max-width:760px){html.mobil .vyp.v2 .vyp-pergamen,html.mobil .vyp.v2 .vyp-akce{width:100%!important;max-width:none!important;align-self:stretch!important;box-sizing:border-box}}
+/* r27-14: pergamen jen tak vysoký, kolik má textu (neroztahuje se), prázdný rámeček voleb během tahu se neukazuje */
+@media (max-width:760px){
+  html.mobil.bez-menu .vyp.v2 .vyp-pergamen{flex:0 1 auto!important}
+  html.mobil .vyp.v2 .vyp-akce:empty,html.mobil .vyp.v2 .vyp-akce:not(:has(button,select)){display:none!important}
+}
+/* r27-14: zakázka radnice, kterou drží jiný hráč */
+.vyh-list.drzi-jiny{filter:grayscale(.7) brightness(.75);opacity:.8}
+.vyh-list.drzi-jiny h3{text-decoration:line-through;text-decoration-color:#7a1f14aa}
+.vyh-prazdno{text-align:center;padding:22px}
+/* r27-14: truhla na telefonu — Uložit / Vzít přepínačem */
+html.mobil .truhla-sloupce{display:block!important}
+html.mobil .truhla-sloupce.strana-ulozit>.panel:nth-child(2),html.mobil .truhla-sloupce.strana-vzit>.panel:nth-child(1){display:none}
+html.mobil .truhla-zal{margin-top:10px}
+html.mobil .truhla-stav{padding:10px 12px}
+html.mobil .truhla-stav .btn{padding:6px 10px;font-size:.82rem;min-height:36px}
+html.mobil .truhla-stav .row,html.mobil .truhla-stav>div:last-child{display:flex;flex-wrap:wrap;gap:6px}
+html.mobil .truhla-sloupce .item{display:grid!important;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px!important}
+html.mobil .truhla-sloupce .item .icon{width:40px!important;height:40px!important}
+html.mobil .truhla-sloupce .item .acts{margin:0!important;display:flex;gap:4px}
+html.mobil .truhla-sloupce .item .acts .btn{padding:6px 10px;min-height:38px}
+html.mobil .truhla-sloupce .panel{padding:10px}
+html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!important;justify-self:end}html.mobil .truhla-sloupce .item>div:nth-child(2){grid-column:2!important;grid-row:1!important;min-width:0}html.mobil .truhla-sloupce .item>.icon,html.mobil .truhla-sloupce .item>img{grid-column:1!important;grid-row:1!important}
+/* r27-14: speciální vlastnost původu výrazně — pečeť, rudozlatý rám */
+.hk-vlastnost{display:flex!important;align-items:center;gap:14px;padding:14px 16px!important;border:2px solid #b8913f!important;border-left-width:2px!important;border-radius:6px!important;
+  background:linear-gradient(135deg,#7a1f14,#5a1510 60%,#3e0f0b)!important;box-shadow:0 6px 16px #0006,inset 0 0 0 1px #f1d9a055!important;color:#f6e7c4}
+.hk-vlastnost .hkv-pecet{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3d27a,#b8913f 70%);box-shadow:0 2px 8px #000a,inset 0 0 0 2px #6a4a1a}
+.hk-vlastnost .hkv-pecet svg{width:28px;height:28px;fill:#5a1510}
+.hk-vlastnost small{display:block;font:700 .72rem var(--serif);letter-spacing:.14em;text-transform:uppercase;color:#f3d27a!important}
+.hk-vlastnost p{margin:4px 0 0!important;font:700 1.08rem/1.35 var(--serif);color:#fff3dc!important}
+/* r27-14: Ostatní — přehledné skupiny nastavení */
+.nast-skup{margin:0 0 16px}
+.nast-hl{display:block;margin:0 0 6px;font:700 .74rem var(--serif);letter-spacing:.14em;text-transform:uppercase;color:#7a5a35}
+.nast-seg{display:grid;border:1px solid #8a6a3c;border-radius:6px;overflow:hidden;background:#fff6dd80}
+.nast-seg.tri{grid-template-columns:repeat(3,1fr)}.nast-seg.ctyri{grid-template-columns:repeat(4,1fr)}
+.nast-seg button{appearance:none;border:0;border-right:1px solid #8a6a3c66;background:transparent;color:#3a2410;font:600 .9rem var(--serif);padding:10px 4px;min-height:44px;cursor:var(--k-klik,pointer)}
+.nast-seg button:last-child{border-right:0}
+.nast-seg button.on{background:linear-gradient(#8f2a1d,#6a1a12);color:#fff1e6}
+.nast-ucet{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nast-ucet .btn{min-height:44px;font-size:.9rem;white-space:normal}
+.nast-smazat{margin-top:10px;border-top:1px dashed #8a6a3c66;padding-top:8px}
+.nast-smazat summary{cursor:var(--k-klik,pointer);color:#7a1f14;font:600 .9rem var(--serif);list-style:none}
+.nast-smazat summary::-webkit-details-marker{display:none}
+.nast-smazat summary::before{content:"▸ "}.nast-smazat[open] summary::before{content:"▾ "}
+@media (max-width:760px){
+  .nast-seg.ctyri{grid-template-columns:repeat(2,1fr)}
+  .nast-seg.ctyri button:nth-child(2){border-right:0}
+  .nast-seg.ctyri button:nth-child(-n+2){border-bottom:1px solid #8a6a3c66}
+  html.mobil .ostatni-mrizka{display:flex!important;flex-direction:column}
+  html.mobil .ostatni-mrizka>.plocha-panel{order:-1}
+  html.mobil .ostatni-mrizka>.panel{padding:14px}
+}
+/* r27-14: věk mazlíčka v obrázku, brát / nechat doma */
+.pet-fig{position:relative}
+.pet-vek{position:absolute;right:10px;top:10px;z-index:4;display:flex;flex-direction:column;align-items:center;padding:6px 12px;border-radius:6px;
+  background:#120c08d9;border:1px solid #b8913f;box-shadow:0 4px 10px #0008;color:#f6e7c4;text-align:center}
+.pet-vek small{font:700 .62rem var(--serif);letter-spacing:.14em;text-transform:uppercase;color:#e2c06e}
+.pet-vek b{font:700 1rem var(--serif)}
+.pet-vek em{font:italic .72rem var(--serif);color:#cbb994}
+.pet-vek.stary{border-color:#9aa3ab}.pet-vek.stary small{color:#c9d4dc}
+.pet-doma{margin:10px 0 4px;grid-template-columns:1fr 1fr}
+.zv-zivot{display:block;margin-top:2px;font-style:italic;color:#c9b48a!important;font-size:.74rem}
+.pet-fig-obal{position:relative;min-width:0}
