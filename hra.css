@@ -350,6 +350,15 @@ main.wide{max-width:1240px}
 .zabodnuta .sipka-svg{width:100%;display:block;transform:scaleY(.62);transform-origin:50% 0}
 .zabodnuta.letí{transform:translate(-50%,120%) scale(3.4) rotate(-12deg);opacity:.2}
 .zabodnuta.mimo{opacity:.55;filter:grayscale(.6) drop-shadow(3px 6px 3px #000a)}
+/* r27-2: malovaná grafika (jakmile je v repu grafiky) */
+.zabodnuta.obr{width:10%;transform:translate(-50%,-50%)}
+.zabodnuta.obr.letí{transform:translate(-50%,40%) scale(3);opacity:.2}
+.sipka-obr{width:100%;display:block}
+img.barva{object-fit:contain;aspect-ratio:1}
+.karta .obraz-k{position:absolute;inset:13% 12%;display:flex;align-items:center;justify-content:center}
+.karta .obraz-k img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.karta .obraz-k.eso-obr{inset:12% 14%}
+.h2-ikona{height:1.3em;width:auto;vertical-align:-.25em}
 .body-tag{position:absolute;z-index:3;transform:translate(-50%,-140%);color:#ffdf8a;font:700 1.4rem var(--serif);text-shadow:0 2px 6px #000,0 0 10px #f80;
   pointer-events:none;animation:dmg 1.3s forwards}
 @keyframes dmg{to{transform:translate(-50%,-320%);opacity:0}}
@@ -415,3 +424,314 @@ main.wide{max-width:1240px}
 .vloc img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover}
 .vloc figcaption{padding:6px 8px}.vloc small{display:block;color:var(--muted)}
 @media (max-width:860px){.vscene.fight .vtitle{display:none}.vyp{grid-template-columns:1fr}.vscene{aspect-ratio:4/3}.vparty{max-width:96%}.vmem{min-width:110px}.vfoehud{min-width:160px}.vbar.big{width:160px}.vside{max-height:none}}
+
+/* ---------------------------------------------------------------- r27: statek sedláka */
+.ftabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 10px}
+.ftab{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:7px 14px;font:inherit;cursor:pointer}
+.ftab.on{background:var(--panel2);border-color:var(--gold);color:var(--gold2);font-weight:700}
+.fbody{margin-bottom:14px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin:10px 0}
+.fcard{display:flex;flex-direction:column;gap:5px;background:linear-gradient(var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:10px}
+.fcard b{font-family:var(--serif);font-size:1.05rem}
+.fcard small{color:var(--muted);font-size:.84rem;line-height:1.3}
+.fcard .row{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.fcard.ripe{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,162,74,.35),0 0 18px rgba(201,162,74,.18)}
+.fcard.dead{border-color:var(--red)}
+.fcard.built{border-color:var(--green)}
+.fcard.locked{opacity:.55}
+.fimg{position:relative;display:block;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:radial-gradient(circle at 50% 40%,#3a2d1b,#1d160d)}
+.fimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fimg i{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:2.6rem}
+.fimg img+i{display:none}
+.vbar.grow{height:7px}.vbar.grow i{background:linear-gradient(90deg,#6d8c3c,#c9b04a)}
+.fevent{border-color:var(--gold);margin-top:14px;background:linear-gradient(#3a2a14,var(--panel))}
+.fevent .row{display:flex;flex-wrap:wrap;gap:8px}
+.flist{margin:8px 0;padding-left:18px}.flist li{margin:4px 0}.flist small{color:var(--dim)}
+.frecs{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin:10px 0}
+.frec{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
+.frec .ic{font-size:1.5rem;text-align:center}.frec small{display:block;color:var(--muted);font-size:.8rem}
+.frec.no{opacity:.6}
+.fchips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;color:var(--text);padding:5px 10px;font:inherit;font-size:.88rem;cursor:pointer}
+.chip:hover{border-color:var(--gold)}
+.fgoods{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:10px 0}
+.fgood{display:grid;grid-template-columns:30px 1fr;grid-template-areas:"ic b" "ic s" "x x";gap:2px 8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
+.fgood .row{grid-area:x;display:flex;flex-wrap:wrap;gap:6px}
+.fgood .ic{grid-area:ic;font-size:1.4rem}.fgood b{grid-area:b}.fgood small{grid-area:s;color:var(--muted)}
+.fgood .row{margin-top:6px}
+.flog p{margin:4px 0}
+@media (max-width:760px){
+  .fgrid{grid-template-columns:1fr 1fr;gap:8px}.fcard{padding:8px}.fimg i{font-size:2rem}
+  .frecs,.fgoods{grid-template-columns:1fr}
+}
+
+/* r27-2: dobové karty (dřevořez kolorovaný přes šablonu, ruční papír, římské číslice) */
+.karta.dobova{border-radius:3px;border:1px solid #6b5631;color:#1d140b;
+  background:
+    radial-gradient(circle at 18% 82%,#8a5a2014 0 6%,transparent 7%),
+    radial-gradient(circle at 84% 22%,#8a5a2012 0 4%,transparent 5%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .33 0 0 0 0 .18 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(170deg,#efe2bf,#e3d0a2 60%,#d4bd88);
+  box-shadow:2px 6px 10px #000a,inset 0 0 14px #7a5a2a40}
+.karta.dobova::before{content:"";position:absolute;inset:4.5%;border:2px solid #1d140bd9;outline:1px solid #1d140b80;outline-offset:-5px;border-radius:2px;pointer-events:none}
+.karta.dobova .pasek{position:absolute;left:50%;top:5.5%;transform:translateX(-50%);z-index:1;font:700 clamp(.5rem,1.1vw,.82rem)/1 var(--serif);
+  letter-spacing:.06em;padding:.12em .55em .1em;background:#efe2bf;border:1px solid #1d140bcc;white-space:nowrap}
+.karta.dobova .pasek.dole{top:auto;bottom:5.5%;transform:translateX(-50%) rotate(180deg)}
+.karta.dobova .pipy{position:absolute;inset:17% 13% 17% 13%;display:block}
+.karta.dobova .oko{position:absolute;width:26%;transform:translate(-50%,-50%)}
+.karta.dobova .oko.obr{transform:translate(-50%,-50%) rotate(180deg)}
+.karta.dobova .oko .barva{width:100%}
+.karta.dobova .eso{inset:15% 13%}
+.karta.dobova .eso .barva.velka{width:78%;filter:drop-shadow(0 0 0 #000)}
+.karta.dobova .figura-k{inset:15% 12%;border:2px solid #1d140bcc;border-radius:46% 46% 3px 3px/24% 24% 3px 3px;
+  background:linear-gradient(#b8432c22,#b8432c00 40%),#efe2bf;justify-content:space-evenly}
+.karta.dobova .figura-k.nahore{flex-direction:column}
+.karta.dobova .figura-k.dole{flex-direction:column-reverse}
+.karta.dobova .figura-k .znak{font-size:1.9em;line-height:1;color:#b8432c;text-shadow:1px 1px 0 #1d140b}
+.karta.dobova .obraz-k{inset:14% 10%}
+/* r27-3: okna míst jako na Discordu */
+.dpanel{margin-top:14px}
+.dpanel .dtext{line-height:1.55;margin-bottom:10px;white-space:normal}
+.dpanel-img{display:block;max-width:100%;border-radius:8px;margin:0 auto 12px;box-shadow:0 6px 16px #0008}
+.dform{display:flex;flex-direction:column;gap:6px}
+.dform input,.dform textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line,#5a4630);background:#120d08;color:inherit;font:inherit}
+.dform textarea{min-height:110px;resize:vertical}
+/* r27-3: kohoutí jáma */
+.kjama{margin-top:14px}
+.kh-arena{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:10px}
+.kh{display:flex;flex-direction:column;align-items:center;gap:6px;transition:opacity .6s,filter .6s}
+.kh.pad{opacity:.45;filter:grayscale(.8)}
+.kh-name{font:700 1.05rem var(--serif);color:var(--gold2)}
+.kh-hp{position:relative;width:min(240px,100%);height:14px;border-radius:7px;background:#2a1a12;border:1px solid #6b5631;overflow:hidden}
+.kh-hp i{position:absolute;inset:0 auto 0 0;background:linear-gradient(#7ec05a,#3f7a2a);transition:width .5s}
+.kh1 .kh-hp i{background:linear-gradient(#e3b84a,#a47a1c)}
+.kh-hp span{position:absolute;inset:0;text-align:center;font-size:10px;line-height:14px;color:#fff;text-shadow:0 1px 2px #000}
+.kh-img{height:min(28vw,220px);display:flex;align-items:flex-end;justify-content:center}
+.kh-img img{max-height:100%;max-width:100%;filter:drop-shadow(0 8px 6px #000a)}
+.kh1 .kh-img{transform:scaleX(-1)}
+.kh-emoji{font-size:min(18vw,140px);line-height:1}
+.kh-stat{font-size:.85rem;color:var(--muted);text-align:center}
+.kh-vs{font:700 1.4rem var(--serif);color:var(--gold2);padding-bottom:40%}
+.kh.utok .kh-img{animation:kutok .6s ease}
+.kh1.utok .kh-img{animation:kutok1 .6s ease}
+.kh.zasah .kh-img{animation:kzasah .5s ease}
+@keyframes kutok{40%{transform:translate(30%,-12%) rotate(8deg)}}
+@keyframes kutok1{40%{transform:scaleX(-1) translate(30%,-12%) rotate(8deg)}}
+@keyframes kzasah{0%,100%{filter:none}30%{filter:brightness(2.2) drop-shadow(0 0 10px #f40)}60%{transform:translateX(6px)}}
+.kh1.zasah .kh-img{animation:kzasah1 .5s ease}
+@keyframes kzasah1{0%,100%{transform:scaleX(-1)}30%{transform:scaleX(-1);filter:brightness(2.2)}60%{transform:scaleX(-1) translateX(-6px)}}
+.kh-head{margin:12px 0 6px}
+.kh-log{max-height:220px;overflow:auto;margin:10px 0 0;padding-left:22px;color:var(--muted);font-size:.92rem}
+@media (prefers-reduced-motion:reduce){.kh .kh-img{animation:none!important}}
+/* r27-3: okna míst — čistá sazba místo vzhledu Discordu */
+.dpanel .dtext h3{font:700 1.35rem/1.2 var(--serif);color:var(--gold2);margin:0 0 .5em}
+.dpanel .dtext p{margin:0 0 .55em;line-height:1.6}
+.dpanel .dtext p.pozn{color:var(--muted);font-size:.88rem;font-style:italic}
+.dpanel .dtext ul{margin:.2em 0 .8em;padding-left:1.2em}
+.dpanel .dtext li{margin:.2em 0;line-height:1.5}
+.dpanel .dtext code{font-family:var(--serif);font-weight:700;color:var(--gold2)}
+.vctl.ciste .vrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.vctl.ciste .vbtn{flex:1 1 auto;min-width:min(200px,100%);font-family:var(--serif);font-weight:700;letter-spacing:.01em;text-align:center}
+.vctl.ciste .vsel{width:100%;font-family:var(--serif)}
+.kh-dot{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin-right:.45em;vertical-align:.05em;border:1px solid #0006}
+.kh-dot.d0{background:#b8432c}.kh-dot.d1{background:#c9a24a}
+.kh-kurz{display:flex;gap:10px;align-items:baseline;font-family:var(--serif)}
+.kh-kurz span{color:var(--muted);font-size:.85rem}.kh-kurz b{font-size:1.3rem;color:var(--gold2)}
+.kh-sil{width:min(22vw,170px);height:auto;filter:drop-shadow(0 8px 6px #000a)}
+.pvpnote{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.vmulti{border:1px solid #6b5631;border-radius:8px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;width:100%}
+.vmulti legend{padding:0 6px;color:var(--muted);font-size:.85rem}
+.vchk{display:flex;gap:6px;align-items:center;cursor:pointer}
+/* r27-3: herní stůl proti hráči */
+.hside h2{margin-bottom:4px}
+.hkdo{font:700 1rem var(--serif);color:var(--muted);margin:8px 0}
+.hkdo.ja{color:var(--gold2)}
+.hspodek{margin-top:16px;flex-wrap:wrap;gap:8px}
+.stul.bezpozadi{background:radial-gradient(ellipse at center,#3a2a18 0%,#1b130b 75%)}
+.kostka.cizi{cursor:default}
+.kmini{display:inline-block;width:44px;height:44px;vertical-align:middle}
+.kmini img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 4px #000a)}
+.kmini.velka{width:58px;height:58px}
+.kmini.prazdna{border:2px dashed #6b563166;border-radius:8px;width:38px;height:38px;margin:3px}
+.kmini.trefa img{filter:drop-shadow(0 0 8px #f3d27a) drop-shadow(0 3px 4px #000a)}
+.kmini.moje{animation:kpad .45s ease-out both;animation-delay:calc(var(--i)*.08s)}
+@keyframes kpad{from{transform:translateY(-30px) rotate(-30deg);opacity:0}to{transform:none;opacity:1}}
+.lhar-plocha{position:absolute;inset:0;display:grid;grid-template-rows:1fr auto 1fr;align-items:center;justify-items:center;padding:4%}
+.lhar-soupe,.lhar-ja{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px}
+.lhar-plocha .kdo{font:700 .85rem var(--serif);color:var(--gold2);background:#1b140cc9;padding:2px 10px;border-radius:8px}
+.kalisek-sklopeny{width:min(150px,26%);min-width:90px;filter:drop-shadow(0 10px 12px #000c)}
+.lhar-odkryto,.lhar-moje{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.lhar-sazka{background:#1b140cd9;border:1px solid var(--line2);border-radius:12px;padding:6px 16px;font:600 1.05rem var(--serif);display:flex;align-items:center;gap:8px}
+.lhar-volba{display:grid;gap:10px;margin-top:8px}
+.lhar-c{font:700 1.3rem var(--serif);min-width:46px;text-align:center}
+.lhar-tvare{display:flex;gap:6px;flex-wrap:wrap}
+.lhar-tvare .tvar{background:none;border:2px solid transparent;border-radius:10px;padding:2px;cursor:pointer}
+.lhar-tvare .tvar.sel{border-color:var(--gold2);background:#f3d27a22}
+.mlyn-plocha{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.mlyn-deska{height:100%;aspect-ratio:1;object-fit:contain;filter:drop-shadow(0 14px 20px #000b)}
+.hry-morris .stul{aspect-ratio:1/1;max-height:76vh}
+.hry-morris .mlyn-plocha{inset:0}
+.hry-morris .mlyn-plocha .mlyn-deska{width:100%;height:100%}
+.bod{position:absolute;transform:translate(-50%,-50%);width:8%;aspect-ratio:1;border-radius:50%;border:0;background:none;padding:0;cursor:default}
+.bod.cil{cursor:pointer}
+.bod.cil-mp::after,.bod.cil-mt::after{content:"";position:absolute;inset:18%;border-radius:50%;background:#f3d27a88;box-shadow:0 0 0 2px #f3d27a,0 0 14px #f3d27a;animation:pulz 1.4s infinite}
+.bod.cil-mp:hover::after,.bod.cil-mt:hover::after{animation:none;background:#f3d27acc}
+.bod.cil-mf .kamen{filter:drop-shadow(0 0 3px #f3d27a) drop-shadow(0 0 7px #f3d27a) drop-shadow(0 6px 5px #000b)}
+.bod.cil-mx .kamen{filter:drop-shadow(0 0 3px #e0533f) drop-shadow(0 0 8px #e0533f) drop-shadow(0 6px 5px #000b)}
+.bod.cil:hover .kamen{transform:translateY(-3px)}
+@keyframes pulz{50%{opacity:.35}}
+.kamen{display:block;width:100%;height:100%;background-image:var(--kameny);background-repeat:no-repeat;
+  background-size:259% 259%;background-position:12.4% 51%;filter:drop-shadow(0 6px 5px #000b);transition:transform .15s;animation:kpolozit .3s ease-out}
+.kamen.tmavy{background-position:87.4% 51%}
+.kamen.vybrany{transform:translateY(-6px) scale(1.08);filter:drop-shadow(0 0 4px #f3d27a) drop-shadow(0 0 9px #f3d27a) drop-shadow(0 12px 8px #000c)}
+@keyframes kpolozit{from{transform:translateY(-20px) scale(1.2);opacity:0}}
+.mlyn-ruce{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.zasoba{display:flex;flex-wrap:wrap;gap:3px;min-height:26px;margin-top:4px}
+.zasoba .kamen{width:22px;height:22px;animation:none}
+.duel-obraz{width:100%;height:100%;object-fit:contain;border-radius:12px}
+.hry-duel .stul{aspect-ratio:4/3}
+.kolbiste-plocha{position:absolute;inset:0;border-radius:14px;overflow:hidden;display:flex;justify-content:space-around;align-items:flex-end}
+.kolbiste-plocha .pozadi{position:absolute;inset:-8px;background-size:cover;background-position:center 70%;filter:brightness(.5) saturate(.8) blur(2.5px)}
+.kolbiste-plocha::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#000b);pointer-events:none}
+.bojovnik{position:relative;width:42%;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.bojovnik-fig{position:absolute;bottom:-1%;height:76%;width:100%;display:flex;justify-content:center;align-items:flex-end;z-index:1}
+.bojovnik-fig .figura{position:relative;height:100%;display:flex;justify-content:center;align-items:flex-end}
+.bojovnik-fig .figura-zbrane{display:none}
+.bojovnik.on .bojovnik-fig{transform:scaleX(-1)}
+.bojovnik.zasazen .bojovnik-fig{animation:zasah .5s}
+@keyframes zasah{20%{filter:brightness(2) sepia(1) hue-rotate(-40deg) saturate(4)}40%{translate:8px 0}60%{translate:-6px 0}}
+.bojovnik.natahu .bojovnik-hud{border-color:var(--gold2);box-shadow:0 0 14px #f3d27a55}
+.bojovnik-hud{position:absolute;top:8px;z-index:2;width:92%;background:#1b140ce6;border:1px solid var(--line2);border-radius:10px;padding:5px 9px;display:grid;gap:1px;font-size:.8rem}
+.bojovnik-hud .vbar{height:6px;margin:1px 0 3px}
+.bojovnik .rana{position:absolute;top:42%;left:50%;z-index:3;font:700 2rem var(--serif);color:#ff7a5a;text-shadow:0 2px 6px #000;animation:vystup 1.3s forwards}
+@keyframes vystup{from{transform:translate(-50%,10px);opacity:0}20%{opacity:1}to{transform:translate(-50%,-40px);opacity:0}}
+.tabs button span:empty{display:none}
+
+/* ================================================================ r27-4: vzhled „Noc nad městem“ a „Kronika“
+   Město a místa: malba přes celou šířku, gotický nadpis, volby v tmavém panelu se zlatými linkami.
+   Postava, batoh, více: kniha — pergamenové stránky v kožených deskách. Hlavní volby jako červená pečeť. */
+:root{
+  --gotic:"Grenze Gotisch","UnifrakturCook",Georgia,serif;
+  --stitek:"Cinzel",Georgia,serif;
+  --serif:"EB Garamond",Georgia,"DejaVu Serif",serif;
+  --sans:"EB Garamond",Georgia,"DejaVu Serif",serif;
+  --bg:#120c08; --bg2:#1a110a; --panel:#1f150d; --panel2:#2a1c11; --line:#4a3420; --line2:#8a6a3c;
+  --gold:#c9a45c; --gold2:#f1d9a0; --text:#ecdcb8; --muted:#c7b08a; --dim:#9a8461;
+  --pecet:#8e1b14; --pecet2:#b8322a; --pergamen:#ead6aa; --inkoust:#2b1d12;
+}
+html,body{font-size:17px}
+body{background:radial-gradient(1400px 700px at 50% -260px,#3a2516 0%,transparent 70%),var(--bg)}
+h1,h2{font-family:var(--gotic);font-weight:700;letter-spacing:0;line-height:1}
+h2{font-size:2rem}
+h3{font-family:var(--stitek);font-weight:700;font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.sect{font-family:var(--stitek);font-size:.8rem;letter-spacing:.24em;color:var(--gold)}
+.sect::before,.sect::after{content:"◆";margin:0 .7em;font-size:.6em;vertical-align:.25em;color:var(--pecet2)}
+
+/* pečeť (znak hry, hlavní volby) */
+.pecet{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;flex:none;
+  background:radial-gradient(circle at 35% 30%,var(--pecet2),#7a140e 72%);box-shadow:inset 0 0 0 3px #0000003d,0 2px 8px #000a;
+  font:700 .8rem/1 var(--stitek);color:var(--gold2);letter-spacing:.04em}
+
+/* tlačítka */
+.btn{border-radius:2px;border:1px solid var(--line2);background:#1a110acc;font-family:var(--serif);font-weight:600;letter-spacing:.01em}
+.btn:hover{border-color:var(--gold);filter:none;background:#c9a45c1f}
+.btn.primary{background:var(--pecet);border-color:#5e0f0a;color:#f3e3bd;box-shadow:inset 0 0 0 2px #5e0f0a,inset 0 0 0 3px var(--gold);font-family:var(--gotic);font-size:1.15rem;font-weight:500}
+.btn.primary:hover{background:#a3221a}
+.btn.danger{background:#3a1410;border-color:#a8261c;color:#f0c9b8}
+.btn.big{min-height:52px;font-size:1.35rem}
+.link{font-family:var(--stitek);font-size:.8rem;letter-spacing:.16em;text-decoration:none}
+.chip{border-radius:2px;font-family:var(--stitek);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+.tag{border-radius:2px;font-family:var(--stitek);letter-spacing:.08em}
+
+/* přihlášení: brána za soumraku */
+.login{background:linear-gradient(180deg,#0a0704a0,#0a070420 40%,#0a0704f0 100%),var(--uvod) center 40%/cover no-repeat}
+.login-card{border:1px solid var(--line2);border-radius:2px;background:#120c08e6;box-shadow:0 30px 80px #000c,inset 0 0 0 4px #120c08,inset 0 0 0 5px #8a6a3c88;backdrop-filter:blur(3px)}
+.login .crest.pecet{width:64px;height:64px;font-size:1.1rem;margin:0 auto 10px}
+.login h1{font-size:3.2rem;color:#f1e2bd;text-shadow:0 4px 16px #000}
+.sub{font-family:var(--stitek);font-style:normal;font-size:.78rem;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+#code{border-radius:2px;font-family:var(--stitek);background:#0d0805;border-color:var(--line2)}
+
+/* horní lišta a hlavní nabídka: zlatá linka s kosočtverci, aktivní místo jako pečeť */
+.topbar{background:linear-gradient(#0d0906f2,#120c08e6);border-bottom:1px solid #8a6a3c55}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--gotic);font-weight:700;font-size:1.6rem;color:#f1e2bd}
+.brand .pecet{width:36px;height:36px;font-size:.72rem}
+.tb-name{font-family:var(--gotic);font-size:1.25rem;font-weight:500;color:#f1e2bd}
+.pill{border-radius:2px;background:transparent;border-color:#8a6a3c88;font-family:var(--stitek);font-size:.72rem;letter-spacing:.12em}
+.tb-clock{font-family:var(--stitek);font-size:.72rem;letter-spacing:.12em;color:var(--gold)}
+.tabs{position:relative;gap:0;justify-content:center;padding:14px 20px 10px;background:#0f0a06;border-bottom:1px solid #8a6a3c44}
+.tabs::before{content:"";position:absolute;left:max(20px,calc(50% - 300px));right:max(20px,calc(50% - 300px));top:27px;height:1px;background:linear-gradient(90deg,transparent,#8a6a3c 12%,#8a6a3c 88%,transparent)}
+.tabs button{position:relative;flex-direction:column;gap:6px;min-width:120px;padding:0 10px 2px;border:0;border-radius:0;background:none!important;color:#bfa577}
+.tabs button>span,.tabs button>span:empty{display:block;width:12px;height:12px;margin:1px 0;transform:rotate(45deg);border:1px solid var(--gold);background:#1a120b;font-size:0;overflow:hidden;transition:all .2s}
+.tabs button b{font-family:var(--gotic);font-weight:500;font-size:1.3rem;line-height:1}
+.tabs button:hover{color:#f1e2bd}
+.tabs button:hover>span{background:var(--gold)}
+.tabs button.on{color:#f6dfa4}
+.tabs button.on>span{width:22px;height:22px;margin:-4px 0;transform:none;border-radius:50%;border:0;
+  background:radial-gradient(circle at 35% 30%,var(--pecet2),#7a140e 72%);box-shadow:0 0 0 2px var(--gold),0 0 14px #e07a5f99}
+
+/* Noc nad městem: scény a volby */
+.scene,.townmap,.stul-scena,.tablebg,.hero-fig{border-radius:3px;border-color:#8a6a3c88}
+.scene-cap{padding:110px 34px 26px;background:linear-gradient(transparent,#0a0704 78%)}
+.scene-cap h2{font-size:3.6rem;color:#f1e2bd;text-shadow:0 4px 18px #000}
+.scene-cap p{font-size:1.25rem;color:#e3cfa3;max-width:46em}
+.opts{gap:10px}
+.opt{grid-template-columns:34px 1fr;border-radius:2px;border:1px solid #c9a45c59;background:#0e0905d9;box-shadow:none;padding:14px 18px}
+.opt:hover{transform:none;border-color:var(--gold);background:#c9a45c1a}
+.opt .ic{font-size:1.25rem;filter:sepia(.6) saturate(.7)}
+.opt b{font-family:var(--serif);font-weight:600;font-size:1.2rem;color:#f1e2bd}
+.opt small{font-family:var(--stitek);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.place{border-radius:2px;background:#0e0905d9;border-color:#c9a45c44;font-family:var(--serif);font-size:1.1rem}
+.place:hover{border-color:var(--gold);background:#c9a45c1a}
+.spot span{font-family:var(--gotic);font-weight:500;font-size:1.05rem;border-radius:2px;color:#5a1510;background:#f3e6c3f0}
+.panel{border-radius:3px;border-color:#8a6a3c66;background:#140d08e8}
+.panel.notice{border-color:var(--pecet2);background:#2a120ee6}
+.toast{border-radius:2px;background:#0e0905f2;font-family:var(--serif);font-size:1.05rem}
+.toast.err{background:#2a0f0cf2}
+.busy span{background:linear-gradient(90deg,transparent,var(--gold),var(--pecet2))}
+
+/* Kronika: postava, batoh a více jako kniha */
+main[data-tab="hero"],main[data-tab="bag"],main[data-tab="more"]{max-width:1180px;margin-top:22px;margin-bottom:40px;padding:26px;border-radius:6px;
+  background:radial-gradient(120% 90% at 50% 40%,#3a2516 0%,#21150d 65%,#160e08 100%);box-shadow:0 20px 60px #000c,0 0 0 1px #5a3d22,inset 0 0 0 6px #160e08,inset 0 0 0 7px #8a6a3c55}
+main[data-tab="hero"] .panel,main[data-tab="bag"] .panel,main[data-tab="more"] .panel{
+  --text:#2b1d12; --muted:#5a4128; --dim:#7a5a35; --gold:#8e1b14; --gold2:#8e1b14; --line:#c2a676; --line2:#a8885a; --panel:#e4cf9f; --panel2:#dcc290;
+  color:var(--text);border:0;border-radius:2px;padding:22px 26px;
+  background:radial-gradient(140% 120% at 30% 15%,#f4e6c4 0%,#ead6aa 55%,#d9bf8a 100%);
+  box-shadow:0 8px 24px #000a,inset 0 0 40px #7850201f}
+main[data-tab="hero"] .panel h3,main[data-tab="bag"] .panel h3,main[data-tab="more"] .panel h3{color:#7a5a35;border-bottom:1px solid #b8924a;padding-bottom:8px}
+main[data-tab="hero"] .panel.notice,main[data-tab="bag"] .panel.notice,main[data-tab="more"] .panel.notice{background:#f3dcc4;box-shadow:inset 4px 0 0 var(--pecet),0 8px 24px #000a}
+main[data-tab] .panel .stat,main[data-tab] .panel .score{background:#fff8e159;border-color:#b8924a}
+main[data-tab] .panel .stat b,main[data-tab] .panel .score b{color:#2b1d12}
+main[data-tab] .panel .item{background:#fff8e14d;border-color:#c2a676}
+main[data-tab] .panel .item:hover{border-color:var(--pecet)}
+main[data-tab] .panel .item.eq{border-color:var(--pecet);box-shadow:inset 3px 0 0 var(--pecet)}
+main[data-tab] .panel .icon{background:#fff8e180;border-color:#c2a676}
+main[data-tab] .panel .track{background:#d1b886;border-color:#a8885a;border-radius:0;height:7px}
+main[data-tab] .panel .fill{border-radius:0}
+main[data-tab] .panel .search,main[data-tab] .panel select{background:#fff8e199;color:#2b1d12;border-color:#a8885a}
+main[data-tab] .panel .btn:not(.primary):not(.danger){background:#fff8e166;color:#2b1d12;border-color:#a8885a}
+main[data-tab] .panel .btn:not(.primary):not(.danger):hover{border-color:var(--pecet);background:#8e1b1414}
+main[data-tab] .panel .chip.on{background:#8e1b14;color:#f3e3bd;border-color:#5e0f0a}
+main[data-tab] .panel a{color:var(--pecet)}
+main[data-tab="hero"] .hero-fig{border:0;box-shadow:0 8px 24px #000a,0 0 0 1px #8a6a3c}
+.vyzbroj{border-radius:2px;background:#f0e0b8e6;border-color:#a8885a}
+.vyzbroj figcaption{color:#8e1b14}
+
+@media (max-width:760px){
+  html,body{font-size:16px}
+  .brand{font-size:1.25rem}
+  .tabs{position:fixed;bottom:0;left:0;right:0;z-index:6;padding:10px 2px calc(8px + env(safe-area-inset-bottom));background:#0d0906f5;border-top:1px solid #8a6a3c66;border-bottom:0}
+  .tabs::before{top:22px;left:8%;right:8%}
+  .tabs button{min-width:0}
+  .tabs button b{font-size:1.05rem}
+  .scene-cap h2{font-size:2rem}.scene-cap p{font-size:1rem}
+  main[data-tab="hero"],main[data-tab="bag"],main[data-tab="more"]{margin:10px 6px 20px;padding:10px;border-radius:4px}
+  main[data-tab="hero"] .panel,main[data-tab="bag"] .panel,main[data-tab="more"] .panel{padding:16px 14px}
+}
+.opt:has(.ic:empty){grid-template-columns:1fr}
+.opt .ic:empty{display:none}
+/* r27-4: skutečná pečeť hry (obrázek z repa grafiky) místo písmen KS */
+.pecet{background:var(--pecet-img) center/contain no-repeat;box-shadow:none;font-size:0;color:transparent;filter:drop-shadow(0 3px 6px #000b)}
+.brand .pecet{width:44px;height:44px}
+.login .crest.pecet{width:110px;height:110px}
+.tabs button.on>span{width:30px;height:30px;margin:-8px 0;background:var(--pecet-img) center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 0 8px #e07a5f88)}
+@media (max-width:760px){.brand .pecet{width:38px;height:38px}}

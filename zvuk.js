@@ -130,9 +130,25 @@ const Zvuk = (() => {
       return () => { stop(); s.stop(); };
     },
     forest(g) { const a = LOOPS.wind(g, .5), b = LOOPS.birds(g); return () => { a(); b(); }; },
+    field(g) { // r27: pole — vítr v obilí a cvrčci v trávě
+      const a = LOOPS.wind(g, .35);
+      const stop = timer(() => { const t = now(), f = 5200 + R() * 600; for (let i = 0; i < 6; i++) tone(g, { t: t + i * .03, f, type: "triangle", d: .02, v: .015 }); }, 400, 1600);
+      return () => { a(); stop(); };
+    },
+    hens(g) { // kdákání slepic
+      const stop = timer(() => { const t = now(), f = 520 + R() * 180, n = 2 + (R() * 4 | 0);
+        for (let i = 0; i < n; i++) tone(g, { t: t + i * .13, f: f * (i === n - 1 ? 1.3 : 1), fEnd: f * .8, type: "square", a: .005, d: .07, v: .03 }); }, 900, 3500);
+      return stop;
+    },
+    barn(g) { // chlév: tlumené dupání, sláma, občas zabučí kráva
+      const s = noise(), lp = filt("lowpass", 300), m = gain(.12); s.connect(lp).connect(m).connect(g); s.start();
+      const stop = timer(() => { if (R() < .35) tone(g, { f: 140, fEnd: 110, type: "sawtooth", a: .15, d: 1.1, v: .05 });
+        else burst(g, { f: 400 + R() * 300, q: 2, a: .01, d: .12, v: .2 }); }, 1500, 5000);
+      return () => { stop(); s.stop(); };
+    },
     night(g) { return LOOPS.crickets(g); },
   };
-  const VOL = { fire: .7, murmur: .6, wind: .5, rain: .6, birds: .7, crickets: .6, church: .8, forge: .8, water: .7, crowd: .6, forest: .7, night: .6, storm: .9, gale: .7 };
+  const VOL = { field: .6, hens: .6, barn: .6, fire: .7, murmur: .6, wind: .5, rain: .6, birds: .7, crickets: .6, church: .8, forge: .8, water: .7, crowd: .6, forest: .7, night: .6, storm: .9, gale: .7 };
   LOOPS.storm = (g) => { const a = LOOPS.rain(g, 1.6), b = LOOPS.wind(g, .8); return () => { a(); b(); }; };
   LOOPS.gale = (g) => LOOPS.wind(g, 1.6);
 
@@ -143,6 +159,7 @@ const Zvuk = (() => {
     forge: ["prostredi/kovarna"], rain: ["prostredi/dest-venku"], rain_in: ["prostredi/dest-uvnitr"], storm: ["prostredi/bourka"],
     wind: ["prostredi/vitr-stromy"], gale: ["prostredi/vitr-stromy"], wind_winter: ["prostredi/vitr-zima"], birds: ["prostredi/les-ptaci-1", "prostredi/les-ptaci-2"],
     night: ["prostredi/noc-cvrcci"], forest: ["prostredi/les-ptaci-1"], street: ["prostredi/kun-vuz"],
+    field: ["prostredi/pole"], hens: ["prostredi/kurnik"], barn: ["prostredi/chlev"],      // r27: statek
   };
   const FILE_SFX = {
     kalisek: ["efekty/kalisek-1", "efekty/kalisek-2"], kostky: ["efekty/kostky-stul-1", "efekty/kostky-stul-2"],
@@ -150,6 +167,9 @@ const Zvuk = (() => {
     zasah: ["efekty/sipky-1", "efekty/sipky-2", "efekty/sip-drevo"], voda: ["efekty/voda"], mec: ["efekty/mec-svih-1", "efekty/mec-svih-2"],
     odrazeno: ["efekty/mec-stret-1", "efekty/mec-stret-2"], uder: ["efekty/stit", "efekty/mec-stit"], hrom: ["efekty/hrom-1"],
     zvon: ["efekty/zvon-1", "efekty/zvon-2"], kovadlina: ["efekty/kovadlina"], dvere: ["efekty/dvere"],
+    kosa: ["efekty/kosa"], seti: ["efekty/seti"], kladivo: ["efekty/kladivo-drevo"],                 // r27: statek
+    "zvire-slepice": ["efekty/slepice"], "zvire-koza": ["efekty/koza"], "zvire-ovce": ["efekty/ovce"],
+    "zvire-prase": ["efekty/prase"], "zvire-krava": ["efekty/krava"],
   };
   const bufs = new Map();                 // název souboru → AudioBuffer | Promise | null (chyba)
   function load(name) {
@@ -230,6 +250,14 @@ const Zvuk = (() => {
     vyhra() { const t = now(); [523, 659, 784, 1046].forEach((f, i) => tone(busSfx, { t: t + i * .12, f, type: "triangle", d: .5, v: .12 })); },
     prohra() { const t = now(); [392, 330, 262].forEach((f, i) => tone(busSfx, { t: t + i * .18, f, type: "triangle", d: .6, v: .1 })); },
     dvere() { burst(busSfx, { f: 200, q: 2, a: .05, d: .5, v: .4, fEnd: 120 }); burst(busSfx, { t: now() + .5, f: 150, q: 1, d: .12, v: .5 }); },
+    kosa() { burst(busSfx, { type: "highpass", f: 2200, a: .06, d: .3, v: .25, fEnd: 4200 }); },
+    seti() { const t = now(); for (let i = 0; i < 12; i++) burst(busSfx, { t: t + i * .03 + R() * .03, f: 3000 + R() * 2500, q: 5, d: .015, v: .12 }); },
+    kladivo() { const t = now(); [0, .32].forEach((dt) => { burst(busSfx, { t: t + dt, f: 500, q: 2, a: .001, d: .08, v: .6 }); tone(busSfx, { t: t + dt, f: 220, fEnd: 120, d: .1, v: .2 }); }); },
+    "zvire-slepice"() { const t = now(); for (let i = 0; i < 4; i++) tone(busSfx, { t: t + i * .12, f: 600, fEnd: 480, type: "square", d: .07, v: .05 }); },
+    "zvire-koza"() { tone(busSfx, { f: 420, fEnd: 380, type: "sawtooth", a: .02, d: .5, v: .06 }); },
+    "zvire-ovce"() { tone(busSfx, { f: 330, fEnd: 300, type: "sawtooth", a: .03, d: .6, v: .06 }); },
+    "zvire-prase"() { burst(busSfx, { f: 450, q: 3, a: .01, d: .25, v: .35, fEnd: 300 }); },
+    "zvire-krava"() { tone(busSfx, { f: 150, fEnd: 115, type: "sawtooth", a: .1, d: 1.2, v: .08 }); },
   };
   const SFX_VOL = { hrom: 1, zvon: .6, kovadlina: .35, dvere: .5, kostky: .8, kalisek: .8 };
   function sfx(name) {

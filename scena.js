@@ -34,6 +34,9 @@ const Scena = (() => {
   ["zbrojir", "strelmistr", "apatykar", "krejci", "pisar", "vetesnik", "pokoj"].forEach((k) => {
     CFG[k] = { emit: [{ t: "dust", rate: .15, area: [10, 10, 90, 90], warm: 1 }], indoor: true };
   });
+  // r27: statek za hradbami (kouř z komína, ptáci, prach na dvoře; obrázky v img/statek/)
+  CFG.statek = { emit: [{ t: "smoke", x: 30, y: 18, rate: .05, s: .8 }, { t: "birds", rate: .006 }, { t: "dust", rate: .15, area: [10, 55, 90, 95], warm: 1 }],
+    night: "statek/statek-dvur-noc", winter: "statek/statek-dvur-zima" };
   // Hostinec má noční verzi okna.
   CFG.hostinec.night = "zima-noc/mesto-hostinec-noc";
   // obchodníci mají vlastní obrázky; efekty berou z nejbližšího místa
@@ -41,7 +44,7 @@ const Scena = (() => {
     "mesto-trziste": "trziste", "mesto-brana": "brana", "mesto-kolbiste": "kolbiste", "mesto-radnice": "radnice",
     "mesto-banka": "banka", "mesto-zverinec": "zverinec", "mesto-dum": "dum", "mesto-paserak": "paserak", "mesto-mapa": "mapa",
     "mesto-zbrojir": "zbrojir", "mesto-strelmistr": "strelmistr", "mesto-apatykar": "apatykar", "mesto-krejci": "krejci",
-    "mesto-pisar": "pisar", "mesto-vetesnik": "vetesnik", "mesto-pokoj": "pokoj" };
+    "mesto-pisar": "pisar", "mesto-vetesnik": "vetesnik", "mesto-pokoj": "pokoj", "statek/statek-dvur": "statek" };
 
   const W = { night: false, eve: false, season: "léto", weather: "jasno", forced: null };
   const live = new Set();

@@ -11,6 +11,9 @@
 <meta name="description" content="Královské stezky — tahová hra z Kutnohorska 15. století. Stejná postava jako na Discordu.">
 <title>Královské stezky</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
 <link rel="stylesheet" href="hra.css">
 </head>
 <body>
@@ -18,7 +21,7 @@
   <!-- přihlášení -->
   <section id="login" class="screen login" hidden>
     <div class="login-card">
-      <div class="crest" aria-hidden="true">⚔️</div>
+      <div class="crest pecet" aria-hidden="true">KS</div>
       <h1 data-t="app_title">Královské stezky</h1>
       <p class="sub" data-t="app_sub">Tahová hra z českého středověku</p>
       <ol class="steps">
@@ -43,7 +46,7 @@
   <!-- hra -->
   <section id="game" class="screen" hidden>
     <header class="topbar">
-      <div class="brand"><span aria-hidden="true">⚔️</span> <span data-t="app_title">Královské stezky</span></div>
+      <div class="brand"><span class="pecet" aria-hidden="true">KS</span> <span data-t="app_title">Královské stezky</span></div>
       <div class="who">
         <span id="tb-name" class="tb-name"></span>
         <span id="tb-level" class="pill"></span>
