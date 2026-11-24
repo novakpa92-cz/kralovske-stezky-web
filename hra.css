@@ -1379,10 +1379,9 @@ main[data-tab="prirucka"]{max-width:1280px}
 .prsi .ruka{min-height:0;height:100%}
 .prsi .ruka.hrac .prsi-karta,.prsi .ruka.hostinsky>.karta{flex:0 1 13%}
 .prsi-barva{left:108%;bottom:auto;top:42%;transform:none}
-/* r27-5: mazlíček stojí v popředí před postavou (blíž k divákovi, překrývá nohy) */
-.hero-fig>.hero-pet{z-index:6;left:14%;bottom:-3%;width:calc(34% * var(--vel,1))}
-.hero-fig>.hero-pet img{filter:drop-shadow(0 10px 8px #000d) brightness(1.04)}
-.hero-fig>.hero-pet::before{content:"";position:absolute;left:12%;right:12%;bottom:6%;height:9%;border-radius:50%;background:radial-gradient(#000a,#0000 70%);z-index:-1}
+/* r27-5: mazlíček na původním místě, ale ve vrstvě za postavou */
+.hero-fig>.hero-pet{z-index:0}
+.hero-fig>.figura{z-index:1}
 /* r27-5: znaky boje — kulaté pečeti, hodnota přesně uprostřed */
 .znak-obr{width:104px;height:104px}
 .znak-obr b{padding-top:14px;font-size:36px;color:#fff6e0!important;text-shadow:0 2px 4px #000c!important;line-height:1}
@@ -1454,3 +1453,30 @@ main[data-tab="prirucka"]{max-width:1280px}
 .terc img:not(.terc-obr),.terc .sipka-svg,.terc .sipka-obr,.terc [class*="sipka"]{pointer-events:none}
 .sipky-legenda .sance{font-style:normal;font-weight:700;color:#c9a55a;margin-left:6px}
 .terc .zabodnuta{pointer-events:none}
+/* r27-5: mobil — mapa města se vejde na šířku (dřív ji min-height roztáhl za okraj obrazovky) */
+@media (max-width:1000px){.mesto-mapa{min-height:0;aspect-ratio:3/2}}
+@media (max-width:640px){.mesto-mapa .townmap .spot span{font-size:.66rem;padding:1px 4px;margin-top:9px;letter-spacing:0}.mesto-mapa .townmap .spot span svg{width:8px;height:8px}}
+/* r27-5: mobil a tablet — postava nad panelem, záložky v jedné posuvné řadě */
+@media (max-width:760px){
+  .hero-sheet{grid-template-columns:1fr;grid-template-rows:auto;height:auto;min-height:0}
+  .hero-sheet .hero-left{height:auto}
+  .hero-sheet .hero-fig{aspect-ratio:4/5;max-height:62vh;width:100%;margin:0 auto}
+  .hk-zalozky{display:flex;overflow-x:auto;scrollbar-width:none}
+  .hk-zalozky::-webkit-scrollbar{display:none}
+  .hk-zalozky button{flex:0 0 auto;white-space:nowrap;padding:12px 12px}
+  .hero-karty{min-width:0}
+  .potreby.velke{grid-template-columns:repeat(3,1fr)}
+  .znaky{grid-template-columns:repeat(2,1fr)}
+  .sb-souboj{min-width:0;overflow:hidden}
+}
+@media (max-width:760px){
+  .dk-zalozky{flex-direction:row!important;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap!important}
+  .dk-zalozky::-webkit-scrollbar{display:none}
+  .dk-zalozky button{flex:0 0 auto!important;white-space:nowrap}
+  .tabs button{font-size:.68rem;padding:.3em .1em;min-width:0}
+  .tabs button b{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .karty-plocha.prsi{padding:2% 2% 4%}
+  .prsi .ruka.hrac .prsi-karta{flex-basis:18%}
+}
+@media (min-width:761px) and (max-width:1050px){.tabs{gap:2px;padding:8px 6px}.tabs button{padding:.4em .55em;font-size:.88rem;gap:.3em}}
+@media (min-width:761px) and (max-width:1050px){.tabs button{flex:0 1 auto!important;min-width:0!important;width:auto!important}}

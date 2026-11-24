@@ -637,12 +637,31 @@ VIEWS.hrbitov = async (view) => {
 
 // r27-4: chat diváků (souboje, kohoutí zápasy) — rozepsaná zpráva přežije obnovení stránky zápasu
 const CHAT = { draft: {}, focus: "" };
-function chatHtml(room, msgs) {
+function chatListHtml(room, msgs) {
   const cas = (ts) => new Date(ts * 1000).toLocaleTimeString(({ en: "en-GB", pl: "pl-PL", sk: "sk-SK" }[S.lang] || "cs-CZ"), { hour: "2-digit", minute: "2-digit" });
+  return (msgs || []).length ? msgs.map((m) => `<li${m.dc ? ' class="z-dc" title="z Discordu"' : ""}><span class="kdy">${cas(m.t)}</span><b>${esc(m.name)}</b> ${esc(m.text)}</li>`).join("")
+    : `<li class="muted">${esc(room === "hostinec" ? L(["U stolů je zatím ticho. Prolomíš ho?", "Quiet at the tables."]) : L(["Zatím ticho. Zakřič první…", "Quiet so far."]))}</li>`;
+}
+/** r27-5: dokud hráč píše do řečí, obnova stránky nepřestaví pole (na mobilu by zavřela klávesnici) — jen doplní nové zprávy.
+ *  Vrací true, když se smí box přestavět celý. */
+function chatRebuild(box, html, rooms) {
+  const a = document.activeElement;
+  if (a && box.contains(a) && a.closest(".chat-form")) {
+    box.querySelectorAll(".chat[data-room]").forEach((c) => {
+      const msgs = rooms[c.dataset.room]; if (!msgs) return;
+      const list = c.querySelector(".chat-list"), dole = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
+      const nove = chatListHtml(c.dataset.room, msgs);
+      if (list.innerHTML !== nove) { list.innerHTML = nove; if (dole) list.scrollTop = list.scrollHeight; }
+    });
+    return false;
+  }
+  box.innerHTML = html;
+  return true;
+}
+function chatHtml(room, msgs) {
   const hospoda = room === "hostinec";
   return `<div class="chat${hospoda ? " hospoda" : ""}" data-room="${esc(room)}"><div class="chat-h">${esc(hospoda ? L(["Hospodské řeči", "Tavern talk"]) : L(["Pokřik z hlediště", "Shouts from the stands"]))}<small>${esc(hospoda ? L(["propojeno s #na-rynku na Discordu", "linked with #na-rynku on Discord"]) : L(["propojeno s vláknem zápasu na Discordu", "linked with the match thread on Discord"]))}</small></div>
-    <ul class="chat-list">${(msgs || []).length ? msgs.map((m) => `<li${m.dc ? ' class="z-dc" title="z Discordu"' : ""}><span class="kdy">${cas(m.t)}</span><b>${esc(m.name)}</b> ${esc(m.text)}</li>`).join("")
-      : `<li class="muted">${esc(hospoda ? L(["U stolů je zatím ticho. Prolomíš ho?", "Quiet at the tables."]) : L(["Zatím ticho. Zakřič první…", "Quiet so far."]))}</li>`}</ul>
+    <ul class="chat-list">${chatListHtml(room, msgs)}</ul>
     <form class="chat-form"><input maxlength="200" placeholder="${esc(hospoda ? L(["Řekni něco ke stolu…", "Say something…"]) : L(["Fanděj, hecuj, sázej…", "Cheer, jeer, bet…"]))}" value="${esc(CHAT.draft[room] || "")}"><button class="btn small primary">${esc(hospoda ? L(["Říct", "Say"]) : L(["Zakřičet", "Shout"]))}</button></form></div>`;
 }
 // hospodské řeči: obnova každé 4 s, jen dokud je hráč v lokálu
@@ -651,7 +670,7 @@ async function hospodaKresli() {
   const box = document.getElementById("hospoda-reci");
   if (!box || S.tab !== "misto" || S.arg !== "hostinec") { clearInterval(HOSPODA.timer); return; }
   let r; try { r = await call("chat", { room: "hostinec" }, true); } catch { return; }
-  box.innerHTML = chatHtml("hostinec", r.chat);
+  if (!chatRebuild(box, chatHtml("hostinec", r.chat), { hostinec: r.chat })) return;
   wireChat(box, hospodaKresli);
 }
 function wireChat(box, after) {
@@ -801,7 +820,7 @@ VIEWS.souboje = async (view) => {
     let r = data; if (!r) { try { r = await call("souboje", {}, true); } catch { return; } }
     const box = $("#soub"); if (!box) return;
     if (!r.souboje.length) { box.innerHTML = `<div class="panel empty">${esc(L(["Teď se na kolbišti nebojuje. Vyzvi někoho na souboj — přijatý souboj se vyhlásí a dvě minuty se na něj sází.", "No duels right now."]))}</div>`; return; }
-    box.innerHTML = r.souboje.map((d) => {
+    if (!chatRebuild(box, r.souboje.map((d) => {
       const zbyva = Math.max(0, d.until - Math.floor(Date.now() / 1000));
       const stav = d.done ? L(["Dobojováno", "Finished"]) : d.betting ? L(["Sázky otevřené · boj za ", "Bets open · fight in "]) + Math.floor(zbyva / 60) + ":" + String(zbyva % 60).padStart(2, "0") : L(["Boj probíhá", "Fighting"]);
       const bojovnik = (side) => {
@@ -825,7 +844,8 @@ VIEWS.souboje = async (view) => {
         ${chatHtml("souboj:" + d.id, d.chat)}
         ${d.betting && d.fighting ? `<p class="muted small">${esc(L(["Bojuješ v tomhle souboji — vsadit můžeš jen sám na sebe (na Discordu).", "You are fighting in this duel."]))}</p>` : ""}
       </article>`;
-    }).join("") + `<p class="muted small">${esc(L(["Kurz se mění podle sázek — čím víc lidí sází na jednoho, tím méně se na něm vydělá. Na jeden souboj nejvýš ", "Odds follow the bets. Max per duel: "]) + r.max + " gr.")}</p>`;
+    }).join("") + `<p class="muted small">${esc(L(["Kurz se mění podle sázek — čím víc lidí sází na jednoho, tím méně se na něm vydělá. Na jeden souboj nejvýš ", "Odds follow the bets. Max per duel: "]) + r.max + " gr.")}</p>`,
+      Object.fromEntries(r.souboje.map((d) => ["souboj:" + d.id, d.chat])))) return;
     wireChat(box, () => kresli());
     box.querySelectorAll("[data-vsad]").forEach((b) => b.onclick = async () => {
       const [gid, side, amount] = b.dataset.vsad.split(":");
@@ -1523,8 +1543,8 @@ function drawCock() {
   const bets = c.status === "betting" ? `<div class="row">${c.cocks.map((k, i) => `<button class="btn primary" data-kbet="${i}">${esc(L(["Vsadit na", "Bet on"]))} ${esc(k.name)}</button>`).join("")}</div>` : "";
   const again = c.status === "done" ? (c.free_in > 0 ? `<p class="dim small">${esc(L([`Další zápas půjde vyvolat asi za ${Math.ceil(c.free_in / 60)} min.`, `Next fight in about ${Math.ceil(c.free_in / 60)} min.`]))}</p>`
     : `<button class="btn primary" id="knew">${esc(L(["Vyvolat další zápas", "Call another fight"]))}</button>`) : "";
-  box.innerHTML = `<div class="kh-arena">${side(c.cocks[0], 0)}<div class="kh-vs">VS</div>${side(c.cocks[1], 1)}</div>
-    <p class="kh-head">${head}</p>${mine}${bets}${again}${log ? `<ol class="kh-log">${log}</ol>` : ""}${c.id ? chatHtml("kohout:" + c.id, c.chat) : ""}`;
+  if (!chatRebuild(box, `<div class="kh-arena">${side(c.cocks[0], 0)}<div class="kh-vs">VS</div>${side(c.cocks[1], 1)}</div>
+    <p class="kh-head">${head}</p>${mine}${bets}${again}${log ? `<ol class="kh-log">${log}</ol>` : ""}${c.id ? chatHtml("kohout:" + c.id, c.chat) : ""}`, c.id ? { ["kohout:" + c.id]: c.chat } : {})) return;
   wireChat(box, () => cockLoad(true));
   box.querySelectorAll("[data-kbet]").forEach((b) => b.onclick = () => cockBet(Number(b.dataset.kbet)));
   const nb = $("#knew"); if (nb) nb.onclick = cockNew;
