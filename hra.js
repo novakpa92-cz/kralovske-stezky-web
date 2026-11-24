@@ -225,6 +225,12 @@ $("#login-form").addEventListener("submit", async (ev) => {
     $("#login-msg").textContent = e.message;
   } finally { btn.disabled = false; }
 });
+{ // r27-6: přihlášení heslem jen pro správce — ukáže se na adrese …/?spravce (a pak už na tom zařízení zůstane)
+  const sp = /[?&#]spravce\b/.test(location.search + location.hash);
+  try { if (sp) localStorage.setItem("ks_spravce", "1"); } catch {}
+  let zn = sp; try { zn = zn || localStorage.getItem("ks_spravce") === "1"; } catch {}
+  $("#login-heslo").hidden = !zn;
+}
 $("#login-pw").addEventListener("submit", async (ev) => {   // r27-6: přihlášení jménem a heslem
   ev.preventDefault();
   const btn = ev.submitter || $("#login-pw button"); btn.disabled = true; $("#pw-msg").textContent = t("connecting");
@@ -321,7 +327,9 @@ async function enterGame() {
   await nacitani(call("me").catch(() => { ok = !!S.token; }));
   if (!ok) return;
   $("#game").hidden = false;
-  call("admin_check", {}, true).then((r) => { const b = document.querySelector('[data-tab="admin"]'); if (b) b.hidden = !r.admin; }).catch(() => {});   // r27-4: jen pro správce
+  { const zkus = (n) => call("admin_check", {}, true).then((r) => { const b = document.querySelector('[data-tab="admin"]'); if (b) b.hidden = !r.admin; if (!r.admin && n) setTimeout(() => zkus(n - 1), 4000); })
+      .catch(() => { if (n) setTimeout(() => zkus(n - 1), 4000); });
+    zkus(1); }   // r27-4: jen pro správce; r27-6: při chybě nebo pomalém Discordu zkusí ještě jednou
   { const z = store.get("tab") || "mesto"; go(z === "admin" || z.startsWith("panel/=") ? "mesto" : z); }   // r27-5: po načtení nic samo nemačkat
 }
 
