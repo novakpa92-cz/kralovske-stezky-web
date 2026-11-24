@@ -2976,3 +2976,20 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 /* r27-15: obrázek situace na telefonu vlevo dole, ať nezakrývá ukazatele */
 @media (max-width:760px){.vyp.v2 .vsit{right:auto;left:3%;top:auto;bottom:24%;width:38%}}
 .hero-hlava .hh-pobyt{margin:6px 0 0!important;font:italic .9rem var(--serif)!important;letter-spacing:.02em!important;text-transform:none!important;color:#e9d6a8!important}
+.zk-zivot{margin:2px 0 6px;font:italic .82rem var(--serif);color:#8a5a2a}.zk-zivot::before{content:"⏳ ";font-style:normal}
+.pet-vlastnosti{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pet-vlastnosti small{flex-basis:100%;font:700 .7rem var(--serif);letter-spacing:.12em;text-transform:uppercase;color:#7a5a35}
+.pet-vlastnosti span{padding:4px 10px;border-radius:999px;background:linear-gradient(#e2c06e,#b8913f);color:#1e140a;font:600 .85rem var(--serif);border:1px solid #6a4a1a}
+/* r27-17: strom schopností */
+.sk-uroven{margin:0 0 14px;padding:10px 12px 4px;border:1px solid #8a6a3c55;border-radius:6px;background:#fff6dd40}
+.sk-uroven.ceka{border:2px solid #b8913f;background:#fff1c860;box-shadow:0 0 0 3px #e2c06e33}
+.sk-uroven.budouci{opacity:.75}
+.sk-uroven-hl{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 6px}
+.sk-uroven-hl b{font:700 .78rem var(--serif);letter-spacing:.14em;text-transform:uppercase;color:#7a1f14}
+.sk-uroven-hl small{font:italic .78rem var(--serif);color:#7a5a35}
+.sk-pozn{margin:0 0 8px;font:italic .88rem var(--serif);color:#5a4024}
+.sk-uroven .schopnosti{margin:0}
+.schop-karta.vybrano{box-shadow:0 0 0 2px #b8913f inset}
+.sk-vybrat{margin-left:auto}
+.sk-cena{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tabs button.ma-volbu{position:relative}.tabs button.ma-volbu::after{content:"";position:absolute;top:6px;right:22%;width:10px;height:10px;border-radius:50%;background:#c0392b;box-shadow:0 0 0 2px #0d0906,0 0 8px #e0533f}
