@@ -258,7 +258,8 @@ const CelaObr = {
   prepni: async () => {
     try {
       if (CelaObr.je()) await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-      else { const el = document.documentElement; await (el.requestFullscreen ? el.requestFullscreen({ navigationUI: "hide" }) : el.webkitRequestFullscreen()); }
+      else { const el = document.documentElement; await (el.requestFullscreen ? el.requestFullscreen({ navigationUI: "hide" }) : el.webkitRequestFullscreen());
+        try { if (navigator.keyboard && navigator.keyboard.lock) await navigator.keyboard.lock(["Escape"]); } catch {} }   // r27-8: Chrome pak nevysouvá lištu u horního okraje (ven podržením Esc nebo tlačítkem)
     } catch { toast(L(["Celou obrazovku teď prohlížeč nepovolil.", "Fullscreen was blocked by the browser."])); }
   },
 };
