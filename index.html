@@ -48,6 +48,16 @@
         <button class="btn primary big" type="submit" data-t="login">Přihlásit</button>
         <p id="login-msg" class="msg" role="alert"></p>
       </form>
+      <details class="login-heslo"><summary>Přihlásit jménem a heslem</summary>
+        <form id="login-pw" autocomplete="on">
+          <label for="pw-name" class="lbl">Jméno</label>
+          <input id="pw-name" name="username" autocomplete="username" maxlength="40" spellcheck="false" required>
+          <label for="pw-pass" class="lbl">Heslo</label>
+          <input id="pw-pass" name="password" type="password" autocomplete="current-password" maxlength="200" required>
+          <button class="btn primary" type="submit">Přihlásit heslem</button>
+          <p class="plocha-zamek">Heslo si nastavíš na Discordu příkazem <b>/heslo</b>. Ve hře se ukládá jen jeho otisk.</p>
+          <p id="pw-msg" class="msg" role="alert"></p>
+        </form></details>
       <div class="lang-row">
         <button type="button" class="link" data-lang="cs">Čeština</button> ·
         <button type="button" class="link" data-lang="en">English</button> ·
@@ -87,6 +97,7 @@
       </div>
     </header>
     <nav class="tabs" aria-label="Menu">
+      <button data-tab="novy" hidden><span aria-hidden="true">✒️</span><b>Nový dobrodruh</b></button>
       <button data-tab="mesto"><span aria-hidden="true">🏰</span><b data-t="nav_town">Město</b></button>
       <button data-tab="hero"><span aria-hidden="true">🛡️</span><b data-t="nav_hero">Postava</b></button>
       <button data-tab="pet"><span aria-hidden="true">🐾</span><b data-t="nav_pet">Mazlíček</b></button>

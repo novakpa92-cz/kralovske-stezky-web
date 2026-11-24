@@ -1952,3 +1952,159 @@ body.mh-otevreno{overflow:hidden}
 .pr-pozn{margin:0;font-size:.85rem;color:#6a4a2a;font-style:italic;border-left:3px solid #8a6a3c66;padding-left:10px}
 .pr-pod{margin:8px 0 0;font:700 1.1rem var(--serif);color:#5a2a12;border-bottom:1px solid #8a6a3c55;padding-bottom:3px}
 @media(max-width:700px){.pr-pojem{grid-template-columns:1fr;gap:4px}}
+
+/* r27-6: výpravy po skupinách */
+.vp-skupina{margin:6px 0 10px}
+.vp-sk-hl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:4px 0 6px;padding-bottom:4px;border-bottom:1px solid #8a6a3c55}
+.vp-sk-hl b{font:700 1rem var(--serif);color:#e8c46a}.vp-sk-hl small{opacity:.75}
+.vp-skupina.zkuseny .vp-sk-hl b{color:#e89a6a}
+.vp-skupina.zkuseny .vp-volba{border-color:#b0603a88}
+.vp-tabor{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px;padding:8px 10px;border-radius:8px;background:#2a1d12;border:1px solid #b0603a55}
+.vp-tabor span{font-weight:700;color:#e89a6a;margin-right:4px}
+.vp-mini{padding:5px 12px;border-radius:14px;border:1px solid #8a6a3c;background:#1a120b;color:#f3e6c8;cursor:var(--k-klik,pointer);font:inherit;font-size:.88rem}
+.vp-mini.on{background:#6d5230;border-color:#f3d382}
+
+/* r27-6: přihlášení heslem */
+.login-heslo{margin-top:12px;text-align:left}.login-heslo summary{cursor:var(--k-klik,pointer);opacity:.85}
+#login-pw{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+
+/* r27-6: žebříček kolbiště */
+.zb-ja{display:flex;gap:16px;align-items:center;padding:14px 16px;margin:10px 0;border-radius:10px;border:1px solid #c9a55a88;background:linear-gradient(90deg,#2e2014,#1a120b)}
+.zb-odznak{font-size:2.6rem;width:70px;height:70px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:radial-gradient(#5a4026,#2a1c10);border:2px solid #c9a55a;flex:none}
+.zb-info{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}.zb-info b{font:700 1.4rem var(--serif);color:#f3d382}.zb-info small{opacity:.8}
+.zb-pruh{height:8px;border-radius:4px;background:#3a2c1d;overflow:hidden;margin:4px 0}.zb-pruh i{display:block;height:100%;background:linear-gradient(90deg,#a87b22,#ffe08a)}
+.zb-stupne{list-style:none;display:flex;gap:6px;padding:0;margin:8px 0 14px;flex-wrap:wrap}
+.zb-stupne li{flex:1 1 110px;display:flex;flex-direction:column;align-items:center;padding:8px 6px;border-radius:8px;border:1px solid #8a6a3c55;background:#1a120b;opacity:.55}
+.zb-stupne li.ma{opacity:1}.zb-stupne li.ted{border-color:#f3d382;box-shadow:0 0 12px #f3d38255;background:#2e2014}
+.zb-stupne span{font-size:1.5rem}.zb-stupne b{font:700 .9rem var(--serif);text-align:center}.zb-stupne small{opacity:.7}
+.zb-tab{width:100%;border-collapse:collapse}.zb-tab th{text-align:left;font-size:.8rem;opacity:.75;border-bottom:1px solid #8a6a3c88;padding:6px}
+.zb-tab td{padding:7px 6px;border-bottom:1px solid #8a6a3c33}.zb-tab tr.m1 td:first-child::before{content:"🥇 "}.zb-tab tr.m2 td:first-child::before{content:"🥈 "}.zb-tab tr.m3 td:first-child::before{content:"🥉 "}
+.zb-tab tr.ja{background:#3a2a1488;outline:1px solid #c9a55a88}
+.zb-nikdo{padding:14px;text-align:center;opacity:.8;border:1px dashed #8a6a3c66;border-radius:8px}
+
+/* r27-6: povoz */
+.povoz-karta{display:grid;grid-template-columns:minmax(240px,1.2fr) 1fr;gap:18px;align-items:center}
+.pv-obr img{width:100%;border-radius:10px;border:1px solid #8a6a3c;box-shadow:0 6px 18px #000a}
+.pv-text h3{margin:0 0 8px}.pv-vyhody{margin:0 0 12px;padding-left:20px;line-height:1.5}
+.pv-koupit{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+@media(max-width:760px){.povoz-karta{grid-template-columns:1fr}}
+
+/* r27-6: obarvená ikona zboží */
+.ikona-barva{position:relative;display:inline-block;flex:none;line-height:0}
+.ikona-barva i{position:absolute;inset:0;background:var(--b);mix-blend-mode:color;opacity:.85;pointer-events:none;
+  -webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
+.ikona-barva.kov i{opacity:.5;mix-blend-mode:multiply}
+
+/* r27-6: obecná okna z Discordu — čitelnější záznamy */
+.zaznam .z-pod{margin:2px 0 0;font-size:.9rem;line-height:1.45;opacity:.9}
+.zaznam .z-cely{display:block;line-height:1.5}
+.zaznam .z-meta{white-space:normal;text-align:right}
+
+/* r27-6: schopnosti a dovednosti */
+.schopnosti{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.schop-karta{display:grid;grid-template-columns:46px 1fr;gap:12px;padding:10px 12px;border-radius:9px;border:1px solid #8a6a3c66;background:#fff8e64d}
+.schop-karta .sk-ikona{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff3d2}
+.schop-karta.aktivni .sk-ikona{background:radial-gradient(#c04a36,#6e1610);box-shadow:0 0 0 2px #c9a55a}
+.schop-karta.stala .sk-ikona{background:radial-gradient(#4f7a8a,#1f3a48);box-shadow:0 0 0 2px #9fb8c4}
+.sk-hl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.sk-hl b{font:700 1.1rem var(--serif);color:#7a1f14}
+.schop-karta.stala .sk-hl b{color:#1f4a5a}
+.sk-druh{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:10px}
+.aktivni .sk-druh{background:#7a1f14;color:#fff3d2}.stala .sk-druh{background:#1f4a5a;color:#e6f2f6}
+.sk-telo p{margin:4px 0 6px;line-height:1.45}
+.sk-cena{display:flex;gap:6px;flex-wrap:wrap}.sk-cena span{font-size:.8rem;padding:1px 8px;border-radius:10px;border:1px solid #8a6a3c66;background:#fff8e680}
+.schop-karta.zamceno{opacity:.55;filter:grayscale(.6)}
+.dov-mriz{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.dov-karta{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center;padding:12px;border-radius:10px;border:1px solid #8a6a3c66;background:#fff8e64d}
+.dv-kruh{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(#a87b22 calc(var(--p)*1%),#d9c79d 0);position:relative}
+.dv-kruh::before{content:"";position:absolute;inset:6px;border-radius:50%;background:#f4e6c4}
+.dv-kruh span{position:relative;font-size:1.6rem}
+.dv-hl{display:flex;justify-content:space-between;align-items:baseline}.dv-hl b{font:700 1.05rem var(--serif);color:#5a2a12}
+.dv-lvl{font:700 1.3rem var(--serif);color:#7a1f14}.dv-lvl small{font-size:.8rem;opacity:.7}
+.dv-body{display:flex;gap:3px;margin:5px 0}.dv-body i{flex:1;height:7px;border-radius:2px;background:#d9c79d}.dv-body i.on{background:linear-gradient(#c99a3a,#8a5a1c)}
+.dv-praxe{height:4px;border-radius:2px;background:#e6d6b0;overflow:hidden}.dv-praxe i{display:block;height:100%;background:#4f7a3a}
+.dv-pozn{display:block;margin-top:4px;opacity:.75;font-size:.78rem}
+.dov-karta.zamceno{opacity:.55}
+.sk-ikona svg{width:26px;height:26px}.dv-kruh span{display:flex;color:#7a1f14}.dv-kruh svg{width:28px;height:28px}
+
+/* r27-6: odznaky — kované znaky */
+.odznaky{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.odznak{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:10px 8px;border-radius:10px;border:1px solid #8a6a3c44;background:#fff8e633}
+.odz-svg{width:84px;height:96px;filter:drop-shadow(0 3px 3px #0006)}
+.odz-svg.neni{filter:grayscale(1) opacity(.5)}
+.odznak b{font:700 .95rem var(--serif);color:#5a2a12}.odznak small{font-size:.75rem;opacity:.75;line-height:1.3}
+.odznak:not(.ma) b{opacity:.7}
+.odznak.ma{background:#fff8e680;border-color:#c9a55a88}
+
+/* r27-6: kalendář nahoře */
+#tb-clock{display:inline-flex;align-items:baseline;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tb-hod{font:700 1.05rem var(--serif);color:#f3d382;letter-spacing:.02em}
+.tb-doba{opacity:.8}.tb-datum{flex-basis:100%;text-align:right;font-size:.82em;opacity:.85}
+#tb-sky{font-weight:600}
+
+/* r27-6: založení postavy na webu */
+.zl-hlava h2{margin:0}.zl-kroky{display:flex;gap:8px;list-style:none;padding:0;margin:10px 0 0;flex-wrap:wrap}
+.zl-kroky li{padding:4px 12px;border-radius:14px;border:1px solid #8a6a3c66;opacity:.6}.zl-kroky li.on{opacity:1;border-color:#f3d382;background:#3a2a14}.zl-kroky li.hotovo{opacity:.85}
+.zl-telo{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:16px;margin-top:12px}
+.zl-fig{min-height:480px}
+.zl-puvody{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.zl-puvod{display:flex;flex-direction:column;gap:4px;text-align:left;padding:12px;border-radius:10px;border:1px solid #8a6a3c;background:#1a120b;color:inherit;font:inherit;cursor:var(--k-klik,pointer)}
+.zl-puvod.on{border-color:#f3d382;background:#3a2a14;box-shadow:0 0 12px #f3d38244}.zl-puvod b{font:700 1.15rem var(--serif);color:#f3d382}
+.zl-role{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;opacity:.85}.zl-puvod small{opacity:.8;line-height:1.35}
+.zl-st{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.zl-st i{font-style:normal;font-size:.75rem;padding:1px 6px;border-radius:8px;background:#2a1d12}
+.zl-detail{margin-top:10px}.zl-detail ul{margin:0;padding-left:18px;line-height:1.5}
+.zl-volba{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;margin:6px 0;align-items:center}.zl-volba>span{font-weight:700;opacity:.85}
+.zl-volba>div{display:flex;flex-wrap:wrap;gap:5px}.zl-volba small{grid-column:2;opacity:.75}
+.zl-staty{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.zl-stat{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;border:1px solid #8a6a3c55}.zl-stat span{flex:1}.zl-stat b{font:700 1.2rem var(--serif);color:#f3d382}
+.zl-nav{justify-content:space-between;margin-top:14px}
+#zl-jmeno{width:100%;margin-bottom:6px}
+@media(max-width:760px){.zl-telo{grid-template-columns:1fr}.zl-fig{min-height:340px}}
+.zl-fig{position:relative;overflow:hidden;background:radial-gradient(#3a2c1d,#140d08);aspect-ratio:2/3;min-height:0;max-height:620px}
+.zl-fig>.figura{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center}
+
+/* r27-6: velín správce — vlastní rozhraní (ne kniha) */
+.velin{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:70vh;border:1px solid var(--line2,#5a4428);border-radius:10px;overflow:hidden;background:#140d08;color:#f3e6c8;
+  font-family:inherit}
+.vl-menu{background:#1c130c;border-right:1px solid #3a2a18;display:flex;flex-direction:column;padding:10px 0}
+.vl-logo{padding:10px 18px 16px;border-bottom:1px solid #3a2a18;margin-bottom:8px}.vl-logo small{display:block;opacity:.6;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.vl-logo b{font-size:1.15rem;color:var(--gold,#e8c46a)}
+.vl-menu button{background:none;border:0;border-left:3px solid transparent;color:#d9c8a4;text-align:left;padding:10px 18px;font:inherit;cursor:pointer}
+.vl-menu button:hover{background:#2a1d12}.vl-menu button.on{border-left-color:#e8c46a;background:#33230f;color:#fff;font-weight:600}
+.vl-obsah{padding:20px 24px;overflow:auto}.vl-obsah h2{margin:0 0 14px;font:700 1.5rem var(--serif);color:#fff}
+.vl-obsah h4,.vl-kat{color:var(--gold,#e8c46a);font:700 .95rem var(--serif);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.05em}
+.vl-dlazdice{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.vl-dlazdice div,.vl-box{background:#1c130c;border:1px solid #3a2a18;border-radius:8px;padding:10px 12px}
+.vl-dlazdice small,.vl-box small{display:block;font-size:.72rem;opacity:.65;text-transform:uppercase;letter-spacing:.05em}
+.vl-dlazdice b{font-size:1.4rem;color:#fff}.vl-radek{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.vl-box b{display:block;color:#fff;margin:2px 0}.vl-box span{font-size:.8rem;opacity:.7}.vl-box.on{border-color:#e0a030}
+.vl-ted{margin:0 0 12px}.vl-ted b{color:#fff}
+.vl-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:10px 0}
+.vl-form label{display:flex;flex-direction:column;font-size:.8rem;opacity:.9;gap:4px}
+.vl-form input,.vl-form select{background:#0f0a06;border:1px solid #5a4428;color:#fff;border-radius:6px;padding:7px 9px;font:inherit;min-width:80px}
+.vl-mriz{display:flex;flex-wrap:wrap;gap:8px}
+.vl-volba,.vl-udalost{background:#1c130c;border:1px solid #3a2a18;color:#f3e6c8;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;text-align:left}
+.vl-volba:hover,.vl-udalost:hover{border-color:#e8c46a}.vl-volba.on,.vl-udalost.on{border-color:#e8c46a;background:#33230f;box-shadow:0 0 0 1px #e8c46a inset}
+.vl-ud{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+.vl-udalost b{display:block;color:#fff;margin-bottom:3px}.vl-udalost small{opacity:.75;line-height:1.35;display:block}
+
+.velin .adm-hrac{background:#1c130c;border-color:#3a2a18}
+.velin .muted{color:#bfae8a}
+@media(max-width:760px){.velin{grid-template-columns:1fr}.vl-menu{flex-direction:row;overflow-x:auto}.vl-logo{display:none}}
+.vl-sez{display:inline-block;font-style:normal;font-size:.7rem;padding:1px 7px;border-radius:8px;background:#3a2a14;color:#f3d382;margin-bottom:4px}
+
+/* r27-6: hřbitov zvířátek a zdraví mazlíčka */
+.hrb-zal{display:flex;gap:8px;margin:0 0 14px;grid-column:1/-1}
+.hroby-zv{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.hrob.zv{transform:scale(.85);transform-origin:top center}
+.hrob.zv .tlapka{width:34px;height:34px;margin:0 auto 6px;border-radius:50%;background:radial-gradient(circle at 50% 70%,#6b6258 0 30%,transparent 31%),
+  radial-gradient(circle at 22% 30%,#6b6258 0 11%,transparent 12%),radial-gradient(circle at 50% 18%,#6b6258 0 11%,transparent 12%),radial-gradient(circle at 78% 30%,#6b6258 0 11%,transparent 12%)}
+.pet-potreby .fill.hp{background:linear-gradient(90deg,#8e1b14,#c04a36)}
+
+/* r27-6: záložka Admin v horní liště zvýrazněná */
+.tabs button[data-tab="admin"]{color:#ffd56a}
+.tabs button[data-tab="admin"] b{background:linear-gradient(#7a1f14,#4a0f0a);color:#ffe9b0;padding:2px 10px;border-radius:12px;border:1px solid #e8c46a;box-shadow:0 0 10px #e8c46a55}
+.vl-dlazdice small,.vl-box small{color:#c9b48a;opacity:1}.vl-box span{color:#bfae8a;opacity:1}
+.velin .vl-logo small{color:#c9b48a}
+.pravni{margin:10px 0;padding:8px 12px;border-left:3px solid #8a6a3c88;opacity:.85;line-height:1.5;font-size:.84rem}
+.o-projektu-pozn{font-size:.82rem;line-height:1.5;opacity:.8;border-left:3px solid #8a6a3c88;padding-left:10px;margin:10px 0}

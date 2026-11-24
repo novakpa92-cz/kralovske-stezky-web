@@ -95,7 +95,7 @@ const Postava = (() => {
     if (!kape) helma();
     const beard = !fem && VOUSY[L.vousy];
     if (beard && !SKRYJE_VOUSY.has(helm)) out.push({ src: P("vousy-" + beard), filter: BARVA[L["barva vousů"]] || "none", cls: "vousy" });
-    if (st) out.push({ src: P("stit-ruka-" + st.replace(/^stit-/, "") + "-" + sx), cls: "stit" });   // r27-4: štít vždy navrch přes všechny vrstvy (i plášť, brašnu a vousy)
+    if (st) out.push({ src: P("stit-ruka-" + st.replace(/^stit-/, "") + "-" + sx), cls: "stit", erb: me.erbStit || "" });   // r27-6: vlastní erb na štítu   // r27-4: štít vždy navrch přes všechny vrstvy (i plášť, brašnu a vousy)
     return out;
   }
 
@@ -147,6 +147,33 @@ const Postava = (() => {
     c.predbarveno = true;
     return c;
   }
+  /** r27-6: erb namalovaný na plochu štítu — uvnitř okraje, textura dřeva a kování prosvítá. */
+  function stitSErbem(stit, erb) {
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(stit, 0, 0, W, H);
+    const d = x.getImageData(0, 0, W, H).data;
+    let x0 = W, y0 = H, x1 = 0, y1 = 0;
+    for (let y = 0; y < H; y += 3) for (let xx = 0; xx < W; xx += 3) if (d[(y * W + xx) * 4 + 3] > 200) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 <= x0) return stit;
+    const bw = x1 - x0, bh = y1 - y0, m = Math.max(bw, bh) * 0.07;     // okraj (kování) zůstane vidět
+    const pole = document.createElement("canvas"); pole.width = W; pole.height = H;
+    const p = pole.getContext("2d");
+    p.drawImage(erb, x0 + m, y0 + m, bw - 2 * m, bh - 2 * m);
+    p.globalCompositeOperation = "destination-in";                 // jen kde je štít (kulatý štít ořízne erb do kruhu)
+    // vnitřní plocha = obrys štítu zmenšený o okraj (kování zůstane vidět)
+    const vnit = document.createElement("canvas"); vnit.width = W; vnit.height = H;
+    const vg = vnit.getContext("2d");
+    const sx = (bw - 2 * m) / bw, sy = (bh - 2 * m) / bh, cx = x0 + bw / 2, cy = y0 + bh / 2;
+    vg.translate(cx, cy); vg.scale(sx, sy); vg.translate(-cx, -cy); vg.drawImage(stit, 0, 0, W, H);
+    p.drawImage(vnit, 0, 0);
+    // textura dřeva a stíny přes barvy erbu — jen jas štítu (barva původní malby se nepromítne)
+    const jas = document.createElement("canvas"); jas.width = W; jas.height = H;
+    const jg = jas.getContext("2d"); jg.filter = "grayscale(1) brightness(1.45) contrast(1.15)"; jg.drawImage(stit, 0, 0, W, H);
+    p.globalCompositeOperation = "multiply"; p.globalAlpha = 0.75; p.drawImage(jas, 0, 0);
+    p.globalCompositeOperation = "destination-in"; p.globalAlpha = 1; p.drawImage(vnit, 0, 0);
+    x.drawImage(pole, 0, 0);
+    return c;
+  }
   const nacti = (src) => new Promise((ok, chyba) => { const i = new Image(); i.crossOrigin = "anonymous"; i.decoding = "async"; i.onload = () => ok(i); i.onerror = chyba; i.src = src; });
   async function malovat(id) {
     const job = fronta.get(id); fronta.delete(id);
@@ -165,7 +192,7 @@ const Postava = (() => {
     const maskyT = job.list.map((l, i) => i > 0 && l.cls !== "telo" && sez.t.has(jm(l)) ? cesta(l, "-skryva-telo.webp") : null);
     const barvit = job.list.map((l) => l.bar ? l.src.replace(/\.webp$/, "-barva.webp") : null);
     const barveneVlasy = job.list.map((l) => !!(l.filter && l.filter !== "none" && /vlasy|vousy/.test(l.cls || "")));
-    if (job.kx === 1 && job.ky === 1 && !masky.some(Boolean) && !maskyT.some(Boolean) && !barvit.some(Boolean) && !barveneVlasy.some(Boolean)) return;   // nic k úpravě: zůstanou obyčejné vrstvy
+    if (job.kx === 1 && job.ky === 1 && !masky.some(Boolean) && !maskyT.some(Boolean) && !barvit.some(Boolean) && !barveneVlasy.some(Boolean) && !job.list.some((l) => l.erb)) return;   // nic k úpravě: zůstanou obyčejné vrstvy
     let obr, mobr, tobr;
     try {
       obr = await Promise.all(job.list.map((l) => nacti(l.src)));
@@ -179,6 +206,7 @@ const Postava = (() => {
     obr = obr.map((im, i) => bobr[i] && jasy[jmeno(job.list[i].src)]?.latka ? obarvi(im, bobr[i], job.list[i].bar, jasy[jmeno(job.list[i].src)].latka) : im);
     // r27-6: obarvené vlasy a vousy bez světlé záře — poloprůhledný okraj by se přebarvil do zářivého lemu, tak se zúží
     obr = obr.map((im, i) => barveneVlasy[i] ? vlasyBezZare(im, job.list[i].filter) : im);
+    for (let i = 0; i < obr.length; i++) if (job.list[i].erb) { try { obr[i] = stitSErbem(obr[i], await nacti(job.list[i].erb)); } catch (e) { /* bez erbu */ } }
     if (!cv.isConnected) return;
     const off = document.createElement("canvas"); off.width = W; off.height = H;
     const o = off.getContext("2d");
