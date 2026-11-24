@@ -1,7 +1,7 @@
 /* Královské stezky — zvuky a hudba (r26-2).
    Tři vrstvy, každá s vlastní hlasitostí a vypínačem: hudba, prostředí, efekty (+ hlavní hlasitost).
    - Hudba podle situace (město ve dne / v noci, hostinec, kostel, výprava, boj, boss, smutek) s prolínáním.
-     Skladby: Kevin MacLeod (incompetech.com), CC BY 4.0 — autor je uveden ve Více.
+     Skladby: Kevin MacLeod (incompetech.com), CC BY 4.0 — autor je uveden v Ostatní.
    - Prostředí a efekty: skutečné nahrávky CC0 z freesound.org (repo grafiky, složka zvuk/).
      Když se soubor nenačte, zahraje se náhrada vytvořená přímo v prohlížeči (Web Audio). */
 "use strict";

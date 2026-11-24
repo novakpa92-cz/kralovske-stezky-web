@@ -1,0 +1,17 @@
+{
+  "name": "Královské stezky",
+  "short_name": "Stezky",
+  "description": "Tahová hra z Kutnohorska 15. století — stejná postava jako na Discordu.",
+  "lang": "cs",
+  "start_url": "./?zdroj=aplikace",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#16110b",
+  "theme_color": "#16110b",
+  "icons": [
+    { "src": "ikona-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "ikona-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "ikona-maskovatelna-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

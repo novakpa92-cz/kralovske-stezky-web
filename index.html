@@ -3,14 +3,23 @@
      Když stránku nahraješ jinam (např. libricivitatis.eu vedle stezky-api.php), nastav data-api="stezky-api.php".
      data-img = adresa úložiště obrázků (GitHub Pages repozitáře kralovske-stezky-grafika); prázdné = složka img/.
      data-zvuk = adresa složky se zvuky a hudbou (repo grafiky, zvuk/); prázdné = vedle obrázků. -->
-<html lang="cs" data-api="https://libricivitatis.eu/stezky-api.php" data-img="https://novakpa92-cz.github.io/kralovske-stezky-grafika/img/" data-zvuk="https://novakpa92-cz.github.io/kralovske-stezky-grafika/zvuk/">
+<html lang="cs" translate="no" data-api="https://libricivitatis.eu/stezky-api.php" data-img="https://novakpa92-cz.github.io/kralovske-stezky-grafika/img/" data-zvuk="https://novakpa92-cz.github.io/kralovske-stezky-grafika/zvuk/">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#16110b">
+<!-- r27-5: bezpečnost — stránka smí spouštět jen vlastní skripty a mluvit jen s herním serverem a úložištěm obrázků -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://novakpa92-cz.github.io; media-src 'self' blob: https://novakpa92-cz.github.io; connect-src 'self' https://libricivitatis.eu https://novakpa92-cz.github.io; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="description" content="Královské stezky — tahová hra z Kutnohorska 15. století. Stejná postava jako na Discordu.">
 <title>Královské stezky</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="ikona-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Stezky">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Cinzel:wght@500;700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap">
@@ -32,6 +41,10 @@
       <form id="login-form" autocomplete="off">
         <label for="code" class="lbl" data-t="code">Kód z Discordu</label>
         <input id="code" name="code" maxlength="8" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="ABC123" required>
+        <div class="plocha-volba" id="plocha-login" hidden>
+          <label class="plocha-chk"><input type="checkbox" id="plocha-chk-login" checked> <span data-t="home_icon">Přidat ikonu hry na plochu</span></label>
+          <p class="plocha-zamek"><svg class="zamek-ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> <span data-t="home_safe_login">Ikona jen otevře tuto stránku, nic se neinstaluje. Kód platí 10 minut a jen jednou — nikomu ho nedávej.</span></p>
+        </div>
         <button class="btn primary big" type="submit" data-t="login">Přihlásit</button>
         <p id="login-msg" class="msg" role="alert"></p>
       </form>
@@ -79,7 +92,7 @@
       <button data-tab="pet"><span aria-hidden="true">🐾</span><b data-t="nav_pet">Mazlíček</b></button>
       <button data-tab="bag"><span aria-hidden="true">🎒</span><b data-t="nav_bag">Batoh</b></button>
       <button data-tab="denik"><span aria-hidden="true">📖</span><b data-t="nav_denik">Deník</b></button>
-      <button data-tab="more"><span aria-hidden="true">☰</span><b data-t="nav_more">Více</b></button>
+      <button data-tab="more"><span aria-hidden="true">☰</span><b data-t="nav_more">Ostatní</b></button>
       <button data-tab="admin" hidden><span aria-hidden="true">⚙️</span><b data-t="nav_admin">Admin</b></button>
     </nav>
     <main id="view" tabindex="-1"></main>
