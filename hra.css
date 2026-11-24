@@ -2993,3 +2993,12 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 .sk-vybrat{margin-left:auto}
 .sk-cena{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .tabs button.ma-volbu{position:relative}.tabs button.ma-volbu::after{content:"";position:absolute;top:6px;right:22%;width:10px;height:10px;border-radius:50%;background:#c0392b;box-shadow:0 0 0 2px #0d0906,0 0 8px #e0533f}
+.hero-fig>.hero-pet{max-width:46%}.hero-fig>.hero-pet img{object-fit:contain;object-position:left bottom}.hero-fig>.hero-pet.pet-velky img{object-position:right bottom}
+/* r27-18: medvěd a mula v popředí */
+.hero-fig>.hero-pet.pet-velky{z-index:3}.hero-fig>.hero-pet.pet-velky img{filter:drop-shadow(0 8px 10px #000c)}
+/* r27-19: pták na rameni — uvnitř figury (roste a dýchá s ní), bidýlko pod nohama oříznuté */
+.figura-telo>.na-rameni{position:absolute;inset:0;transform-origin:50% 100%;pointer-events:none;z-index:2}
+.na-rameni>.hero-pet.pet-ptak{position:absolute!important;margin:0;width:calc(var(--w) * 1.5%)!important;height:calc(var(--h) * 1% * (100 - var(--orez)) / 100)!important;
+  left:calc((var(--cx) - var(--w) * .75) * 1%)!important;top:calc((var(--sed) - var(--h) * (100 - var(--orez)) / 100) * 1%)!important;bottom:auto!important;right:auto;overflow:hidden;z-index:2}
+.na-rameni>.hero-pet.pet-ptak picture,.na-rameni>.hero-pet.pet-ptak img{display:block;width:100%!important;height:auto!important;max-width:none;margin:0!important;animation:none}
+.zvire .zv-tl{display:flex;gap:6px;justify-content:center;margin-top:6px}

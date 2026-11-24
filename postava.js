@@ -54,9 +54,8 @@ const Postava = (() => {
     if (fem && odKey === "kozisek" && ["platova", "goticky-plat", "cerny-plat", "platovy-kyrys"].includes(ZBROJ[eq.zbroj])) odKey = "vlnene-saty";
     if (odKey) out.push({ src: P("odev-" + sx + "-" + odKey), cls: "odev", bar: bar["oděv"] });
     if (fem && ZBROJ[eq.zbroj]) out.push({ src: P("nohy-zena-" + (odKey || "bez")), cls: "nohy" });   // r27-3: žena ve zbroji má nohavice a boty
-    // r27-6: pod kožešinou (zbroj z medvědí kůže) vede popruh brašny pod ní, ne přes ni
-    const batohPodZbroji = me.gear?.batoh && BATOH_HOTOVY && ZBROJ[eq.zbroj] === "medvedi" && !PLAST[eq["plášť"]];
-    if (batohPodZbroji) out.push({ src: P((me.gear.batoh === "Velký batoh" ? "batoh-velky" : "batoh") + (fem ? "-zena" : "")), cls: "batoh" });
+    // r27-19: zbroj z medvědí kůže — brašna i popruh přes kůži a opasek, jen na ramenou pod kožichem (vrstva <zbroj>-kozich navrch)
+    const kozich = ZBROJ[eq.zbroj] === "medvedi";
     if (ZBROJ[eq.zbroj]) out.push({ src: P("zbroj-" + sx + "-" + ZBROJ[eq.zbroj]), cls: "zbroj", pod: odKey ? sx + "-" + odKey : "" });
     if (nese("Lovecký nůž")) out.push({ src: P("naradi-pas-nuz"), cls: "naradi" });   // r27-6: nůž za lucernou a opaskem, šikmo
     if (nese("Sekera")) out.push({ src: P("naradi-pas-sekera"), cls: "naradi" });     // topůrko za opaskem a brašnou
@@ -86,13 +85,13 @@ const Postava = (() => {
       maskIn: kape ? P(helm === "kapalin" ? "plast-vlneny-s-kapi-vlasy" : "plast-vlneny-s-kapi-helma") : PLAST[eq["plášť"]] ? P("plast-muz-" + PLAST[eq["plášť"]] + "-helma") : "" }); };   // r27-3: bez kápě se helma (závěs) schová pod plášť   // r27-3: helma v kápi — co trčí z kápě ven, se nekreslí
     // r27-3: pravidlo vnoření — co je pod pláštěm, je pod ním: brašna (řemen), helma i vlasy v kápi
     const brasna = () => { const velky = me.gear.batoh === "Velký batoh"; if (velky) sekeraHlava();
-      out.push({ src: P((velky ? "batoh-velky" : "batoh") + (fem ? "-zena" : "")), cls: "batoh" }); if (!velky) sekeraHlava(); };
+      out.push({ src: P((velky ? "batoh-velky" : "batoh") + (fem ? "-zena" : "")), cls: "batoh" }); if (!velky) sekeraHlava();
+      if (kozich) out.push({ src: P("zbroj-" + sx + "-medvedi-kozich"), cls: "zbroj kozich" }); };
     if (me.gear?.batoh && BATOH_HOTOVY && PLAST[eq["plášť"]]) brasna();
     if (kape) vlasy();
     if (kape) helma();                                             // r27-3: v kápi je helma pod pláštěm, jinak přes něj (plášť má výřez krku)
     if (PLAST[eq["plášť"]]) out.push({ src: P("plast-muz-" + PLAST[eq["plášť"]]), cls: "plast", bar: bar["plášť"] });   // ženské pláště nekryly ruce — mužské sedí na obě těla
-    if (me.gear?.batoh && BATOH_HOTOVY && !PLAST[eq["plášť"]] && !batohPodZbroji) brasna();
-    if (batohPodZbroji) sekeraHlava();
+    if (me.gear?.batoh && BATOH_HOTOVY && !PLAST[eq["plášť"]]) brasna();
     if (!kape) vlasy();
     if (!kape) helma();
     const beard = !fem && VOUSY[L.vousy];
@@ -252,7 +251,7 @@ const Postava = (() => {
   }
 
   /** HTML figury. base = adresa složky img/ (končí lomítkem). */
-  function html(me, base) {
+  function html(me, base, naRameni) {   // r27-19: naRameni = pták na rameni (html), roste a dýchá s postavou
     const L = me.looks || {};
     const kx = STAVBA[L.postava] || 1, ky = VYSKA[L["výška"]] || 1;
     const eq = {};
@@ -265,7 +264,7 @@ const Postava = (() => {
       return `<img class="vrstva ${l.cls}" src="${l.src}" alt="" decoding="async"${st ? ` style="${st}"` : ""}>`; }).join("");
     const side = (e, src) => e ? `<figure class="vyzbroj"><img src="${src}" alt="" loading="lazy"><figcaption>${escH(e.name)}</figcaption></figure>` : "";
     return `<div class="figura">
-      <div class="figura-plocha"><div class="figura-telo">${stavba(me, base, imgs, kx, ky)}</div><div class="figura-stin"></div></div>
+      <div class="figura-plocha"><div class="figura-telo">${stavba(me, base, imgs, kx, ky)}${naRameni ? `<div class="na-rameni"${kx !== 1 || ky !== 1 ? ` style="transform:scale(${kx},${ky})"` : ""}>${naRameni}</div>` : ""}</div><div class="figura-stin"></div></div>
       <div class="figura-zbrane">${side(weapon, weapon ? base + "predmety/zbrane/zbran-" + slug(weapon.id) + ".webp" : "")}
         ${side(shield, shield ? base + "predmety/zbrane/" + (STIT[shield.id] || "stit-" + slug(shield.id)) + ".webp" : "")}
         ${side(torch, base + "predmety/zbrane/svetlo-louc.webp")}</div>

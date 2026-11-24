@@ -543,11 +543,22 @@ VIEWS.hero = (view) => {
   };
   const sg = (n) => (n >= 0 ? "+" : "") + n;
   // r27-4: mazlíček vedle postavy (malované zvíře podle stupně růstu)
-  const pet = P.pet ? (() => { const sl = ZVIRE_SLUG[P.pet.kind] || Postava.slug(P.pet.kind), poz = PET_POZ[sl] || PET_POZ.pes;
-    const vel = [0.62, 0.8, 1, 1.06][P.pet.stage] || 1, h = poz.h * vel;
-    const y = poz.typ === "ptak" ? 50 : 4 - poz.pod * h;                    // ptáci výš u ramene, ostatní na zemi
-    return `<figure class="hero-pet pet-${poz.typ}${poz.za ? " za" : ""}${P.pet.hungry ? " hlad" : ""}" style="--h:${h.toFixed(1)};--y:${y.toFixed(1)};--x:${poz.x}">`; })() + `
-      ${IMG("bytosti/zvire-" + (ZVIRE_SLUG[P.pet.kind] || Postava.slug(P.pet.kind)) + "-" + P.pet.stage)}</figure>` : "";
+  // r27-19: s postavou až dva mazlíčci — zvíře na zemi (vedle nohou / velké vpravo) a pták na rameni
+  const petsS = [P.pet, P.pet2].filter(Boolean);
+  const pet = petsS.map((pp) => { const sl = ZVIRE_SLUG[pp.kind] || Postava.slug(pp.kind), poz = PET_POZ[sl] || PET_POZ.pes;
+    if (poz.typ === "ptak") return "";
+    const vel = [0.74, 0.87, 1, 1.04][pp.stage] || 1, h = poz.h * vel, y = 4 - poz.pod * h;
+    return `<figure class="hero-pet pet-${poz.typ}${poz.za ? " za" : ""}${pp.hungry ? " hlad" : ""}" style="--h:${h.toFixed(1)};--y:${y.toFixed(1)};--x:${poz.x}">`
+      + IMG("bytosti/zvire-" + sl + "-" + pp.stage) + `</figure>`; }).join("");
+  // pták na rameni — sova a sokol na levém rameni (z pohledu postavy, hledí k hlavě), havran na pravém; bidýlko pod nohama skryté
+  const ptak = petsS.map((pp) => { const sl = ZVIRE_SLUG[pp.kind] || Postava.slug(pp.kind), poz = PET_POZ[sl];
+    if (!poz || poz.typ !== "ptak") return "";
+    const vel = [0.74, 0.87, 1, 1.04][pp.stage] || 1, h = poz.h * vel, w = h * 2 / 3;
+    const eqs = new Set((m.equipped || []).map((e) => e.slot + ":" + e.id));
+    const ramenoVys = [...eqs].some((s) => s.startsWith("plášť:") || s === "zbroj:Zbroj z medvědí kůže");   // plášť a kožich zvednou rameno
+    const sed = poz.strana === "leve" && !ramenoVys ? poz.sed + 2 : poz.sed;
+    return `<figure class="hero-pet pet-ptak na-rameni-${poz.strana}${pp.hungry ? " hlad" : ""}" style="--h:${h.toFixed(1)};--w:${w.toFixed(1)};--cx:${poz.cx};--sed:${sed};--orez:${poz.orez}">`
+      + IMG("bytosti/zvire-" + sl + "-" + pp.stage) + `</figure>`; }).join("");
   // (r27-12: velikost podle skutečné výšky zvířete vůči postavě, místo podle druhu: zem vlevo / pták u ramene / velké zvíře za postavou vpravo)   // jen pro efekt; podrobnosti má záložka Mazlíček
   const ZN = (d) => `<svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
   const ZNAKY = {
@@ -672,7 +683,7 @@ VIEWS.hero = (view) => {
     ${P.debt ? `<p class="upozorneni">${esc(L(["Dluh u apatykáře: ", "Apothecary debt: "]) + P.debt + " gr.")}</p>` : ""}
     <div class="hero-sheet${jeMobil() ? (HERO.karta === "vzhled" ? " m-vzhled" : " m-bez-figury") : ""}">
       <div class="hero-left">
-        <div class="hero-fig live" data-img="mesto-pokoj" data-key="pokoj">${Postava.html(m, IMG_BASE)}${pet}</div>
+        <div class="hero-fig live" data-img="mesto-pokoj" data-key="pokoj">${Postava.html(m, IMG_BASE, ptak)}${pet}</div>
       </div>
       <div class="panel hero-karty">
         <nav class="hk-zalozky">${(jeMobil() ? [["vzhled", L(["Vzhled", "Look"])], ...HK] : HK).map(([k, n]) => `<button class="${HERO.karta === k ? "on" : ""}" data-karta="${k}">${n}</button>`).join("")}</nav>
@@ -1843,8 +1854,12 @@ VIEWS.pet = (view) => {
       </div>
     </div>
     ${Z.length > 1 ? `<div class="panel" style="margin-top:18px"><h3>${esc(L(["Tvá další zvířata", "Your other animals"]))}</h3>
-      <div class="zvirata">${Z.filter((z) => z !== A).map((z) => `<button type="button" class="zvire" data-vzit="${esc(z.kind)}">${obr(z)}<b>${esc(z.name)}</b>
-        <small>${esc(z.kind + " · " + z.stage_name + " · " + z.bonus)}</small><small class="vzit">${esc(L(["Vzít s sebou", "Take along"]))}</small></button>`).join("")}</div></div>` : ""}`));
+      <p class="muted small">${esc(L(["S sebou smíš mít nejvýš dvě zvířata, každé z jiné třídy (ptáci, psovité, kočka, fretka, myš, medvěd, mula). Myš nejde s ptákem, kočkou, fretkou ani liškou, medvěd ne s mulou.", "Up to two companions, each of a different class."]))}</p>
+      <div class="zvirata">${Z.filter((z) => z !== A).map((z) => { const ne = petNeSpolu(A.kind, z.kind);
+        return z.druhy ? `<div class="zvire vybrano">${obr(z)}<b>${esc(z.name)}</b><small>${esc(z.kind + " · " + z.stage_name + " · " + z.bonus)}</small>
+          <small class="vzit">${esc(L(["jde s tebou", "with you"]))}</small><span class="zv-tl"><button type="button" class="btn small" data-vzit="${esc(z.kind)}">${esc(L(["Pečovat", "Care"]))}</button><button type="button" class="btn small" data-solo="1">${esc(L(["Nechat doma", "Leave home"]))}</button></span></div>`
+        : `<button type="button" class="zvire" data-vzit="${esc(z.kind)}">${obr(z)}<b>${esc(z.name)}</b>
+        <small>${esc(z.kind + " · " + z.stage_name + " · " + z.bonus)}</small><small class="vzit">${esc(ne ? L(["Vzít místo ", "Take instead of "]) + A.name : L(["Vzít s sebou", "Take along"]))}</small>${ne ? `<small class="dim">${esc(ne)}</small>` : ""}</button>`; }).join("")}</div></div>` : ""}`));
   mountLive(view, { still: true });
   const zv = (data, msg) => call("zvire", { kind: A.kind, ...data }).then(() => { Zvuk.sfx("klik"); toast(msg); render(); }).catch(() => {});
   view.querySelectorAll("[data-doma]").forEach((b) => b.onclick = () => zv({ act: "doma", doma: b.dataset.doma === "1" }, b.dataset.doma === "1" ? L(["Zůstane doma.", "Stays home."]) : L(["Půjde s tebou na výpravy.", "Joins your expeditions."])));
@@ -1853,6 +1868,8 @@ VIEWS.pet = (view) => {
   view.querySelectorAll("[data-krmit]").forEach((b) => b.onclick = () => { b.disabled = true; zv({ act: "krmit", food: b.dataset.krmit || null }, L([`${A.name} se pustil(a) do jídla.`, `${A.name} eats.`])); });
   const mz = view.querySelector("[data-mazlit]");
   if (mz) mz.onclick = () => { mz.disabled = true; zv({ act: "pomazlit" }, L([`${A.name} spokojeně vrní.`, `${A.name} is pleased.`])); };
+  const so = view.querySelector("[data-solo]");
+  if (so) so.onclick = async () => { so.disabled = true; try { await call("raid_click", { id: "ks:pet:solo" }); await call("me"); toast(L(["Zůstane doma.", "Stays home."])); render(); } catch { so.disabled = false; } };
   view.querySelectorAll("[data-vzit]").forEach((b) => b.onclick = async () => {
     b.disabled = true;
     try { await call("raid_click", { id: "ks:pet:set", values: [b.dataset.vzit] }); await call("me"); toast(L(["Vzal sis ", "Now with you: "]) + b.dataset.vzit); render(); }
@@ -2665,11 +2682,24 @@ function wireLazebna(box) {
 const ZVIRE_SLUG = { "Cvičený medvěd": "medved", "Ochočená liška": "liska" };
 /** r27-12: mazlíček u postavy — h = výška obrázku v % výšky rámu (podle skutečné velikosti, postava ≈ 1,8 m),
  *  pod = prázdné místo pod zvířetem v obrázku, x = odsazení od kraje v %, typ = zem (vlevo u nohou) / ptak (u ramene) / velky (za postavou vpravo). */
-const PET_POZ = {
-  mys: { h: 17, pod: 0, x: 8, typ: "zem" }, fretka: { h: 28, pod: .267, x: 4, typ: "zem" }, kocka: { h: 21, pod: .025, x: 3, typ: "zem" },
-  liska: { h: 30, pod: .124, x: 0, typ: "zem", za: 1 }, pes: { h: 32, pod: .036, x: -2, typ: "zem", za: 1 }, "honici-pes": { h: 41.5, pod: .095, x: -4, typ: "zem", za: 1 },
-  "valecny-pes": { h: 46, pod: .1, x: -6, typ: "zem", za: 1 }, havran: { h: 20.5, pod: 0, x: -1, typ: "ptak" }, sova: { h: 24, pod: 0, x: -3, typ: "ptak" },
-  sokol: { h: 23.5, pod: 0, x: -3, typ: "ptak" }, medved: { h: 76, pod: .115, x: -20, typ: "velky" }, mula: { h: 74, pod: 0, x: -22, typ: "velky" },
+// r27-19: dvojice společníků — každý z jiné třídy, myš ne s lovcem myší (stejné jako pets.proc_ne_spolu)
+const PET_TRIDA = { "Myš": "myš", "Fretka": "fretka", "Kočka": "kočka", "Ochočená liška": "psovité", "Pes": "psovité", "Honicí pes": "psovité",
+  "Válečný pes": "psovité", "Havran": "ptáci", "Sova": "ptáci", "Sokol": "ptáci", "Cvičený medvěd": "medvěd", "Mula": "mula" };
+function petNeSpolu(a, b) {
+  const ta = PET_TRIDA[a] || a, tb = PET_TRIDA[b] || b;
+  if (ta === tb) return L(["stejná třída (" + ta + ")", "same class"]);
+  const lovi = (k) => ["ptáci", "kočka", "fretka"].includes(PET_TRIDA[k]) || k === "Ochočená liška";
+  if ((a === "Myš" && lovi(b)) || (b === "Myš" && lovi(a))) return L(["myš by to nepřežila", "the mouse wouldn't survive"]);
+  if ([a, b].includes("Cvičený medvěd") && [a, b].includes("Mula")) return L(["mula se medvěda bojí", "the mule fears the bear"]);
+  return "";
+}
+const PET_POZ = {   // r27-18: celé zvíře vždy uvnitř rámu (žádné záporné odsazení)
+  mys: { h: 17, pod: 0, x: 4, typ: "zem" }, fretka: { h: 28, pod: .267, x: 2, typ: "zem" }, kocka: { h: 21, pod: .025, x: 2, typ: "zem" },
+  liska: { h: 30, pod: .124, x: 1, typ: "zem" }, pes: { h: 32, pod: .036, x: 1, typ: "zem" }, "honici-pes": { h: 40, pod: .095, x: 1, typ: "zem" },
+  "valecny-pes": { h: 42, pod: .1, x: 1, typ: "zem" }, havran: { h: 19, typ: "ptak", strana: "prave", cx: 37, sed: 23, orez: 6 },
+  sova: { h: 21, typ: "ptak", strana: "leve", cx: 65, sed: 22.5, orez: 29 },
+  sokol: { h: 23, typ: "ptak", strana: "leve", cx: 65, sed: 22.5, orez: 31.5 },   // cx = střed na šířce figury v %, sed = výška ramene od shora v %, orez = spodek obrázku skrytý (bidýlko) v %
+  medved: { h: 58, pod: .115, x: 1, typ: "velky" }, mula: { h: 60, pod: 0, x: 1, typ: "velky" },
 };
 const ZVIRE_STUPEN = [["zkušen", 3], ["dospěl", 2], ["dospívaj", 1], ["mládě", 0]];
 function zverinecHtml(controls) {
