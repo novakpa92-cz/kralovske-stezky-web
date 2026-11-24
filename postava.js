@@ -1,6 +1,6 @@
 /* Královské stezky — postava složená z vrstev (r26-2).
    Všechny vrstvy mají stejné plátno 1024 × 1536 a sedí na tělo muže nebo ženy (repo grafiky img/postava/).
-   Pořadí: tělo → oděv → zbroj → opasek → zbraň a pěst → štít → plášť → batoh → vlasy → helma → vousy → světlo. */
+   Pořadí: tělo → oděv → zbroj → opasek → zbraň a pěst → plášť → batoh → vlasy → helma → vousy → štít (vždy navrch). */
 "use strict";
 
 const Postava = (() => {
@@ -63,7 +63,6 @@ const Postava = (() => {
     if (levaZb || st || louc) out.push({ src: P("ruka-dlan-leva-" + sx), cls: "dlan" });
     if (levaZb) out.push({ src: P("zbran-ruka-" + slug(eq["zbraň"]) + "-" + sx), cls: "zbran" }, pest("leva"));
     if (louc) out.push({ src: P("svetlo-louc-ruka-" + sx), cls: "svetlo ohen" }, pest("leva"));
-    if (st) out.push({ src: P("stit-ruka-" + st.replace(/^stit-/, "") + "-" + sx), cls: "stit" });
     const helm = HELMA[eq.hlava];
     const hair = VLASY[L.vlasy];
     const kape = PLAST[eq["plášť"]] === "vlneny-s-kapi";          // r27-3: v kápi je hlava uvnitř — vlasy pod kápí, ne přes ni
@@ -81,6 +80,7 @@ const Postava = (() => {
     if (!kape) helma();
     const beard = !fem && VOUSY[L.vousy];
     if (beard && !SKRYJE_VOUSY.has(helm)) out.push({ src: P("vousy-" + beard), filter: BARVA[L["barva vousů"]] || "none", cls: "vousy" });
+    if (st) out.push({ src: P("stit-ruka-" + st.replace(/^stit-/, "") + "-" + sx), cls: "stit" });   // r27-4: štít vždy navrch přes všechny vrstvy (i plášť, brašnu a vousy)
     return out;
   }
 

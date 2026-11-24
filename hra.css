@@ -690,28 +690,28 @@ h3{font-family:var(--stitek);font-weight:700;font-size:.82rem;letter-spacing:.2e
 .busy span{background:linear-gradient(90deg,transparent,var(--gold),var(--pecet2))}
 
 /* Kronika: postava, batoh a více jako kniha */
-main[data-tab="hero"],main[data-tab="bag"],main[data-tab="more"]{max-width:1180px;margin-top:22px;margin-bottom:40px;padding:26px;border-radius:6px;
+main[data-tab="hero"],main[data-tab="bag"],main[data-tab="more"],main[data-tab="pet"],main[data-tab="denik"]{max-width:1180px;margin-top:22px;margin-bottom:40px;padding:26px;border-radius:6px;
   background:radial-gradient(120% 90% at 50% 40%,#3a2516 0%,#21150d 65%,#160e08 100%);box-shadow:0 20px 60px #000c,0 0 0 1px #5a3d22,inset 0 0 0 6px #160e08,inset 0 0 0 7px #8a6a3c55}
-main[data-tab="hero"] .panel,main[data-tab="bag"] .panel,main[data-tab="more"] .panel{
+main[data-tab="hero"] .panel,main[data-tab="bag"] .panel,main[data-tab="more"] .panel,main[data-tab="pet"] .panel{
   --text:#2b1d12; --muted:#5a4128; --dim:#7a5a35; --gold:#8e1b14; --gold2:#8e1b14; --line:#c2a676; --line2:#a8885a; --panel:#e4cf9f; --panel2:#dcc290;
   color:var(--text);border:0;border-radius:2px;padding:22px 26px;
   background:radial-gradient(140% 120% at 30% 15%,#f4e6c4 0%,#ead6aa 55%,#d9bf8a 100%);
   box-shadow:0 8px 24px #000a,inset 0 0 40px #7850201f}
-main[data-tab="hero"] .panel h3,main[data-tab="bag"] .panel h3,main[data-tab="more"] .panel h3{color:#7a5a35;border-bottom:1px solid #b8924a;padding-bottom:8px}
-main[data-tab="hero"] .panel.notice,main[data-tab="bag"] .panel.notice,main[data-tab="more"] .panel.notice{background:#f3dcc4;box-shadow:inset 4px 0 0 var(--pecet),0 8px 24px #000a}
-main[data-tab] .panel .stat,main[data-tab] .panel .score{background:#fff8e159;border-color:#b8924a}
-main[data-tab] .panel .stat b,main[data-tab] .panel .score b{color:#2b1d12}
-main[data-tab] .panel .item{background:#fff8e14d;border-color:#c2a676}
-main[data-tab] .panel .item:hover{border-color:var(--pecet)}
-main[data-tab] .panel .item.eq{border-color:var(--pecet);box-shadow:inset 3px 0 0 var(--pecet)}
-main[data-tab] .panel .icon{background:#fff8e180;border-color:#c2a676}
-main[data-tab] .panel .track{background:#d1b886;border-color:#a8885a;border-radius:0;height:7px}
-main[data-tab] .panel .fill{border-radius:0}
-main[data-tab] .panel .search,main[data-tab] .panel select{background:#fff8e199;color:#2b1d12;border-color:#a8885a}
-main[data-tab] .panel .btn:not(.primary):not(.danger){background:#fff8e166;color:#2b1d12;border-color:#a8885a}
-main[data-tab] .panel .btn:not(.primary):not(.danger):hover{border-color:var(--pecet);background:#8e1b1414}
-main[data-tab] .panel .chip.on{background:#8e1b14;color:#f3e3bd;border-color:#5e0f0a}
-main[data-tab] .panel a{color:var(--pecet)}
+main[data-tab="hero"] .panel h3,main[data-tab="bag"] .panel h3,main[data-tab="more"] .panel h3,main[data-tab="pet"] .panel h3{color:#7a5a35;border-bottom:1px solid #b8924a;padding-bottom:8px}
+main[data-tab="hero"] .panel.notice,main[data-tab="bag"] .panel.notice,main[data-tab="more"] .panel.notice,main[data-tab="pet"] .panel.notice{background:#f3dcc4;box-shadow:inset 4px 0 0 var(--pecet),0 8px 24px #000a}
+main.kniha .panel .stat,main.kniha .panel .score{background:#fff8e159;border-color:#b8924a}
+main.kniha .panel .stat b,main.kniha .panel .score b{color:#2b1d12}
+main.kniha .panel .item{background:#fff8e14d;border-color:#c2a676}
+main.kniha .panel .item:hover{border-color:var(--pecet)}
+main.kniha .panel .item.eq{border-color:var(--pecet);box-shadow:inset 3px 0 0 var(--pecet)}
+main.kniha .panel .icon{background:#fff8e180;border-color:#c2a676}
+main.kniha .panel .track{background:#d1b886;border-color:#a8885a;border-radius:0;height:7px}
+main.kniha .panel .fill{border-radius:0}
+main.kniha .panel .search,main.kniha .panel select{background:#fff8e199;color:#2b1d12;border-color:#a8885a}
+main.kniha .panel .btn:not(.primary):not(.danger){background:#fff8e166;color:#2b1d12;border-color:#a8885a}
+main.kniha .panel .btn:not(.primary):not(.danger):hover{border-color:var(--pecet);background:#8e1b1414}
+main.kniha .panel .chip.on{background:#8e1b14;color:#f3e3bd;border-color:#5e0f0a}
+main.kniha .panel a{color:var(--pecet)}
 main[data-tab="hero"] .hero-fig{border:0;box-shadow:0 8px 24px #000a,0 0 0 1px #8a6a3c}
 .vyzbroj{border-radius:2px;background:#f0e0b8e6;border-color:#a8885a}
 .vyzbroj figcaption{color:#8e1b14}
@@ -724,8 +724,8 @@ main[data-tab="hero"] .hero-fig{border:0;box-shadow:0 8px 24px #000a,0 0 0 1px #
   .tabs button{min-width:0}
   .tabs button b{font-size:1.05rem}
   .scene-cap h2{font-size:2rem}.scene-cap p{font-size:1rem}
-  main[data-tab="hero"],main[data-tab="bag"],main[data-tab="more"]{margin:10px 6px 20px;padding:10px;border-radius:4px}
-  main[data-tab="hero"] .panel,main[data-tab="bag"] .panel,main[data-tab="more"] .panel{padding:16px 14px}
+  main[data-tab="hero"],main[data-tab="bag"],main[data-tab="more"],main[data-tab="pet"],main[data-tab="denik"]{margin:10px 6px 20px;padding:10px;border-radius:4px}
+  main[data-tab="hero"] .panel,main[data-tab="bag"] .panel,main[data-tab="more"] .panel,main[data-tab="pet"] .panel{padding:16px 14px}
 }
 .opt:has(.ic:empty){grid-template-columns:1fr}
 .opt .ic:empty{display:none}
@@ -735,3 +735,623 @@ main[data-tab="hero"] .hero-fig{border:0;box-shadow:0 8px 24px #000a,0 0 0 1px #
 .login .crest.pecet{width:110px;height:110px}
 .tabs button.on>span{width:30px;height:30px;margin:-8px 0;background:var(--pecet-img) center/contain no-repeat;box-shadow:none;filter:drop-shadow(0 0 8px #e07a5f88)}
 @media (max-width:760px){.brand .pecet{width:38px;height:38px}}
+/* r27-4: malované ikony předmětů */
+.icon.malovana{image-rendering:auto;object-fit:contain;padding:2px;filter:drop-shadow(0 1px 2px #0006)}
+.item{grid-template-columns:52px minmax(0,1fr) auto}
+.item .icon{width:52px;height:52px}
+@media (max-width:760px){.item{grid-template-columns:44px minmax(0,1fr)}.item .icon{width:44px;height:44px}}
+/* r27-4: zvěřinec s malovanými zvířaty */
+.zvirata{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 16px}
+.zvire{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 8px;border:1px solid #c9a45c59;border-radius:2px;background:#0e0905d9;color:var(--text);cursor:pointer;text-align:center}
+.zvire:hover{border-color:var(--gold);background:#c9a45c1a}
+.zvire.vybrano{border-color:var(--pecet2);box-shadow:inset 0 0 0 1px var(--pecet2)}
+.zvire.zamceno{opacity:.5;cursor:not-allowed}
+.zvire picture,.zvire img{width:100%;aspect-ratio:1;object-fit:contain;display:block}
+.zvire b{font-family:var(--serif);font-size:1.05rem;color:#f1e2bd}
+.zvire small{font-family:var(--stitek);font-size:.66rem;letter-spacing:.1em;color:var(--gold)}
+/* r27-4: lazebna s postavou naživo */
+.lazebna{display:grid;grid-template-columns:minmax(220px,340px) minmax(0,1fr);gap:18px;align-items:start;margin:10px 0 14px}
+.lazebna:not([data-sel]){grid-template-columns:minmax(220px,340px)}
+.laz-fig{position:relative;overflow:hidden;background:radial-gradient(120% 90% at 50% 30%,#3a2516,#120c08)}
+.laz-volby{display:flex;flex-direction:column;gap:14px}
+.laz-moznosti{display:flex;flex-wrap:wrap;gap:8px}
+.laz-o{font-size:.8rem;padding:.5em 1em;min-height:44px}
+.laz-o.on{border-color:var(--pecet2);background:var(--pecet);color:#f3e3bd}
+.s-lazebnou .vctl{display:none}
+@media (max-width:760px){.lazebna{grid-template-columns:1fr}.laz-fig{max-width:300px;margin:0 auto}}
+/* r27-4: přehlednější texty oken (nástěnka, lekce, zakázky…) */
+.dpanel .dtext h3{font-family:var(--gotic);font-weight:700;font-size:2.1rem;letter-spacing:0;text-transform:none;color:#f1e2bd;border-bottom:1px solid #8a6a3c66;padding-bottom:.25em;margin:0 0 .6em}
+.dpanel .dtext>p{color:#e3cfa3}
+.dpanel .dtext>p.pozn{color:var(--muted);font-size:.9rem;margin-top:-.3em}
+.dpanel .dtext .zaznam{border:1px solid #c9a45c44;border-left:3px solid var(--gold);background:#0e0905b3;padding:10px 14px;margin:0 0 10px}
+.dpanel .dtext .zaznam p{margin:0}
+.dpanel .dtext .z-hl{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;font-size:1.1rem}
+.dpanel .dtext .z-hl b{color:#f1e2bd}
+.dpanel .dtext .z-meta{font-family:var(--stitek);font-size:.78rem;letter-spacing:.1em;color:var(--gold);white-space:nowrap}
+.dpanel .dtext .zaznam .pozn{margin-top:4px;color:var(--muted);font-size:.92rem;font-style:italic}
+main.kniha .panel .dtext .zaznam{background:#fff8e159;border-color:#c2a676;border-left-color:var(--pecet)}
+main.kniha .panel .dtext .z-hl b,main.kniha .panel .dtext h3{color:#8e1b14}
+main.kniha .panel .dtext>p{color:#2b1d12}
+.dpanel .vsel{background:#1a110a;color:#f1e2bd;border:1px solid var(--line2);border-radius:2px;min-height:44px;font-family:var(--serif);font-size:1rem}
+.dpanel .dtext h4{font-family:var(--stitek);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:1.1em 0 .4em;padding-bottom:.3em;border-bottom:1px solid #8a6a3c55}
+.dpanel .dtext p.radek{display:flex;justify-content:space-between;gap:14px;padding:7px 12px;margin:0 0 4px;background:#0e0905b3;border:1px solid #c9a45c2e;color:#f1e2bd}
+.dpanel .dtext p.radek .z-meta{font-size:.85rem}
+main.kniha .panel .dtext p.radek{background:#fff8e159;border-color:#c2a676;color:#2b1d12}
+main.kniha .panel .dtext h4{color:#7a5a35}
+/* r27-4: vyhláška a kronika nad mapou */
+.zpravy{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:0 0 16px}
+.zpravy section{border:1px solid #c9a45c44;background:#0e0905d9;padding:14px 18px}
+.zpravy .sect{margin:0 0 6px;text-align:left}
+.vyhlaska{border-left:3px solid var(--pecet2)!important}
+.vyhlaska h3{font-family:var(--gotic);font-size:1.9rem;letter-spacing:0;text-transform:none;color:#f1e2bd;margin:0 0 4px}
+.vyhlaska .dtext p{margin:0;color:#e3cfa3}
+.vyhlaska .pozn{margin:6px 0 0;color:var(--muted);font-size:.85rem;font-style:italic}
+.kronika ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.kronika li{display:grid;grid-template-columns:48px 1fr;gap:10px;font-size:.98rem;color:#e3cfa3;border-bottom:1px dotted #8a6a3c55;padding-bottom:5px}
+.kronika .kdy{font-family:var(--stitek);font-size:.72rem;color:var(--gold);padding-top:3px}
+/* r27-4: šipky na terči 2,5× větší */
+.zabodnuta{width:12.5%}
+.zabodnuta.obr{width:25%}
+
+/* r27-4: přehledná tlačítka — zlatá a světlá; červená jen pro nesouhlas, odchod a ukončení */
+.btn{background:#2a1c11;border-color:#c9a45c;color:#f1e2bd}
+.btn:hover{background:#3a2716;border-color:#e7c27a}
+.btn.primary,.vbtn.primary,.vbtn.success{background:linear-gradient(#e2c06e,#b8913f);border-color:#f1d9a0;color:#1e140a;box-shadow:inset 0 0 0 1px #fff3c855;font-family:var(--serif);font-weight:700;font-size:1rem}
+.btn.primary:hover,.vbtn.primary:hover,.vbtn.success:hover{background:linear-gradient(#ecd07f,#c69d48)}
+.btn.big.primary{font-family:var(--gotic);font-weight:500;font-size:1.35rem}
+.vbtn.secondary{background:#2a1c11;border-color:#c9a45c;color:#f1e2bd}
+.btn.danger,.vbtn.danger,.btn.ne,.vbtn.ne{background:#5e140f;border-color:#b8322a;color:#f6e2d4;box-shadow:none}
+.btn.danger:hover,.vbtn.danger:hover,.btn.ne:hover,.vbtn.ne:hover{background:#7a1a13}
+.btn:disabled,.vbtn:disabled{background:#1a120b;border-color:#5a4630;color:#8f7a58;box-shadow:none}
+main.kniha .panel .btn.primary{color:#1e140a}
+
+/* r27-4: načítací obrazovka po přihlášení — jako načítání na serveru (lišta dole, cesta se zastávkami, rada pro cestu) */
+.nacitani{position:fixed;inset:0;z-index:900;display:flex;flex-direction:column;justify-content:space-between;
+  background:linear-gradient(180deg,#0a070499,#0a070420 35%,#0a070430 60%,#0a0704 100%),var(--uvod) center 40%/cover no-repeat;transition:opacity .6s ease}
+.nacitani[hidden]{display:none}
+.nacitani.pryc{opacity:0;pointer-events:none}
+.n-stred{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.n-pecet{width:110px!important;height:110px!important;margin-bottom:10px;animation:n-tep 2.4s ease-in-out infinite}
+@keyframes n-tep{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.nacitani h1{font-family:"Grenze Gotisch",serif;font-size:clamp(46px,9vw,96px);line-height:1;color:#ecd9b0;margin:0;text-shadow:0 4px 18px #000,0 0 2px #000}
+.n-pod{font-family:Cinzel,serif;color:#c9a55a;letter-spacing:.35em;text-transform:uppercase;font-size:14px;margin:12px 0 0;text-shadow:0 2px 8px #000}
+.n-lista{display:grid;grid-template-columns:1fr 360px;gap:36px;padding:22px 48px 30px;background:linear-gradient(180deg,#0a070400,#0a0704e6 30%)}
+.n-kraj{font-family:Cinzel,serif;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#c9a55a;margin:0 0 6px}
+.n-kraj i{color:#a8321f;font-style:normal;font-size:9px}
+.n-stav{font-family:"Grenze Gotisch",serif;font-weight:500;font-size:clamp(24px,3vw,34px);color:#e8c77a;margin:0;text-shadow:0 2px 8px #000}
+.n-proc{font-family:Cinzel,serif;font-size:20px;color:#f0e2c0}
+.n-cesta{position:relative;margin-top:22px;height:46px}
+.n-linka{position:absolute;left:0;right:0;top:12px;height:2px;background:#8a6a3c55}
+.n-linka i{display:block;height:100%;width:0;background:linear-gradient(90deg,#8a5a1c,#e8c77a);box-shadow:0 0 8px #e8c77a99}
+.n-znak{position:absolute!important;top:-6px;width:38px!important;height:38px!important;transform:translateX(-50%);left:0}
+.n-zastavky{list-style:none;margin:0;padding:0;position:absolute;inset:0;display:flex;justify-content:space-between}
+.n-zastavky li{position:relative;padding-top:26px;font-family:Cinzel,serif;font-size:12px;letter-spacing:.08em;color:#8f7a58;transform:translateX(-50%)}
+.n-zastavky li:first-child{transform:none}.n-zastavky li:last-child{transform:none}
+.n-zastavky li:before{content:"";position:absolute;top:8px;left:50%;width:9px;height:9px;transform:translateX(-50%) rotate(45deg);border:1px solid #8a6a3c;background:#120c07}
+.n-zastavky li:first-child:before{left:4px}.n-zastavky li:last-child:before{left:auto;right:4px}
+.n-zastavky li.on{color:#f0e2c0}.n-zastavky li.on:before{background:#c9a55a;border-color:#e8c77a}
+.n-vpravo{border-left:1px solid #8a6a3c66;padding-left:24px;align-self:end}
+.n-rada{font-family:"EB Garamond",serif;color:#e9dcc0;font-size:17px;margin:4px 0 12px}
+.n-drobne{font-family:"EB Garamond",serif;font-style:italic;color:#8f7a58;font-size:13px;margin:0}
+@media (max-width:760px){.n-lista{grid-template-columns:1fr;gap:16px;padding:16px 18px 22px}.n-vpravo{border-left:0;padding-left:0;border-top:1px solid #8a6a3c66;padding-top:12px}}
+
+/* r27-4: aukce hráčů — rozklikávací karty */
+.aukce-akce{margin:14px 0 6px;gap:10px}
+.aukce{display:flex;flex-direction:column;gap:10px;margin:10px 0 18px}
+.aukce-karta{border:1px solid #6b5228;background:linear-gradient(180deg,#1c140c,#120c07);border-radius:6px;overflow:hidden}
+.aukce-karta.vedu{border-color:#c9a55a;box-shadow:0 0 0 1px #c9a55a40 inset}
+.aukce-karta[open]{border-color:#c9a55a}
+.aukce-karta summary{display:grid;grid-template-columns:56px 1fr auto auto;align-items:center;gap:14px;padding:10px 16px;cursor:pointer;list-style:none}
+.aukce-karta summary::-webkit-details-marker{display:none}
+.aukce-karta summary:hover{background:#2a1d1080}
+.aukce-karta summary img.icon{width:52px;height:52px}
+.a-nm,.a-cena{display:flex;flex-direction:column;line-height:1.25}
+.a-nm b{font-size:19px;color:#f0e2c0}
+.a-nm small,.a-cena small{font-family:Cinzel,serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a8916a}
+.a-cena{text-align:right}
+.a-cena b{font-size:20px;color:#e8c77a}
+.a-cas{font-family:Cinzel,serif;font-size:13px;color:#d9c9a5;border:1px solid #6b5228;border-radius:4px;padding:4px 10px;min-width:92px;text-align:center}
+.a-cas:before{content:"⏳ "}
+.aukce-karta summary:after{content:"▾";color:#c9a55a;font-size:18px;grid-column:4;display:none}
+.a-telo{padding:4px 16px 16px 86px;border-top:1px solid #6b522855}
+.a-telo .row{gap:8px;flex-wrap:wrap}
+@media (max-width:760px){.aukce-karta summary{grid-template-columns:44px 1fr auto}.a-cas{grid-column:2/4;justify-self:start}.a-telo{padding-left:16px}}
+
+/* r27-4: jméno, úroveň a groše uprostřed horní lišty, větší */
+.topbar{display:grid;grid-template-columns:1fr auto 1fr}
+.topbar .brand{justify-self:start}
+.topbar .who{justify-self:center;display:flex;align-items:center;gap:14px}
+.topbar .tb-cas{justify-self:end;display:flex;gap:10px;align-items:center}
+.topbar .tb-name{font-size:1.75rem;max-width:34vw}
+.topbar .who .pill{font-size:.95rem;padding:5px 14px}
+@media (max-width:760px){
+  .topbar{grid-template-columns:auto 1fr}
+  .topbar .brand span:not(.pecet){display:none}
+  .topbar .tb-cas{display:none}
+  .topbar .tb-name{font-size:1.3rem;max-width:40vw}
+  .topbar .who{gap:8px}.topbar .who .pill{font-size:.8rem;padding:3px 8px}
+}
+
+/* r27-4: postava — dýchá (nohy na zemi), mazlíček, schopnosti, dovednosti */
+@keyframes dech{50%{transform:scale(1.004,1.009)}}
+.figura-telo{transform-origin:50% 93%}
+.hero-fig>.hero-pet{position:absolute;z-index:2;left:3%;bottom:-2%;top:auto;width:calc(30% * var(--vel,1));margin:0;text-align:center;pointer-events:none}
+.hero-pet img{width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 8px 10px #000c);animation:dech 3.1s ease-in-out infinite;transform-origin:50% 95%}
+.hero-pet.hlad img{filter:drop-shadow(0 8px 10px #000c) grayscale(.6) brightness(.8)}
+.hero-pet figcaption{display:inline-flex;flex-direction:column;background:#120c07d9;border:1px solid #8a6a3c;border-radius:4px;padding:3px 10px;margin-top:2px}
+.hero-pet figcaption b{font-size:14px;color:#f0e2c0}
+.hero-pet figcaption small{font-family:Cinzel,serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#c9a55a}
+.upozorneni{margin:10px 0 0;padding:6px 10px;border-left:3px solid #b8892e;background:#b8892e1a;font-weight:600}
+.upozorneni.ne{border-color:#9b2a1e;background:#9b2a1e1a;color:#7a1f14}
+.bojstaty{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.bojstaty div{border:1px solid #8a6a3c88;border-radius:4px;padding:8px 6px;text-align:center;display:flex;flex-direction:column}
+.bojstaty small{font-family:Cinzel,serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.bojstaty b{font-size:22px}
+.hero-dalsi{margin-top:18px;align-items:start}
+.pasivni{margin:0 0 10px}
+.schopnosti{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.schopnosti li{border:1px solid #8a6a3c88;border-radius:4px;padding:8px 12px}
+.schopnosti li p{margin:4px 0 0;font-size:.95em}
+.schopnosti li.zamceno{opacity:.5}
+.dovednosti{display:grid;gap:12px;margin-bottom:8px}
+.dovednost.zamceno{opacity:.55}
+.dovednost small{font-size:.8em;opacity:.75}
+.dovednost .lvl{font-size:1.1em}
+.body10{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:5px 0 3px}
+.body10 i{height:8px;border-radius:2px;background:#8a6a3c40}
+.body10 i.on{background:linear-gradient(90deg,#8a5a1c,#c9a55a)}
+@media (max-width:760px){.bojstaty{grid-template-columns:repeat(2,1fr)}.hero-pet{width:calc(38% * var(--vel,1))}}
+.hero-fig>.hero-pet{bottom:0}
+.hero-pet img{display:block;margin-bottom:-8%}
+.hero-pet figcaption{position:absolute;left:50%;transform:translateX(-50%);bottom:4%;white-space:nowrap}
+.hero-fig>.hero-pet{bottom:1.5%}
+.hero-pet img{margin-bottom:-22%}
+.hero-pet figcaption{position:relative;left:auto;bottom:auto;transform:none}
+
+/* r27-4: batoh — nasazeno + opasek vlevo, kapsy + batoh vpravo, volná místa */
+.batoh .item.volno{opacity:.45;border-style:dashed;min-height:56px}
+.batoh .icon.prazdne{display:inline-block;width:44px;height:44px;border:1px dashed #8a6a3c88;border-radius:4px}
+
+/* r27-4: záložka Mazlíček */
+.pet-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);align-items:start}
+.pet-fig{position:relative;border-radius:3px;overflow:hidden;aspect-ratio:4/5;box-shadow:0 8px 24px #000a,0 0 0 1px #8a6a3c}
+.pet-fig .stage .pic>img.bg{filter:brightness(.6) saturate(.85) blur(1.5px)}
+.pet-zvire{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;justify-content:center}
+.pet-zvire img{width:82%;height:auto;margin-bottom:-6%;filter:drop-shadow(0 14px 18px #000d);animation:dech 3.4s ease-in-out infinite;transform-origin:50% 90%}
+.pet-zvire.hlad img{filter:drop-shadow(0 14px 18px #000d) grayscale(.6) brightness(.8)}
+.stupne{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:12px 0}
+.stupne span{text-align:center;font-family:Cinzel,serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 2px;border:1px solid #8a6a3c66;border-radius:3px;opacity:.55}
+.stupne span.on{opacity:1;background:#c9a55a22}
+.stupne span.ted{background:#8a2a1a;color:#f6e7c4;border-color:#8a2a1a}
+.pet-bonus{font-size:1.5em;font-weight:700;color:#7a1f14;margin:0 0 6px}
+.zvire .vzit{display:block;margin-top:4px;font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#c9a55a}
+.pet-zadny{text-align:center;padding:40px}
+@media (max-width:760px){.pet-grid{grid-template-columns:1fr}}
+
+/* r27-4: Deník jako kniha se záložkami (podle příručky na serveru) */
+.denik-kniha{background:linear-gradient(#2a1d12,#1c130b);border:1px solid #8a6a3c;border-radius:6px;padding:16px 0 22px 22px;box-shadow:0 14px 40px #000c}
+.dk-hlava{display:flex;align-items:center;gap:14px;padding:0 22px 14px 0;border-bottom:1px solid #8a6a3c55;margin-bottom:16px}
+.dk-hlava .pecet{width:52px;height:52px}
+.dk-hlava small{font-family:Cinzel,serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#c9a55a}
+.dk-hlava h2{margin:2px 0 0;font-family:"Grenze Gotisch",serif;font-weight:500;font-size:32px;color:#f0e2c0}
+.dk-telo{display:grid;grid-template-columns:1fr 190px;align-items:start}
+.dk-strana{min-height:520px;background:radial-gradient(ellipse at 30% 20%,#f6e9c9,#e8d3a4 70%,#d9be86);color:#2a1a0e;border-radius:4px 0 0 4px;padding:28px 34px 34px;box-shadow:inset 0 0 40px #8a5a1c44,0 4px 14px #000a;font-family:"EB Garamond",serif}
+.dk-strana .muted{color:#6b5030}
+.kapitola{margin:0;font-family:Cinzel,serif;font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:#8a2a1a}
+.dk-nadpis{font-family:"Grenze Gotisch",serif!important;font-weight:500;font-size:40px!important;color:#7a1f14!important;margin:0 0 14px!important;letter-spacing:0!important;text-transform:none!important;border:0!important}
+.dk-zalozky{display:flex;flex-direction:column;gap:6px;padding-top:18px}
+.dk-zalozky button{display:flex;align-items:center;gap:10px;text-align:left;border:0;cursor:pointer;padding:12px 12px 12px 10px;border-radius:0 6px 6px 0;
+  background:linear-gradient(90deg,#d9c294,#ecdcb6);color:#3a2412;font-family:"EB Garamond",serif;font-size:16px;font-weight:600;border-right:5px solid #7a1f14;box-shadow:2px 3px 6px #0008;margin-left:-2px}
+.dk-zalozky button i{font-style:normal;font-family:Cinzel,serif;font-size:12px;color:#8a2a1a;min-width:26px}
+.dk-zalozky button:hover{background:linear-gradient(90deg,#e6d2a8,#f6e9c9)}
+.dk-zalozky button.on{background:linear-gradient(90deg,#f6e9c9,#fff4dc);margin-left:-8px;padding-left:16px;color:#7a1f14}
+.dk-strana .bojstaty div{background:#fff6e033}
+.zaznam-vypravy{border-bottom:1px solid #8a6a3c55;padding:4px 0}
+.zaznam-vypravy summary{display:grid;grid-template-columns:96px 1fr auto auto auto;gap:12px;align-items:baseline;cursor:pointer;padding:8px 4px;list-style:none}
+.zaznam-vypravy summary::-webkit-details-marker{display:none}
+.zaznam-vypravy summary:hover{background:#8a6a3c18}
+.zaznam-vypravy .kdy{font-family:Cinzel,serif;font-size:11px;color:#6b5030}
+.zaznam-vypravy .vysl{font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#3d6b2a}
+.zaznam-vypravy.pad .vysl{color:#9b2a1e}
+.zaznam-vypravy .zisk{font-weight:700;color:#7a4a12}
+.zaznam-vypravy .telo{padding:0 4px 10px 108px}
+.zaznam-vypravy .telo p{margin:4px 0}
+.zaznam-vypravy .ztraty{color:#9b2a1e}
+.zapisky{width:100%;min-height:380px;resize:vertical;background:repeating-linear-gradient(#0000 0 31px,#8a6a3c40 31px 32px),#fff6e055;border:1px solid #8a6a3c88;border-radius:3px;
+  font-family:"EB Garamond",serif;font-size:19px;line-height:32px;color:#2a1a0e;padding:4px 14px;margin:10px 0}
+.pisemnost{border-bottom:1px solid #8a6a3c55}
+.pisemnost summary{display:flex;align-items:center;gap:12px;padding:10px 4px;cursor:pointer;list-style:none}
+.pisemnost summary::-webkit-details-marker{display:none}
+.pisemnost summary img.icon{width:44px;height:44px}
+.pisemnost summary span{display:flex;flex-direction:column}
+.pisemnost summary b{font-size:19px}
+.pisemnost summary small{font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6b5030}
+.pergamen{padding:6px 18px 16px 60px;font-size:18px;line-height:1.55}
+.odznaky{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:8px}
+.odznak{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:14px 10px;border:1px solid #8a6a3c66;border-radius:4px;opacity:.5;filter:grayscale(1)}
+.odznak.ma{opacity:1;filter:none;background:#fff6e055;border-color:#b8892e}
+.o-ikona{width:58px;height:58px;display:flex;align-items:center;justify-content:center;font-size:30px;border-radius:50%;background:radial-gradient(#c9a55a,#8a5a1c);box-shadow:0 3px 8px #0006,inset 0 0 0 3px #e8c77a;color:#2a1a0e;font-family:Cinzel,serif}
+.odznak small{font-size:13px;color:#6b5030}
+@media (max-width:760px){
+  .denik-kniha{padding:12px}
+  .dk-telo{grid-template-columns:1fr}
+  .dk-zalozky{order:-1;flex-direction:row;overflow-x:auto;padding:0 0 8px}
+  .dk-zalozky button{border-right:0;border-bottom:4px solid #7a1f14;border-radius:6px 6px 0 0;white-space:nowrap;margin:0}
+  .dk-zalozky button.on{margin:0}
+  .dk-strana{padding:18px;border-radius:4px}
+  .zaznam-vypravy summary{grid-template-columns:1fr auto}.zaznam-vypravy .kdy,.zaznam-vypravy .muted{grid-column:1/3}
+  .zaznam-vypravy .telo,.pergamen{padding-left:6px}
+}
+.dk-strana b,.dk-strana summary b{color:#2a1a0e}
+.dk-strana .bojstaty b{color:#7a1f14}
+.dk-strana .bojstaty small{color:#6b5030;opacity:1}
+.dk-strana .zaznam-vypravy summary>b{font-size:18px}
+.dk-strana .empty{color:#6b5030}
+.n-pod{color:#e8c77a;text-shadow:0 2px 6px #000,0 0 14px #000}
+main[data-tab="pet"] .pet-fig{border:0}
+main[data-tab="pet"] .zvire{background:#fff8e14d;border-color:#c2a676;color:#2b1d12}
+main[data-tab="pet"] .zvire small{color:#6b5030}
+.o-ikona{font-family:"Grenze Gotisch",serif;font-size:34px;color:#4a1a0c;text-shadow:0 1px 0 #f0d79a}
+.odznak:not(.ma) .o-ikona{background:radial-gradient(#cfc4ad,#9b8f78);box-shadow:inset 0 0 0 3px #bdb39c;color:#6b6250;text-shadow:none}
+.dk-strana .pill{color:#7a1f14;border-color:#7a1f14;background:#fff6e055}
+main[data-tab="denik"]{background:none!important;box-shadow:none!important;border:0!important;padding:0!important}
+main[data-tab="denik"]:before,main[data-tab="denik"]:after{display:none!important}
+main[data-tab="pet"] .zvire b{color:#2b1d12}
+.spot.zamceno span{opacity:1;filter:none;border-style:solid;background:#3a2c1ccc!important;color:#cbb994!important;border-color:#6b5228!important;display:inline-flex;align-items:center;gap:6px}
+.spot.zamceno span:before{content:"";width:12px;height:14px;flex:none;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 14'%3E%3Cpath d='M3 6V4a3 3 0 0 1 6 0v2' fill='none' stroke='%23cbb994' stroke-width='1.6'/%3E%3Crect x='1' y='6' width='10' height='8' rx='1.5' fill='%23cbb994'/%3E%3C/svg%3E")}
+.spot.zamceno:after{display:none}
+
+/* r27-4: postava jako list v kronice — hlavička, kruhové potřeby, vlastnosti jako pečeti */
+.hero-hlava{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;margin-bottom:18px;padding:18px 24px;
+  background:linear-gradient(90deg,#3a1610,#5a2014 40%,#3a1610);border:1px solid #8a6a3c;border-radius:4px;box-shadow:0 8px 24px #000a,inset 0 0 0 3px #2a0f0a,inset 0 0 0 4px #b8892e66}
+.hh-uroven{width:84px;height:84px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 35% 30%,#f0d79a,#c9a55a 45%,#8a5a1c);box-shadow:0 4px 12px #000c,inset 0 0 0 4px #e8c77a,inset 0 0 0 6px #8a5a1c;color:#3a1610}
+.hh-uroven small{font-family:Cinzel,serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:-4px}
+.hh-uroven b{font-family:"Grenze Gotisch",serif;font-size:42px;line-height:1}
+.hh-jmeno h1{margin:0;font-family:"Grenze Gotisch",serif;font-weight:500;font-size:clamp(34px,4.4vw,52px);line-height:1;color:#f3e3bd;text-shadow:0 3px 10px #000}
+.hh-jmeno p{margin:6px 0 10px;font-family:Cinzel,serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#e8c77a}
+.hh-zk{position:relative;height:16px;background:#1c0b07;border:1px solid #b8892e88;border-radius:2px;overflow:hidden;max-width:560px}
+.hh-zk i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#8a5a1c,#e8c77a)}
+.hh-zk span{position:relative;display:block;text-align:center;font-family:Cinzel,serif;font-size:10px;letter-spacing:.12em;line-height:16px;color:#fff6e0;text-shadow:0 1px 2px #000}
+.hh-cas{font-family:Cinzel,serif;font-size:12px;letter-spacing:.1em;color:#d8c49a;text-align:right;max-width:180px}
+.potreby{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.potreba{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.potreba .kruh{--c:#9b2a1e;width:78px;height:78px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(#f6ecd4 58%,#0000 59%),conic-gradient(var(--c) calc(var(--p)*1%),#d1b886 0);box-shadow:0 2px 6px #0004}
+.potreba.food .kruh{--c:#a0702a}.potreba.water .kruh{--c:#3a6a9a}.potreba.rest .kruh{--c:#5a7a32}
+.potreba .kruh b{font-size:22px;line-height:1;color:#2b1d12}.potreba .kruh small{font-size:11px;color:#6b5030}
+.potreba span{font-family:Cinzel,serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#5a4128}
+.vlastnosti{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.vlastnost{display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;border:1px solid #b8924a;border-radius:3px 3px 40% 40%/3px 3px 18% 18%;background:linear-gradient(#fff8e1aa,#ead6a8aa);box-shadow:inset 0 0 0 2px #fff8e166}
+.vlastnost b{font-family:"Grenze Gotisch",serif;font-size:34px;line-height:1;color:#7a1f14}
+.vlastnost span{font-family:Cinzel,serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#3a2412;margin-top:2px}
+.vlastnost small{font-size:12px;color:#6b5030}
+.hero-prava{gap:16px}
+@media (max-width:760px){.hero-hlava{grid-template-columns:auto 1fr;padding:14px}.hh-cas{display:none}.hh-uroven{width:64px;height:64px}.hh-uroven b{font-size:32px}
+  .potreba .kruh{width:62px;height:62px}.potreby{gap:4px}}
+
+/* r27-4: příprava výpravy na webu */
+.vyp-priprava,.vyp-druziny,.vyp-lobby{margin-top:14px}
+.vp-krok{display:flex;align-items:baseline;gap:10px;margin:18px 0 8px}
+.vp-krok b{font-family:Cinzel,serif;letter-spacing:.1em;text-transform:uppercase;font-size:13px;color:var(--gold2)}
+.vp-c{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#8e1b14;color:#f3e3bd;font-family:Cinzel,serif;font-size:12px}
+.vp-volby{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.vp-volba{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:3px;padding:12px 14px;border:1px solid #6b5228;border-radius:4px;background:#1a120ae0;color:var(--text);cursor:pointer}
+.vp-volba b{font-size:17px}
+.vp-volba small{color:#a8916a;font-size:13px;line-height:1.3}
+.vp-volba:hover{border-color:#c9a55a;background:#2a1d10}
+.vp-volba.on{border-color:#e8c77a;background:linear-gradient(#3a2a14,#2a1d10);box-shadow:inset 0 0 0 1px #e8c77a66,0 0 12px #e8c77a22}
+.vp-volba.on b{color:#f3d58a}
+.vp-volba.tezke small:after{content:" · na tebe zatím těžké";color:#d06a4a}
+.vp-volba.prepinac b:before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;vertical-align:-1px;border:1px solid #c9a55a;border-radius:2px}
+.vp-volba.prepinac.on b:before{background:#c9a55a;box-shadow:inset 0 0 0 3px #1a120a}
+.vp-start{margin-top:20px;align-items:center;gap:14px}
+.btn.big{font-size:18px;padding:12px 28px}
+.druziny{display:grid;gap:8px}
+.druzina{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;border:1px solid #6b5228;border-radius:4px;background:#1a120ae0}
+.druzina small{display:block;font-family:Cinzel,serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#a8916a}
+.druzina p{margin:4px 0 0}
+.pozvat{margin-top:12px;gap:8px}
+.pozvat select{min-width:220px}
+.opt.zamceno{opacity:.6;filter:grayscale(.5);border-style:dashed}
+.opt.zamceno b:before{content:"";display:inline-block;width:12px;height:14px;margin-right:8px;vertical-align:-1px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 14'%3E%3Cpath d='M3 6V4a3 3 0 0 1 6 0v2' fill='none' stroke='%23c9a55a' stroke-width='1.6'/%3E%3Crect x='1' y='6' width='10' height='8' rx='1.5' fill='%23c9a55a'/%3E%3C/svg%3E")}
+
+/* r27-4: probíhající souboje na kolbišti — diváci a sázky */
+.souboje{display:grid;gap:18px;margin-top:14px}
+.sb-souboj header{margin-bottom:10px}
+.sb-souboj header b{font-family:"Grenze Gotisch",serif;font-weight:500;font-size:26px}
+.sb-plocha{position:relative;height:440px;border-radius:4px;overflow:hidden;display:flex;justify-content:space-around;align-items:flex-end;box-shadow:inset 0 0 0 1px #8a6a3c}
+.sb-plocha .pozadi{position:absolute;inset:-8px;background-size:cover;background-position:center 70%;filter:brightness(.5) saturate(.8) blur(2.5px)}
+.sb-plocha::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#000b);pointer-events:none}
+.sb-bojovnik{position:relative;width:44%;height:100%}
+.sb-fig{position:absolute;bottom:-1%;left:0;right:0;height:74%;display:flex;justify-content:center;align-items:flex-end;z-index:1}
+.sb-fig .figura{position:relative;height:100%;display:flex;justify-content:center;align-items:flex-end}
+.sb-fig .figura-zbrane{display:none}
+.sb-bojovnik.target .sb-fig{transform:scaleX(-1)}
+.sb-bojovnik.zasazen .sb-fig{animation:zasah .5s}
+.sb-bojovnik .rana{position:absolute;top:42%;left:50%;z-index:3;font:700 2rem var(--serif);color:#ff7a5a;text-shadow:0 2px 6px #000;animation:vystup 1.3s forwards}
+.sb-hud{position:absolute;top:8px;left:4%;right:4%;z-index:2;background:#1b140ce6;border:1px solid var(--line2);border-radius:4px;padding:6px 10px;display:grid;gap:2px;font-size:.85rem}
+.sb-hud small{font-family:Cinzel,serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#a8916a}
+.sb-bojovnik.natahu .sb-hud{border-color:var(--gold2);box-shadow:0 0 14px #f3d27a55}
+.sb-bojovnik.vitez .sb-hud{border-color:#e8c77a;background:#3a2a14ee}
+.sb-bojovnik.vitez .sb-hud b:after{content:" — vítěz";color:#e8c77a}
+.sb-kurz{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+.sb-kurz span{font-family:Cinzel,serif;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#a8916a}
+.sb-kurz b{font-size:22px;color:#f3d58a}
+.sb-sazky{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.sb-sazky .btn{padding:3px 8px;font-size:13px}
+.sb-info{margin:10px 0 4px}
+.sb-log{border-left:3px solid #8a6a3c;padding:4px 12px;background:#1a120a99;max-height:160px;overflow:auto}
+.sb-souboj.konec{opacity:.85}
+@media (max-width:760px){.sb-plocha{height:380px}.sb-bojovnik{width:50%}}
+.mapy{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:10px 0 14px}
+.mapa-karta{display:flex;flex-direction:column;text-align:left;gap:2px;padding:10px 14px;border:1px solid #8a6a3c88;border-radius:3px;background:#fff6e055;color:#2a1a0e;cursor:pointer;font-family:"EB Garamond",serif}
+.mapa-karta b{font-size:17px}.mapa-karta small{color:#6b5030}
+.mapa-karta.poklad{border-color:#9b2a1e;background:#9b2a1e14}
+.mapa-karta.on{box-shadow:inset 0 0 0 2px #7a1f14;background:#fff6e0aa}
+.mapa-obr img{display:block;width:100%;height:auto;border-radius:3px;box-shadow:0 6px 16px #0006}
+.shop-kat{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.shoppanel .kat-nadpis{grid-column:1/-1;margin:14px 0 4px}
+
+/* r27-4: Postava na jednu obrazovku — tři sloupce: postava | stav, vlastnosti, boj | schopnosti, dovednosti */
+main[data-tab="hero"]{max-width:1560px;margin-top:10px;margin-bottom:10px;padding:14px 18px}
+main[data-tab="hero"] .hero-hlava{padding:8px 18px;margin-bottom:10px;gap:16px}
+main[data-tab="hero"] .hh-uroven{width:58px;height:58px}
+main[data-tab="hero"] .hh-uroven b{font-size:30px}
+main[data-tab="hero"] .hh-jmeno h1{font-size:36px}
+main[data-tab="hero"] .hh-jmeno p{margin:2px 0 6px;font-size:11px}
+main[data-tab="hero"] .upozorneni{margin:0 0 8px}
+.hero-sheet{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1fr) minmax(0,1fr);gap:12px;height:calc(100vh - 262px);min-height:540px}
+.hero-sheet>*{min-height:0}
+.hero-sheet .hero-left{height:100%}
+.hero-sheet .hero-fig{height:100%;max-height:none;aspect-ratio:auto}
+.hero-sheet .hero-prava{display:flex;flex-direction:column;gap:10px;overflow:auto;scrollbar-width:thin}
+.hero-sheet .panel{padding:12px 16px}
+.hero-sheet .panel h3{margin:0 0 8px;padding-bottom:5px;font-size:12px}
+.hero-sheet .potreba .kruh{width:58px;height:58px}
+.hero-sheet .potreba .kruh b{font-size:17px}.hero-sheet .potreba .kruh small{font-size:10px}
+.hero-sheet .potreba span{font-size:10px}
+.hero-sheet .vlastnosti{gap:6px}
+.hero-sheet .vlastnost{padding:5px 2px 4px}
+.hero-sheet .vlastnost b{font-size:24px}
+.hero-sheet .vlastnost span{font-size:10px}
+.hero-sheet .bojstaty{gap:6px;margin-bottom:4px}
+.hero-sheet .bojstaty div{padding:5px 4px}
+.hero-sheet .bojstaty b{font-size:18px}
+.hero-sheet .small{font-size:12px;margin:4px 0 0}
+.hero-treti .panel:first-child{flex:1 1 auto}
+.hero-sheet .pasivni{font-size:14px;margin-bottom:6px}
+.hero-sheet .schopnosti{gap:5px}
+.hero-sheet .schopnosti li{padding:5px 10px}
+.hero-sheet .schopnosti li b{font-size:14px}
+.hero-sheet .schopnosti li p{font-size:13px;margin-top:1px;line-height:1.3}
+.hero-sheet .schopnosti .pill{font-size:10px;padding:1px 6px}
+.hero-sheet .dovednosti{gap:6px}
+.hero-sheet .dovednost{font-size:13px}
+.hero-sheet .dovednost b{font-size:14px}
+.hero-sheet .body10{margin:3px 0 1px}.hero-sheet .body10 i{height:6px}
+@media (max-width:1100px){.hero-sheet{grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:auto}.hero-sheet .hero-left{grid-row:span 2;height:auto}.hero-sheet .hero-fig{aspect-ratio:4/5}.hero-sheet .hero-prava{overflow:visible}}
+@media (max-width:760px){.hero-sheet{grid-template-columns:1fr}.hero-sheet .hero-left{grid-row:auto}}
+.hero-sheet{grid-template-rows:minmax(0,1fr);height:calc(100vh - 280px)}
+.hero-sheet .hero-left{position:relative}
+.hero-sheet .hero-fig{position:absolute!important;inset:0;height:auto}
+@media (max-width:1100px){.hero-sheet{grid-template-rows:auto}.hero-sheet .hero-left{position:static}.hero-sheet .hero-fig{position:relative!important;inset:auto}}
+
+/* r27-4: chat diváků */
+.chat{margin-top:12px;border:1px solid #6b5228;border-radius:4px;background:#120c07cc}
+.chat-h{font-family:Cinzel,serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#c9a55a;padding:6px 12px;border-bottom:1px solid #6b522866}
+.chat-list{list-style:none;margin:0;padding:6px 12px;max-height:180px;overflow:auto;display:grid;gap:3px;font-size:14px}
+.chat-list .kdy{font-family:Cinzel,serif;font-size:10px;color:#8f7a58;margin-right:6px}
+.chat-list b{color:#e8c77a;margin-right:4px}
+.chat-form{display:flex;gap:6px;padding:6px 8px;border-top:1px solid #6b522866}
+.chat-form input{flex:1;min-width:0;background:#1a120a;border:1px solid #6b5228;border-radius:3px;color:var(--text);padding:6px 10px;font:inherit}
+main[data-tab="hero"] .hh-uroven small{font-size:7px;letter-spacing:.08em}
+.hero-sheet .dovednost .muted.small{font-size:11px;margin:0}
+.hero-sheet .hero-treti>.panel:last-child>p.muted.small{display:none}
+.hero-sheet .schopnosti li p{font-size:12px}
+.hero-treti .panel:first-child{flex:0 0 auto}
+
+/* r27-4: Město na jednu obrazovku — mapa vlevo na výšku okna, vyhláška a kronika vpravo */
+main[data-tab="mesto"]{max-width:none;padding-top:10px;padding-bottom:10px}
+.mesto-plocha{display:grid;grid-template-columns:minmax(0,auto) minmax(260px,340px);gap:14px;justify-content:center;align-items:start}
+.mesto-mapa{height:calc(100vh - 165px);min-height:420px;aspect-ratio:3/2;max-width:100%}
+.mesto-mapa .townmap.live{height:100%;width:auto;aspect-ratio:3/2;max-width:100%}
+.mesto-zpravy{height:calc(100vh - 165px);min-height:420px;overflow:auto;scrollbar-width:thin}
+.mesto-zpravy .zpravy{grid-template-columns:1fr;margin:0}
+.mesto-zpravy .vyhlaska h3{font-size:1.5rem}
+.mesto-zpravy .kronika li{font-size:.9rem}
+@media (max-width:1000px){.mesto-plocha{grid-template-columns:1fr}.mesto-mapa{height:auto;width:100%}.mesto-mapa .townmap.live{width:100%;height:auto}.mesto-zpravy{height:auto;order:2}}
+
+/* r27-4: hřbitov */
+.hroby{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;margin:16px 0}
+.hrob{position:relative;text-align:center;padding:46px 16px 18px;border-radius:110px 110px 6px 6px;
+  background:linear-gradient(#8c8577,#6d675b 60%,#57524a);box-shadow:inset 0 0 0 4px #9c9586,inset 0 0 30px #0006,0 10px 20px #000a;color:#1e1b16}
+.hrob .kriz{position:absolute;top:12px;left:50%;width:18px;height:26px;transform:translateX(-50%);
+  background:linear-gradient(#2e2a24,#2e2a24) center/4px 100% no-repeat,linear-gradient(#2e2a24,#2e2a24) center 30%/16px 4px no-repeat}
+.hrob h3{margin:0;font-family:"Grenze Gotisch",serif;font-weight:500;font-size:28px;color:#1e1b16;text-shadow:0 1px 0 #b7b0a1;letter-spacing:0;text-transform:none;border:0}
+.h-puvod{margin:2px 0 8px;font-family:Cinzel,serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#2e2a24}
+.h-napis{font-family:"EB Garamond",serif;font-style:italic;font-size:15px;margin:0 0 10px;color:#1e1b16}
+.h-data,.h-cisla{font-family:Cinzel,serif;font-size:11px;letter-spacing:.06em;color:#2e2a24;margin:4px 0 0}
+
+/* r27-4: kroniky na radnici */
+.kroniky{margin-top:6px;margin-bottom:14px}
+.kron-zapisy{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.kron-zapisy li{display:grid;grid-template-columns:100px 1fr;gap:12px;padding:7px 4px;border-bottom:1px dotted #8a6a3c66;font-size:17px}
+.kron-zapisy .kdy{font-family:Cinzel,serif;font-size:11px;color:#6b5030;padding-top:3px}
+.slavni{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.slavni h4{margin:0 0 6px;font-family:Cinzel,serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#7a1f14;border-bottom:1px solid #8a6a3c66;padding-bottom:4px}
+.slavni ol{margin:0;padding:0;list-style:none;counter-reset:p}
+.slavni li{display:flex;justify-content:space-between;gap:8px;padding:3px 0 3px 28px;position:relative;counter-increment:p;font-size:16px}
+.slavni li:before{content:counter(p);position:absolute;left:0;top:3px;width:20px;height:20px;border-radius:50%;font:11px Cinzel,serif;display:flex;align-items:center;justify-content:center;background:#d8c294;color:#3a2412}
+.slavni li.m0:before{background:radial-gradient(#f0d79a,#b8892e)}.slavni li.m1:before{background:radial-gradient(#eee,#9a9a9a)}.slavni li.m2:before{background:radial-gradient(#e0a878,#8a5a2c)}
+.slavni li span{color:#6b5030}
+.zijici{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.zijici-k{display:flex;flex-direction:column;padding:8px 12px;border:1px solid #8a6a3c66;border-radius:3px;background:#fff6e044}
+.zijici-k b{font-size:17px}.zijici-k small{font-family:Cinzel,serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7a1f14}.zijici-k span{font-size:13px;color:#6b5030}
+@media (max-width:760px){.kron-zapisy li{grid-template-columns:1fr;gap:0}}
+
+/* r27-4: karta vedle postavy — schopnosti, dovednosti, účinky (bonusy a postihy) */
+.hero-sheet{grid-template-columns:minmax(0,.9fr) minmax(0,1.05fr) minmax(0,.95fr)}
+.hero-karty{display:flex;flex-direction:column;height:100%;min-height:0;padding:0!important;overflow:hidden}
+.hk-zalozky{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #b8924a}
+.hk-zalozky button{border:0;background:#d9c294;color:#5a4128;padding:11px 6px;cursor:pointer;font-family:Cinzel,serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;border-right:1px solid #b8924a88}
+.hk-zalozky button:last-child{border-right:0}
+.hk-zalozky button:hover{background:#e6d3aa}
+.hk-zalozky button.on{background:transparent;color:#7a1f14;box-shadow:inset 0 -3px 0 #7a1f14}
+.hk-pocet{font-style:normal;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;background:#3d6b2a;color:#f6ecd4;font-size:10px;margin-left:4px;padding:0 5px;letter-spacing:0}
+.hk-pocet.zle{background:#9b2a1e}
+.hk-obsah{flex:1;min-height:0;overflow:auto;padding:12px 16px;scrollbar-width:thin}
+.hk-vlastnost{border:1px solid #b8892e;background:linear-gradient(#fff3d2aa,#f0dca8aa);border-radius:4px;padding:8px 12px;margin-bottom:10px;box-shadow:inset 3px 0 0 #b8892e}
+.hk-vlastnost small{font-family:Cinzel,serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8a5a1c}
+.hk-vlastnost p{margin:2px 0 0;font-size:15px}
+.uc-sk{margin-bottom:12px}
+.uc-sk>small{display:block;font-family:Cinzel,serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+.uc-sk.bonus>small{color:#3d6b2a}.uc-sk.postih>small{color:#9b2a1e}
+.ucinek{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;padding:7px 10px;margin-bottom:6px;border-radius:4px;border:1px solid}
+.ucinek.bonus{border-color:#5a8a3a88;background:#5a8a3a14}
+.ucinek.postih{border-color:#9b2a1e88;background:#9b2a1e12}
+.uc-znak{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 20px Cinzel,serif;color:#f6ecd4}
+.ucinek.bonus .uc-znak{background:radial-gradient(#6fa04a,#3d6b2a)}.ucinek.postih .uc-znak{background:radial-gradient(#c04a36,#7a1f14)}
+.ucinek b{font-size:15px}.ucinek p{margin:1px 0 0;font-size:14px;line-height:1.3}.ucinek small{font-size:11px;color:#6b5030}
+.adm-cisla{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important;margin:6px 0 16px}
+.adm-akce{margin-bottom:16px}
+.adm-akce h4,#adm h4{font-family:Cinzel,serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#7a5a35;margin:12px 0 8px}
+#adm-vysl{margin-top:10px}
+.adm-zprava{font-size:14px;max-height:60vh;overflow:auto}
+
+/* r27-4: vedle postavy jeden panel se záložkami — vidět je vždy jen obsah vybrané záložky */
+.hero-sheet{grid-template-columns:minmax(0,.85fr) minmax(0,1.6fr)}
+.hk-zalozky{grid-template-columns:repeat(6,1fr)}
+.hk-zalozky button{font-size:11px;padding:12px 4px}
+.hk-obsah{padding:22px 26px}
+.potreby.velke{gap:18px;margin-top:20px}
+.potreby.velke .potreba .kruh{width:120px;height:120px}
+.potreby.velke .potreba .kruh b{font-size:32px}.potreby.velke .potreba .kruh small{font-size:14px}
+.potreby.velke .potreba span{font-size:13px}
+.vlastnosti.velke{gap:14px;margin-top:10px}
+.vlastnosti.velke .vlastnost{padding:18px 6px 14px}
+.vlastnosti.velke .vlastnost b{font-size:52px}
+.vlastnosti.velke .vlastnost span{font-size:14px;margin-top:4px}
+.vlastnosti.velke .vlastnost small{font-size:14px}
+.bojstaty.velke{grid-template-columns:repeat(2,1fr);gap:14px;margin-top:10px}
+.bojstaty.velke div{padding:20px 8px}
+.bojstaty.velke small{font-size:13px}
+.bojstaty.velke b{font-size:44px}
+.hk-pozn{margin-top:22px;font-size:15px}
+.hk-schop .schopnosti li b,.hk-dov .dovednost b{font-size:17px}
+.hk-schop .schopnosti li p{font-size:15px}
+.hk-schop .schopnosti{gap:10px}.hk-schop .schopnosti li{padding:10px 14px}
+.hk-dov .dovednosti{gap:16px}.hk-dov .dovednost{font-size:15px}.hk-dov .body10 i{height:9px}
+.hk-uc .ucinek p{font-size:15px}.hk-uc .ucinek b{font-size:17px}
+.adm-hraci{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:6px;max-height:42vh;overflow:auto;margin-bottom:10px}
+.adm-hrac{display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center;padding:7px 12px;border:1px solid #6b5228;border-radius:4px;background:#1a120ad9}
+.adm-hrac b{display:block}.adm-hrac small{color:#a8916a;font-size:12px}
+.adm-hrac .tecka{width:10px;height:10px;border-radius:50%;background:#6b6250}
+.adm-hrac.online .tecka{background:#4caf50;box-shadow:0 0 8px #4caf50}
+.adm-hrac.nedavno .tecka{background:#c9a55a}
+.adm-hrac.offline{opacity:.7}
+.adm-kde{font-size:12px;color:#d8c49a;text-align:right}
+.hk-zalozky{grid-template-columns:repeat(5,1fr)}
+.sb-sekce{display:flex;align-items:center;gap:10px;margin:6px 0 4px}
+.sb-sekce small{font-family:Cinzel,serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#7a1f14;white-space:nowrap}
+.sb-sekce:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#b8924a,#0000)}
+.hk-stav .potreby.velke{margin:10px 0 18px}
+.hk-stav .potreby.velke .potreba .kruh{width:104px;height:104px}
+.znaky{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.znak{display:flex;flex-direction:column;align-items:center;text-align:center}
+.znak-obr{position:relative;width:110px;height:126px;filter:drop-shadow(0 6px 8px #0005)}
+.znak-obr svg{width:100%;height:100%}
+.znak-obr b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-top:6px;font-family:"Grenze Gotisch",serif;font-size:40px;color:#fff6e0;text-shadow:0 2px 4px #000c}
+.znak:first-child .znak-obr b,.znak:nth-child(3) .znak-obr b{color:#3a1610;text-shadow:0 1px 0 #f6e7c0}
+.znak:nth-child(4) .znak-obr b{font-size:24px}
+.znak span{font-family:Cinzel,serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#3a2412;margin-top:6px}
+.znak small{font-size:13px;color:#6b5030}
+.hospoda-reci{margin:16px 0}
+.chat.hospoda{background:linear-gradient(#2a1a0ee6,#1a1008e6);border-color:#8a6a3c}
+.chat.hospoda .chat-list{max-height:260px;min-height:120px}
+.chat.hospoda .chat-h{font-size:13px;color:#e8c77a}
+.adm-cas{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:4px}
+.adm-cas input{width:72px;background:#1a120a;border:1px solid #6b5228;color:var(--text);padding:5px 8px;border-radius:3px;font:inherit}
+.adm-cas label{display:flex;align-items:center;gap:6px;font-family:Cinzel,serif;font-size:12px}
+.napad{margin-top:16px;border-top:1px solid #b8924a88;padding-top:12px}
+.napad h4{margin:0 0 8px;font-family:Cinzel,serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#7a5a35}
+.napad textarea{width:100%;margin:8px 0;background:#fff8e199;border:1px solid #a8885a;border-radius:3px;padding:8px 10px;font:inherit;color:#2b1d12;resize:vertical}
+
+/* r27-4: příručka hráče */
+main[data-tab="prirucka"]{max-width:1280px}
+.prirucka .dk-hlava{flex-wrap:wrap}
+.pr-hledat{margin-left:auto;max-width:280px;background:#1a120a;border:1px solid #6b5228;color:var(--text)}
+.pr-strana{min-height:60vh}
+.pr-text{font-size:17px;line-height:1.6;color:#2a1a0e}
+.pr-text b,.pr-text strong{color:#5a1a10}
+.pr-text mark{background:#f0d79a;color:#2a1a0e;padding:0 2px}
+.pr-zalozky button{font-size:14px;padding:9px 10px 9px 8px}
+.pr-zalozky button.mimo{opacity:.4}
+.pr-dalsi{justify-content:space-between;margin-top:24px;border-top:1px solid #8a6a3c55;padding-top:12px}
+.dk-strana .btn.small{background:#fff6e088;color:#3a2412;border-color:#a8885a}
+.adm-kde{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.adm-plat{font-style:normal;font-size:11px;padding:1px 7px;border-radius:9px;border:1px solid #6b5228;color:#d8c49a}
+.adm-plat.dc{border-color:#5865f2;color:#c7cbff}
+.adm-plat.web{border-color:#c9a55a;color:#f3d58a}
+.adm-plat.dc.web{background:linear-gradient(90deg,#5865f233,#c9a55a33)}
+.chat-list li.z-dc b{color:#aab2ff}
+.chat-h small{float:right;font-family:"EB Garamond",serif;font-size:12px;letter-spacing:0;text-transform:none;color:#8f7a58}
+
+/* r27-4: šipky — bodové zóny na terči a tabulka mířidel */
+.terc-zony{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.tz-k{fill:none;stroke:#f3e3bd;stroke-width:.25;stroke-dasharray:1 .8;opacity:.75}
+.tz-tri{stroke:#ff8a6a;opacity:.9}
+.tz-bull{stroke:#ffd27a}
+.tz-t{font:700 3.6px Cinzel,serif;fill:#fff6e0;stroke:#2a1608;stroke-width:.7px;paint-order:stroke;text-anchor:middle}
+.tz-3{fill:#ffb39a}.tz-s{fill:#ffd27a;font-size:3.2px}
+.sipky-legenda{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
+.sipky-legenda div{display:flex;flex-direction:column;padding:6px 10px;border:1px solid #6b5228;border-radius:4px;background:#1a120ab3}
+.sipky-legenda b{font-size:14px}.sipky-legenda span{color:#f3d58a;font-size:14px}.sipky-legenda small{color:#a8916a;font-size:12px}
+.terc-zony{pointer-events:none}
+.terc-zony.klik .tz-z{pointer-events:visibleFill;cursor:crosshair}
+.tz-z{fill:transparent;stroke:#f3e3bd;stroke-width:.25;stroke-dasharray:1 .8;opacity:.8;transition:fill .15s}
+.terc-zony.klik .tz-z:hover{fill:#fff6e033;stroke-dasharray:none;stroke-width:.5}
+.tz-z.tz-tri{stroke:#ff8a6a}.tz-z.tz-bull{stroke:#ffd27a}
+.tz-t{pointer-events:none}
+.hod{margin:10px 0 4px;padding:8px 12px;border:1px solid #6b5228;border-radius:4px;background:#1a120ab3;font-size:14px}
+.hod p{margin:2px 0}
+.hod-ok{color:#9fd27a;font-weight:700}.hod-ne{color:#e88a6a;font-weight:700}
+.body-tag.vedle{color:#e88a6a}
+.sipky-legenda{grid-template-columns:repeat(3,minmax(0,1fr))}
+.terc-zony{pointer-events:none}
+.terc-zony.klik .tz-z{pointer-events:visibleFill;cursor:crosshair}
+.tz-z{fill:transparent;stroke:#f3e3bd;stroke-width:.25;stroke-dasharray:1 .8;opacity:.8;transition:fill .15s}
+.terc-zony.klik .tz-z:hover{fill:#fff6e033;stroke-dasharray:none;stroke-width:.5}
+.tz-z.tz-tri{stroke:#ff8a6a}.tz-z.tz-bull{stroke:#ffd27a}
+.tz-t{pointer-events:none}
+.hod{margin:10px 0 4px;padding:8px 12px;border:1px solid #6b5228;border-radius:4px;background:#1a120ab3;font-size:14px}
+.hod p{margin:2px 0}
+.hod-ok{color:#9fd27a;font-weight:700}.hod-ne{color:#e88a6a;font-weight:700}
+.body-tag.vedle{color:#e88a6a}
+.sipky-legenda{grid-template-columns:repeat(3,minmax(0,1fr))}
+.truhla-stav{margin:14px 0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}
+.ts-info{display:flex;flex-direction:column;gap:2px}.ts-info b{font-size:18px}.ts-info span{font-size:14px;color:#c9b38a}.ts-info .ne{color:#e88a6a}
+.ts-akce{gap:8px;flex-wrap:wrap}
+.vp-volba[disabled]{opacity:.45;cursor:not-allowed}
+/* r27-4: obchod jako truhla — zboží | tvoje věci */
+.obchod-stav .search{max-width:260px}
+.obchod-sloupce .items{max-height:calc(100vh - 380px);overflow:auto}
+.obchod-sloupce .item.nechce{opacity:.5}
+.tag.ok{background:rgba(90,140,70,.25);color:#cfe3b8;border:1px solid rgba(120,170,90,.5);margin-left:6px;font-size:11px;padding:1px 6px;border-radius:8px}
+@media(max-width:800px){.obchod-sloupce .items{max-height:none}}
+/* r27-4: volby bez rolet — tlačítko přímo u záznamu, krátké nabídky jako karty */
+.dtext .zaznam.s-akci,.dtext p.radek.s-akci{display:grid;grid-template-columns:1fr auto;column-gap:16px;align-items:center}
+.dtext .zaznam.s-akci>*:not(.z-akce){grid-column:1}
+.dtext .zaznam.s-akci>.z-akce{grid-column:2;grid-row:1/span 6;display:flex;gap:6px;align-self:center}
+.dtext p.radek.s-akci>.z-akce{display:flex;gap:6px}
+.dtext p.radek.s-akci{grid-template-columns:1fr auto auto}
+.volby-blok{margin:10px 0 6px}
+.volby-blok .sect{margin:0 0 8px}
+@media(max-width:640px){.dtext .zaznam.s-akci{grid-template-columns:1fr}.dtext .zaznam.s-akci>.z-akce{grid-column:1;grid-row:auto;margin-top:8px}}
+.vctl .vrow:not(:has(>:not([hidden]))){display:none}
+.vctl>.volby-blok{width:100%}
+/* r27-4: mapa města jen jako pergamen — bez rámu, stínu a podkladu (okraje obrázku jsou průhledné) */
+.mesto-mapa .townmap,.mesto-mapa .townmap.live,.mesto-mapa .townmap .stage{background:transparent;border:0;box-shadow:none;border-radius:0}
+.mesto-mapa .townmap .stage .pic>img.bg{filter:drop-shadow(0 10px 22px #000c)}
+.mesto-mapa .townmap .stage .overlay,.mesto-mapa .townmap .stage .night,.mesto-mapa .townmap .stage .frost{-webkit-mask:var(--maska) center/contain no-repeat;mask:var(--maska) center/contain no-repeat}
+.mesto-mapa .townmap .stage .vig{display:none}

@@ -37,9 +37,25 @@
       </form>
       <div class="lang-row">
         <button type="button" class="link" data-lang="cs">Čeština</button> ·
-        <button type="button" class="link" data-lang="en">English</button>
+        <button type="button" class="link" data-lang="en">English</button> ·
+        <button type="button" class="link" data-lang="sk">Slovenčina</button> ·
+        <button type="button" class="link" data-lang="pl">Polski</button>
       </div>
       <p class="fine" data-t="login_note">Hraješ se stejnou postavou jako na Discordu — co uděláš tady, uvidíš i tam.</p>
+    </div>
+  </section>
+
+  <!-- r27-4: načítací obrazovka po přihlášení (podle načítání na serveru) -->
+  <section id="nacitani" class="screen nacitani" hidden aria-live="polite">
+    <div class="n-stred"><span class="pecet n-pecet" aria-hidden="true">KS</span><h1>Královské stezky</h1><p class="n-pod">Tahová hra z českého středověku</p></div>
+    <div class="n-lista">
+      <div class="n-vlevo">
+        <p class="n-kraj"><i>◆</i> <span class="n-rok">Kutnohorsko · Léta Páně 1403</span> <i>◆</i></p>
+        <div class="spread"><h2 class="n-stav">Otevírá se městská brána…</h2><b class="n-proc">0 %</b></div>
+        <div class="n-cesta"><div class="n-linka"><i></i></div><span class="pecet n-znak" aria-hidden="true"></span>
+          <ol class="n-zastavky"><li>Brána</li><li>Glejt</li><li>Vyhlášky</li><li>Město</li></ol></div>
+      </div>
+      <div class="n-vpravo"><p class="n-kraj"><i>◆</i> <span class="n-rada-h">Rada pro cestu</span></p><p class="n-rada"></p><p class="n-drobne">Stájník ještě čistí latrínu po noční změně…</p></div>
     </div>
   </section>
 
@@ -51,6 +67,8 @@
         <span id="tb-name" class="tb-name"></span>
         <span id="tb-level" class="pill"></span>
         <span id="tb-coins" class="pill gold"></span>
+      </div>
+      <div class="tb-cas">
         <span id="tb-clock" class="tb-clock"></span>
         <span id="tb-sky" class="tb-clock"></span>
       </div>
@@ -58,8 +76,11 @@
     <nav class="tabs" aria-label="Menu">
       <button data-tab="mesto"><span aria-hidden="true">🏰</span><b data-t="nav_town">Město</b></button>
       <button data-tab="hero"><span aria-hidden="true">🛡️</span><b data-t="nav_hero">Postava</b></button>
+      <button data-tab="pet"><span aria-hidden="true">🐾</span><b data-t="nav_pet">Mazlíček</b></button>
       <button data-tab="bag"><span aria-hidden="true">🎒</span><b data-t="nav_bag">Batoh</b></button>
+      <button data-tab="denik"><span aria-hidden="true">📖</span><b data-t="nav_denik">Deník</b></button>
       <button data-tab="more"><span aria-hidden="true">☰</span><b data-t="nav_more">Více</b></button>
+      <button data-tab="admin" hidden><span aria-hidden="true">⚙️</span><b data-t="nav_admin">Admin</b></button>
     </nav>
     <main id="view" tabindex="-1"></main>
   </section>
@@ -70,6 +91,7 @@
 <script src="scena.js"></script>
 <script src="postava.js"></script>
 <script src="zvuk.js"></script>
+<script src="jazyky.js"></script>
 <script src="hra.js"></script>
 </body>
 </html>
