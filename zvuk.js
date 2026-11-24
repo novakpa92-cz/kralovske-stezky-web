@@ -304,7 +304,17 @@ const Zvuk = (() => {
       const oa = old.a; setTimeout(() => { if (decks[deckIdx].a !== oa) oa.pause(); }, fade * 1000 + 200); }
   }
   /** Přepne hudbu na situaci (např. "hostinec", "mesto-noc", "boj"). Stejná situace hraje dál. */
+  // r27-11: hudba se přepne až když nová situace chvíli trvá — při překreslování výpravy (cesta, krátký boj,
+  // načítání) se jinak skladba trhala a střídala jedna za druhou
+  let chci = "", chciT = null;
   function music(ctx) {
+    chci = ctx;
+    clearTimeout(chciT);
+    if (ctx === mctx) return;
+    if (!mctx || !decks.length) { musicNow(ctx); return; }
+    chciT = setTimeout(() => { if (chci === ctx && ctx !== mctx) musicNow(ctx); }, ctx === "boj" || ctx === "boss" ? 600 : 2500);
+  }
+  function musicNow(ctx) {
     if (ctx === mctx) return;
     mctx = ctx;
     if (!ac) return;                      // spustí se po prvním kliknutí (init)

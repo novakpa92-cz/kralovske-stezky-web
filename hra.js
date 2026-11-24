@@ -463,7 +463,12 @@ function render() {
   if ((S.me.pet_umrti || []).length) { const mrtva = S.me.pet_umrti; S.me.pet_umrti = []; setTimeout(() => alert(L([`Tvůj mazlíček ${mrtva.join(", ")} uhynul — dlouho neměl jídlo ani péči.`, `Your pet ${mrtva.join(", ")} died of neglect.`])), 300); }   // r27-6: zkušební režim správce — výrazný pruh nahoře
   view.dataset.tab = S.tab; view.classList.toggle("kniha", ["hero", "bag", "more", "pet", "denik"].includes(S.tab));   // příručka má vlastní knihu                         // r27-4: vzhled podle záložky (Noc nad městem / Kronika)
   view.classList.toggle("wide", ["mesto", "misto", "obchod", "hra", "vyprava", "panel", "domov", "kohouti", "statek", "hraci", "aukce", "souboje", "hrbitov"].includes(S.tab));
+  const stejna = S._lastRoute === S.tab + "/" + (S.arg || ""), y = window.scrollY;   // r27-11: po akci zůstaň, kde jsi byl
+  S._lastRoute = S.tab + "/" + (S.arg || "");
+  if (stejna && y > 0) view.style.minHeight = view.offsetHeight + "px";
   const r = VIEWS[S.tab](view);
+  const vrat = () => { if (stejna && y > 0) { window.scrollTo(0, y); requestAnimationFrame(() => window.scrollTo(0, y)); } view.style.minHeight = ""; };
+  if (r && r.then) r.then(() => setTimeout(vrat, 30)); else vrat();
   const pvpNote = () => {                          // r27-3: rozehraná hra nebo výzva od jiného hráče
     if (!S.me.pvp || S.tab === "hraci" || document.getElementById("pvpnote")) return;
     view.prepend(h(`<div class="panel notice pvpnote" id="pvpnote"><span>${esc(S.me.pvp === "open" ? L(["Máš výzvu ke hře od jiného hráče.", "You have a challenge from another player."])
@@ -783,20 +788,24 @@ VIEWS.prirucka = async (view) => {
   qi.oninput = () => { clearTimeout(tm); tm = setTimeout(() => { PRIR.q = qi.value; render(); const n = $("#pr-q"); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 350); };
 };
 
+// r27-11: barevný štítek kusu (aby šlo poznat, který kus nasazuješ / prodáváš)
+const barvaStitek = (barva, hx) => barva ? ` <span class="barva-kus" title="${esc(barva)}"><i${hx ? ` style="--b:${hx}"` : ` class="prirodni"`}></i>${esc(barva.toLowerCase())}</span>` : "";
+
 // --- batoh
 VIEWS.bag = (view) => {
   // r27-4: vlevo Nasazeno a Na opasku, vpravo Kapsy a Batoh (jen to, co je v nich — ne co má postava na sobě)
   const m = S.me, N = m.nosim || { pockets: [], backpack: [], belt: [], pockets_max: 5, backpack_max: 0, belt_max: 2 };
   const row = {}; m.inventory.forEach((i) => { row[i.id] = i; });
-  const vec = ([id, q]) => {
+  const vec = ([id, q, barva, hx]) => {
     const i = row[id] || { id, name: id, slot_name: "" };
+    const db = barva ? ` data-barva="${esc(barva)}"` : "";
     return `<div class="item">${icon(id)}
-      <div><div class="nm">${esc(i.name)}${q > 1 ? ` <span class="muted">× ${esc(q)}</span>` : ""}</div>
+      <div><div class="nm">${esc(i.name)}${q > 1 ? ` <span class="muted">× ${esc(q)}</span>` : ""}${barvaStitek(barva, hx)}</div>
       <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.merchant_name ? " · " + esc(t("sell_to", i.merchant_name)) : ""}</div>${opotrebeni(i)}</div>
       <div class="acts">
         ${i.use ? `<button class="btn small" data-use="${esc(id)}">${esc(t("use"))}</button>` : ""}
-        ${i.equip ? `<button class="btn small" data-equip="${esc(id)}">${esc(t("equip"))}</button>` : ""}
-        ${i.sell ? `<button class="btn small" data-sell="${esc(id)}" data-name="${esc(i.name)}" data-shop="${esc(i.merchant)}" data-price="${esc(i.sell)}">${esc(t("sell"))} · ${esc(t("coins", i.sell))}</button>` : ""}
+        ${i.equip ? `<button class="btn small" data-equip="${esc(id)}"${db}>${esc(t("equip"))}</button>` : ""}
+        ${i.sell ? `<button class="btn small" data-sell="${esc(id)}"${db} data-name="${esc(i.name)}" data-shop="${esc(i.merchant)}" data-price="${esc(i.sell)}">${esc(t("sell"))} · ${esc(t("coins", i.sell))}</button>` : ""}
       </div></div>`;
   };
   const prazdne = (n) => Array.from({ length: Math.max(0, n) }, () => `<div class="item volno"><span class="icon prazdne"></span><div class="muted">${esc(L(["volné místo", "empty slot"]))}</div></div>`).join("");
@@ -806,7 +815,7 @@ VIEWS.bag = (view) => {
     <div class="grid g2 batoh" style="align-items:start">
       <div class="grid">
         ${blok(t("equipped"), "", m.equipped.length ? m.equipped.map((e) => `<div class="item eq">${icon(e.id)}
-          <div><div class="nm">${esc(e.name)}${e.enh ? ` <span class="muted">+${e.enh}</span>` : ""}</div><div class="meta">${esc(e.slot_name)}</div>${opotrebeni(e)}</div>
+          <div><div class="nm">${esc(e.name)}${e.enh ? ` <span class="muted">+${e.enh}</span>` : ""}${barvaStitek(e.color_name, e.color)}</div><div class="meta">${esc(e.slot_name)}</div>${opotrebeni(e)}</div>
           <div class="acts"><button class="btn small" data-unequip="${esc(e.slot)}">${esc(t("unequip"))}</button></div></div>`).join("")
           : `<div class="empty">${esc(L(["Pěsti a obyčejný oděv.", "Fists and plain clothes."]))}</div>`)}
         ${blok(L(["Na opasku", "On the belt"]) + (N.belt_name ? " · " + N.belt_name : ""), N.belt.length + " / " + N.belt_max,
@@ -821,10 +830,10 @@ VIEWS.bag = (view) => {
   view.querySelectorAll("[data-f]").forEach((b) => b.onclick = () => { S.bagFilter = b.dataset.f; render(); });
   const act = (op, data, msg) => call(op, data).then((r) => { toast(msg ? msg(r) : t("done")); render(); }).catch(() => {});
   view.querySelectorAll("[data-unequip]").forEach((b) => b.onclick = () => act("unequip", { slot: b.dataset.unequip }));
-  view.querySelectorAll("[data-equip]").forEach((b) => b.onclick = () => act("equip", { item: b.dataset.equip }));
+  view.querySelectorAll("[data-equip]").forEach((b) => b.onclick = () => act("equip", { item: b.dataset.equip, color: b.dataset.barva || "" }));
   view.querySelectorAll("[data-use]").forEach((b) => b.onclick = () => act("use", { item: b.dataset.use }));
   view.querySelectorAll("[data-sell]").forEach((b) => b.onclick = () => {
-    if (confirm(t("sell_q", b.dataset.name, t("coins", b.dataset.price)))) act("sell", { item: b.dataset.sell, shop: b.dataset.shop }, (r) => t("sold", r.price));
+    if (confirm(t("sell_q", b.dataset.name, t("coins", b.dataset.price)))) act("sell", { item: b.dataset.sell, shop: b.dataset.shop, color: b.dataset.barva || "" }, (r) => t("sold", r.price));
   });
   loadIcons([...m.inventory.map((i) => i.id), ...m.equipped.map((e) => e.id)]);
 };
@@ -2172,6 +2181,12 @@ VIEWS.mesto = (view) => {
       ? ["Zamčeno. " + jm[0] + " si koupíš na radnici (Nemovitosti → Koupit podnik).", "Locked. Buy the " + jm[1] + " at the town hall."]
       : [jm[2] + " je podnik pro jiný původ postavy." + (id === "kovar" ? " Kováře a jeho zboží najdeš na tržišti." : ""), "This business belongs to another origin."]])) };
   sc.pic.insertAdjacentHTML("beforeend", SPOTS.map((p) => `<button class="spot${PLACES[p.id] ? "" : " later"}${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}" data-kraj="${p.x < 13 ? "l" : p.x > 87 ? "r" : ""}" style="left:${p.x}%;top:${p.y}%"><span>${esc(L(p.n))}</span></button>`).join(""));
+  { // r27-11: na mobilu seznam míst pod mapou (mapa se dá posouvat prstem do stran)
+    const mm = view.querySelector(".mesto-mapa");
+    mm.insertAdjacentHTML("afterend", `<div class="mesto-mista">${SPOTS.filter((p) => PLACES[p.id]).sort((a, b) => zamceno(a.id) - zamceno(b.id))
+      .map((p) => `<button class="chip${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}">${esc(L(p.n))}</button>`).join("")}</div>`);
+    if (innerWidth <= 760) requestAnimationFrame(() => { mm.scrollLeft = (mm.scrollWidth - mm.clientWidth) / 2; });
+  }
   view.querySelectorAll("[data-spot]").forEach((b) => b.onclick = () => {
     if (zamceno(b.dataset.spot)) { if (typeof Zvuk !== "undefined") Zvuk.sfx("klik"); toast(L(ZAMEK_TXT[b.dataset.spot])); return; }
     const p = PLACES[b.dataset.spot];
@@ -3111,10 +3126,10 @@ VIEWS.obchod = async (view) => {
         ${barvi === i.id ? `<div class="kup-barva">${Object.entries(i.colors).sort(([a], [b]) => ((i.dye_fees || {})[a] || 0) - ((i.dye_fees || {})[b] || 0)).map(([cc, h2]) =>
           `<button class="kb${cc === c ? " on" : ""}" data-zvol="${esc(i.id)}" data-barva="${esc(cc)}" title="${esc(cc)}"><i${h2 ? ` style="--b:${h2}"` : ` class="prirodni"`}></i><small>${esc(cc)}</small><em>${(i.dye_fees || {})[cc] ? "+" + i.dye_fees[cc] + " gr." : L(["zdarma", "free"])}</em></button>`).join("")}</div>` : ""}`; })() : ""}</div>`; };
   const prodat = (i) => `<div class="item${i.sell ? "" : " nechce"}">${icon(i.id)}
-      <div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}${i.sell && i.best ? `<span class="tag ok">${esc(L(["nejlepší výkup", "best price"]))}</span>` : ""}</div>
+      <div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}${barvaStitek(i.color, i.hex)}${i.sell && i.best ? `<span class="tag ok">${esc(L(["nejlepší výkup", "best price"]))}</span>` : ""}</div>
       <div class="meta">${esc(i.sell ? (i.best_shop ? L(["víc dá ", "more at "]) + i.best_shop + " (" + t("coins", i.best_price) + ")" : i.slot_name) : L(["tohle nevykupuje", "won't buy this"]))}</div>${opotrebeni(i)}</div>
       <div class="acts">${i.sell ? `${mnoz(i.count, i.sell)}<span class="price" data-cena-txt>${esc(t("coins", i.sell))}</span>
-        <button class="btn small" data-sell="${esc(i.id)}">${esc(t("sell"))}</button>` : ""}</div></div>`;
+        <button class="btn small" data-sell="${esc(i.id)}"${i.color ? ` data-barva="${esc(i.color)}"` : ""}>${esc(t("sell"))}</button>` : ""}</div></div>`;
   const drawShop = () => {
     const vse = data.items.filter(sedi);
     const rows = vse.filter((i) => !kat || (i.slot_name || OST) === kat);
@@ -3130,6 +3145,7 @@ VIEWS.obchod = async (view) => {
     const mine = (data.mine || []).filter(sedi).sort((x, y) => (y.sell ? 1 : 0) - (x.sell ? 1 : 0) || (y.best ? 1 : 0) - (x.best ? 1 : 0));
     $("#shop-mine").innerHTML = mine.length ? mine.map(prodat).join("") : `<div class="empty">${esc(L(["Nic u sebe nemáš.", "Nothing carried."]))}</div>`;
     $("#mine-n").textContent = (data.mine || []).filter((i) => i.sell).length;
+    { const n2 = $("#mine-n2"); if (n2) n2.textContent = "· " + (data.mine || []).filter((i) => i.sell).length; }
     wireMnoz(box);
     const kolik = (b) => Number(b.closest(".item")?.querySelector("[data-mn]")?.value || 1);
     box.querySelectorAll("[data-barvit]").forEach((b) => b.onclick = () => { barvi = barvi === b.dataset.barvit ? "" : b.dataset.barvit; drawShop(); });
@@ -3139,7 +3155,7 @@ VIEWS.obchod = async (view) => {
     box.querySelectorAll("[data-sell]").forEach((b) => b.onclick = () => {
       const n = kolik(b);
       b.disabled = true;
-      call("sell", { item: b.dataset.sell, shop: shopId, count: n }).then((r) => { Zvuk.sfx("mince"); toast(t("sold", r.price)); render(); }).catch(() => { b.disabled = false; });
+      call("sell", { item: b.dataset.sell, shop: shopId, count: n, color: b.dataset.barva || "" }).then((r) => { Zvuk.sfx("mince"); toast(t("sold", r.price)); render(); }).catch(() => { b.disabled = false; });
     });
     loadIcons([...rows, ...mine].map((i) => i.id));
   };
@@ -3152,13 +3168,21 @@ VIEWS.obchod = async (view) => {
       <span>${esc(L(["Měšec: ", "Purse: "]) + t("coins", S.me.coins))}</span>${data.smuggler ? `<span class="dim">${esc(data.night ? L(["Každou noc jiné zboží · vykupuje jen cennosti a trofeje", "New goods every night · buys only valuables and trophies"]) : L([`Pašerák tu není — přijde v noci (21–5), asi za ${Math.floor(data.opens_min / 60)} h ${data.opens_min % 60} min.`, "The smuggler comes at night (9 pm–5 am)."]))}</span>` : `<span class="dim">🔄 ${esc(t("restock", left))}</span>`}</div>
       <div class="row">${DILNA[shopId] !== undefined ? `<button class="btn" id="oprava" title="${esc(L(["Opotřebená výbava zpět na 100 %, zušlechtění nasazené", "Worn gear back to 100 %, improve what you wear"]))}">${esc(L(["Opravit a zušlechtit", "Repair and improve"]))}</button>` : ""}
       <input class="search" id="shop-q" type="search" placeholder="${esc(t("search"))}"></div></div>
-    <div class="grid g2 truhla-sloupce obchod-sloupce" style="align-items:start">
+    <div class="obchod-prepinac" role="tablist">
+      <button class="${S.shopStrana !== "prodat" ? "on" : ""}" data-strana="koupit">${esc(L(["Koupit", "Buy"]))}</button>
+      <button class="${S.shopStrana === "prodat" ? "on" : ""}" data-strana="prodat">${esc(L(["Prodat", "Sell"]))} <span id="mine-n2"></span></button></div>
+    <div class="grid g2 truhla-sloupce obchod-sloupce strana-${S.shopStrana === "prodat" ? "prodat" : "koupit"}" style="align-items:start">
       <div class="panel"><div class="spread"><h3>${esc(L(["Zboží", "For sale"]))}</h3><span class="pill">${data.items.length}</span></div>
         <div class="filter shop-kat" id="shop-kat"></div><div class="items" id="shop-items"></div></div>
       <div class="panel"><div class="spread"><h3>${esc(L(["Tvoje věci — prodej", "Your things — sell"]))}</h3><span class="pill" id="mine-n"></span></div>
         <p class="muted small">${esc(L(["Každý obchodník dá nejvíc za své zboží, jinde jen polovic.", "Each merchant pays most for his own trade."]))}</p>
         <div class="items" id="shop-mine"></div></div>
     </div>`));
+  box.querySelectorAll("[data-strana]").forEach((b) => b.onclick = () => {   // r27-11: na mobilu Koupit / Prodat přepínačem (bez dlouhého scrollování)
+    S.shopStrana = b.dataset.strana;
+    box.querySelectorAll("[data-strana]").forEach((x) => x.classList.toggle("on", x === b));
+    const sl = box.querySelector(".obchod-sloupce"); sl.classList.toggle("strana-prodat", S.shopStrana === "prodat"); sl.classList.toggle("strana-koupit", S.shopStrana !== "prodat");
+  });
   const millBtn = $("#mill");
   if (millBtn) millBtn.onclick = () => call("mill").then((r) => { Zvuk.sfx("mince"); toast(L([`Semleto: ${r.milled}× mouka za ${r.paid} gr.`, `Ground: ${r.milled}× flour for ${r.paid} gr.`])); render(); }).catch(() => {});
   const opr = $("#oprava");   // r27-4: oprava a zušlechtění = panel obchodníka jako na Discordu (výběr „Opravit výbavu“ a „Zušlechtit“)
@@ -3558,15 +3582,18 @@ function controlsHtml(list, cls = "") {
 }
 
 // r27-5: tlačítka výpravy — hlavní volby (cesty, boj) jako velké karty, pomocné akce jako lišta pod nimi
-function raidControlsHtml(list, busy) {
+function raidControlsHtml(list, busy, boj = false) {
   if (!list || !list.length) return "";
   const tl = list.filter((c) => c.t !== "select");
   const hl = tl.filter((c) => c.style !== "secondary"), ved = tl.filter((c) => c.style === "secondary");
   if (!hl.length) { hl.push(...ved.splice(0, Math.min(ved.length, 2))); }
   const btn = (c, cls) => `<button class="btn vbtn ${esc(c.style)} ${cls}" data-cid="${esc(c.id)}"${c.disabled ? " disabled" : ""}><span>${esc(noEmoji(c.label).trim())}</span></button>`;
+  // r27-11: nový vzhled — oddíly s nadpisem jako v ostatních místech hry
+  const nad = (t) => `<div class="sect vyp-sect">${esc(t)}</div>`;
   return `<div class="vctl vyp-ctl${busy ? " busy" : ""}">
+    ${hl.length ? nad(boj ? L(["Tvůj tah", "Your move"]) : L(["Co uděláš", "What will you do"])) : ""}
     <div class="vyp-hlavni${hl.length === 1 ? " jedna" : ""}">${hl.map((c) => btn(c, "vyp-karta")).join("")}</div>
-    ${ved.length ? `<div class="vyp-lista">${ved.map((c) => btn(c, "vyp-mala")).join("")}</div>` : ""}
+    ${ved.length ? nad(boj ? L(["Obrana a jiné", "Defence and more"]) : L(["Další možnosti", "More options"])) + `<div class="vyp-lista">${ved.map((c) => btn(c, "vyp-mala")).join("")}</div>` : ""}
     ${controlsHtml(list.filter((c) => c.t === "select"))}</div>`;
 }
 
@@ -3614,18 +3641,18 @@ function drawRaid(view) {
       ${e.intent ? `<div class="vintent">${esc(e.intent)}</div>` : ""}
       ${e.pack && e.pack.length ? `<div class="vpack">${e.pack.map((p) => `<span>${esc(p.name.split(" — ")[0])}${p.health != null ? " · ❤️ " + p.health : ""}</span>`).join("")}</div>` : ""}</div>` : "";
   const sit = !combat && m.situation && SIT_ART[m.situation] ? `<div class="vsit">${IMG("situace/" + SIT_ART[m.situation])}</div>` : "";
-  view.replaceChildren(h(`<div class="vyp">
+  view.replaceChildren(h(`<div class="vyp v2${combat ? " boj" : ""}">
     <div class="vscene live${combat ? " fight" : ""}" data-img="${esc(sc.img)}" data-key="${esc(sc.key)}">
       <div class="vtitle"><h2>${esc(m.node || m.location)}</h2><small>${esc(m.location)}${m.weather ? " · " + esc(m.weather) : ""}</small></div>
       ${foe}${sit}<div class="vparty">${members}</div>
-      ${combat ? `<div class="vturn">${busy ? "⏳ " + esc(L(["Probíhá tah…", "Turn in progress…"])) : myTurn ? "⚔️ " + esc(L(["Jsi na tahu", "Your turn"])) : "⏳ " + esc(L(["Na tahu je jiný člen družiny", "Another member's turn"]))}</div>` : ""}
+      ${combat ? `<div class="vturn${myTurn && !busy ? " moje" : ""}">${busy ? esc(L(["Probíhá tah…", "Turn in progress…"])) : myTurn ? esc(L(["Jsi na tahu", "Your turn"])) : esc(L(["Na tahu je jiný člen družiny", "Another member's turn"]))}</div>` : ""}
     </div>
-    <div class="vside panel">
-      <div class="vtext">${dmd(m.content)}</div>
-      ${combat && e.log && e.log.length ? "" : ""}
-      ${raidControlsHtml(m.controls, busy)}
-      <p class="dim small" style="margin-top:10px">${esc(L(["Stejná výprava běží i v tvém kanálu na Discordu — můžeš kdykoli přejít.", "The same expedition runs in your Discord channel — switch any time."]))}</p>
+    <div class="vyp-telo">
+      <article class="vyp-pergamen"><div class="vtext">${dmd(m.content)}</div></article>
+      <div class="vyp-akce">${raidControlsHtml(m.controls, busy, combat)}
+        <p class="vyp-discord">${esc(L(["Stejná výprava běží i v tvém kanálu na Discordu — můžeš kdykoli přejít.", "The same expedition runs in your Discord channel — switch any time."]))}</p></div>
     </div></div><div id="vpanel"></div>`));
+  vypPergamen(view.querySelector(".vyp-pergamen"), m);
   const s = mountLive(view, { still: m.phase === "combat" });
   if (s && m.under) s.el.classList.add("is-night");
   Zvuk.scene(m.under ? ["fire"] : ["forest"], { ...(S.me || {}), weather: m.weather || (S.me || {}).weather }, !!m.under);
@@ -3634,6 +3661,35 @@ function drawRaid(view) {
   wireRaid(view);
   if (!MINI.inAct && !RAID.busy) miniSync(st.mini, RAID.panel, "raid");
   if (busy) setTimeout(async () => { if (S.tab === "vyprava") { const r = await raidLoad(); if (r) { animateDiff(RAID.st, r); RAID.st = r; drawRaid($("#view")); } } }, Math.max(500, m.busy_until * 1000 - Date.now() + 300));
+}
+
+/** r27-11: text výpravy jako list pergamenu — bez opakovaného názvu místa, údaje o výpravě jako štítky. */
+function vypPergamen(el, m) {
+  if (!el) return;
+  const vt = el.querySelector(".vtext"); if (!vt) return;
+  const cist = (x) => noEmoji(x || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const jmena = [m.location, m.node].filter(Boolean).map(cist);
+  const tmp = document.createElement("div");
+  // md() dává řádky oddělené <br> — rozdělit na odstavce (prázdný řádek) a řádky
+  const odst = vt.innerHTML.split(/(?:<br\s*\/?>\s*){2,}/i).map((o) => o.replace(/^(\s*<br\s*\/?>)+|(<br\s*\/?>\s*)+$/gi, "").trim()).filter(Boolean);
+  const out = [];
+  let stitky = "";
+  odst.forEach((o) => {
+    const radky = o.split(/<br\s*\/?>/i).filter((r) => {
+      tmp.innerHTML = r; const t = cist(tmp.textContent);
+      if (!t || jmena.includes(t)) return false;                  // název místa je už v obrázku
+      if (!stitky && /výprava|expedition/.test(t) && t.includes(" · ") && t.length < 160) {   // „Lehká výprava · 41. den · 18:38 · Počasí: déšť“
+        stitky = `<div class="vyp-stitky">${noEmoji(tmp.textContent).split(" · ").map((x) => x.trim().replace(/^Počasí:\s*/i, "")).filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("")}</div>`;
+        return false;
+      }
+      return true;
+    });
+    if (radky.length) out.push(`<p>${radky.join("<br>")}</p>`);
+  });
+  vt.innerHTML = stitky + out.join("");
+  const p1 = vt.querySelector("p");
+  if (p1) { tmp.innerHTML = p1.innerHTML.split(/<br/i)[0]; const b = tmp.querySelector("b");
+    if (b && cist(b.textContent) === cist(tmp.textContent) && cist(b.textContent).length < 70) p1.innerHTML = p1.innerHTML.replace(/^\s*<b>(.*?)<\/b>\s*(<br\s*\/?>)?/i, '<span class="vyp-nadpis">$1</span>'); }
 }
 
 // r27-4: příprava výpravy na webu — sólo i družina, lokace bez map (mapu si koupíš u písaře), obtížnost, glejt a nosič
@@ -3712,7 +3768,7 @@ function drawRaidSetup(view, st) {
 // r27-4: družina před vyražením — nastavení, role, pozvání hráče, vyrazit
 function drawLobby(view, m) {
   view.replaceChildren(h(`${sceneHead("mesto-brana", L(["Družina #", "Party #"]) + m.id + " · " + m.location, m.difficulty || "")}
-    <div class="panel vyp-lobby"><div class="vtext">${dmd(m.content)}</div>
+    <div class="panel vyp-lobby"><article class="vyp-pergamen"><div class="vtext">${dmd(m.content)}</div></article>
       ${controlsHtml(m.controls)}
       ${m.member && (m.players || []).length ? `<div class="row pozvat"><select id="lob-pozvat"><option value="">${esc(L(["Pozvat hráče…", "Invite a player…"]))}</option>
         ${m.players.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}</select>
@@ -3720,6 +3776,7 @@ function drawLobby(view, m) {
       <p class="dim small">${esc(L(["Pozvánka přijde hráči do jeho vlákna na Discordu; přidat se může i tady na webu u Brány.", "The invite goes to the player's Discord thread; they can also join here."]))}</p>
     </div><p><button class="btn" data-go="misto/brana">← ${esc(t("back"))}</button></p><div id="vpanel"></div>`));
   mountLive(view);
+  vypPergamen(view.querySelector(".vyp-pergamen"), { location: m.location });
   const pb = $("#lob-poslat");
   if (pb) pb.onclick = () => { const v = $("#lob-pozvat").value; if (v) raidClick("ks:lobby:" + m.id + ":send", [v], pb); };
   if (RAID.panel) showRaidPanel(RAID.panel);

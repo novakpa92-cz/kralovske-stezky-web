@@ -2346,3 +2346,131 @@ html:fullscreen,html:fullscreen body,:fullscreen{cursor:var(--k-zaklad)}
 .dpanel.nove .dtext .zaznam .z-hl,.dpanel.nove .dtext .zaznam .z-hl>span{text-align:left!important;align-items:flex-start!important;justify-content:flex-start!important;align-self:stretch}
 /* r27-8: v celé obrazovce bez posuvníku prohlížeče (kurzor hry až k okraji; posouvá se kolečkem) */
 html:fullscreen{scrollbar-width:none}html:fullscreen::-webkit-scrollbar,html:fullscreen body::-webkit-scrollbar{display:none;width:0}
+
+/* r27-11: mobil (např. Galaxy XCover 6 Pro, 412 px) — čas, datum a počasí v pruhu pod jménem */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (max-width:760px){
+  .topbar{row-gap:2px;padding-bottom:4px}
+  .topbar .tb-cas{display:flex!important;grid-column:1/-1;justify-self:stretch;justify-content:center;gap:8px;flex-wrap:wrap;
+    padding-top:3px;border-top:1px solid #8a6a3c33;font-size:.8rem;line-height:1.25}
+  .topbar .tb-cas .tb-clock{display:inline-flex!important;align-items:baseline;gap:6px;white-space:nowrap}
+  .topbar .tb-cas .tb-datum{display:inline!important;flex-basis:auto!important;font-size:.78rem;margin:0}
+  .topbar .tb-cas .tb-hod{font-size:.95rem}
+  .topbar .tb-full{width:28px;height:28px;margin-left:2px}
+}
+
+/* r27-11: mobil — mapa města větší a posuvná do stran, pod ní seznam míst */
+.mesto-mista{display:none}
+@media (max-width:760px){
+  .mesto-plocha .mesto-mapa{overflow-x:auto;overflow-y:hidden;aspect-ratio:auto!important;height:auto!important;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .mesto-plocha .mesto-mapa::-webkit-scrollbar{display:none}
+  .mesto-plocha .mesto-mapa .townmap.live{width:740px!important;max-width:none!important;height:auto!important;aspect-ratio:3/2}
+  .mesto-mapa .townmap .spot span{font-size:.78rem!important;padding:2px 6px!important;margin-top:12px!important}
+  .mesto-mista{display:flex;flex-wrap:wrap;gap:6px;margin:8px 4px 12px}
+  .mesto-mista .chip{min-height:38px;font-size:.85rem}
+  .mesto-mista .chip.zamceno{opacity:.5}
+}
+@media (max-width:760px){
+  .hk-zalozky{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;overflow:visible!important}
+  .hk-zalozky button{flex:none!important;width:auto!important;min-width:0!important;white-space:normal!important;padding:10px 4px!important;
+    font-size:.78rem!important;line-height:1.15;text-align:center;justify-content:center}
+  /* drobné písmo na telefonu čitelnější */
+  .meta,.item .meta,small,.pill,.tag,.chip,.kdy,.sk-druh,.hk-pocet{font-size:max(.78rem,12.5px)}
+  .hero-hlava small,.hero-hlava p{font-size:.8rem}
+}
+/* r27-11: obchod na mobilu — přepínač Koupit / Prodat místo dvou dlouhých sloupců pod sebou */
+.obchod-prepinac{display:none}
+@media (max-width:800px){
+  .obchod-prepinac{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:0 0 10px;position:sticky;top:var(--lista-h,92px);z-index:4;
+    border:1px solid #8a6a3c;border-radius:6px;overflow:hidden;background:#120c08}
+  .obchod-prepinac button{appearance:none;border:0;background:transparent;color:#cbb994;font:700 1rem var(--serif);padding:12px 6px;min-height:46px;cursor:var(--k-klik,pointer)}
+  .obchod-prepinac button.on{background:linear-gradient(#e2c06e,#b8913f);color:#1e140a}
+  .obchod-sloupce.strana-koupit>.panel:nth-child(2),.obchod-sloupce.strana-prodat>.panel:nth-child(1){display:none}
+}
+@media (max-width:760px){
+  .hero-sheet .hero-fig{max-height:42vh!important;aspect-ratio:auto!important;height:42vh!important}
+}
+/* r27-11: barva konkrétního kusu */
+.barva-kus{display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:1px 8px 1px 3px;border:1px solid #6b5333;border-radius:999px;
+  font:600 .8rem var(--serif);color:#e8d7b0;background:#1a120b;vertical-align:middle;white-space:nowrap}
+.barva-kus i{width:14px;height:14px;border-radius:50%;background:var(--b);border:1px solid #0008;box-shadow:inset 0 0 0 1px #fff3}
+.barva-kus i.prirodni{background:repeating-linear-gradient(45deg,#c9b18a 0 3px,#a88a5c 3px 6px)}
+/* ================================================================ r27-11: výprava v novém vzhledu */
+.vyp.v2{display:block;max-width:1100px;margin:0 auto}
+.vyp.v2 .vscene{aspect-ratio:16/7;border-radius:4px;border:1px solid #8a6a3c;box-shadow:0 18px 50px #000a}
+.vyp.v2.boj .vscene{aspect-ratio:16/8}
+.vyp.v2 .vtitle{left:auto;top:auto;bottom:0;left:0;right:0;padding:40px 28px 18px;background:linear-gradient(transparent,#0b0805d9);text-shadow:0 2px 12px #000}
+.vyp.v2 .vtitle h2{font-size:clamp(1.6rem,3.2vw,2.6rem);line-height:1.05;color:#f6e7c4}
+.vyp.v2 .vtitle small{font-size:1.02rem}
+.vyp.v2:not(.boj) .vparty{left:auto;right:2%;bottom:4%;justify-content:flex-end;max-width:45%}
+.vyp.v2.boj .vtitle{display:none}
+.vyp.v2 .vmem{background:#1b140ce6;border-color:#8a6a3c;border-radius:4px}
+.vyp.v2 .vturn{border-radius:4px;font-weight:700}
+.vyp.v2 .vturn.moje{background:linear-gradient(#e2c06e,#b8913f);color:#1e140a;border-color:#f1d9a0;animation:pulseI 2s ease-in-out infinite}
+.vyp.v2 .vsit{border-color:#8a6a3c;border-radius:4px}
+.vyp-telo{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;margin-top:18px;align-items:start}
+.vyp-pergamen{position:relative;padding:22px 24px 20px;border:1px solid #8a6a3c;border-radius:4px;color:#2e1d0e;
+  background:linear-gradient(160deg,#f4e6c4,#e6d1a0 60%,#d8bd85);box-shadow:0 6px 18px #000a,inset 0 0 40px #8a6a3c44}
+.vyp-pergamen::before{content:"";position:absolute;inset:6px;border:1px solid #8a6a3c55;border-radius:2px;pointer-events:none}
+.vyp-pergamen .vtext{font-size:1.04rem;line-height:1.6;color:#2e1d0e}
+.vyp-pergamen .vtext p{margin:0 0 .7em}.vyp-pergamen .vtext p:last-child{margin:0}
+.vyp-pergamen .vtext b,.vyp-pergamen .vtext strong{color:#5a1510}
+.vyp-pergamen .vtext em,.vyp-pergamen .vtext i{color:#4a3018}
+.vyp-pergamen .vtext a{color:#7a2a10}
+.vyp-pergamen .vtext ul{margin:.2em 0 .8em;padding-left:1.2em}
+.vyp-pergamen .vtext .muted,.vyp-pergamen .vtext .dim{color:#6a5030!important}
+.vyp-pergamen .vyp-nadpis{font:700 1.3rem var(--serif);color:#5a1510;margin-bottom:.4em!important;padding-bottom:.35em;border-bottom:1px solid #8a6a3c66}
+.vyp-stitky{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.vyp-stitky span{padding:3px 10px;border:1px solid #8a6a3c;border-radius:999px;background:#fff6dd88;color:#4a2e14;font:600 .85rem var(--serif)}
+.vyp-stitky span:first-child{background:#5a1510;color:#f6e7c4;border-color:#5a1510}
+.vyp-akce .vyp-sect{margin:0 0 10px;text-align:left}
+.vyp-akce .vyp-sect:not(:first-child){margin-top:18px}
+.vyp.v2 .vyp-ctl{margin-top:0}
+.vyp.v2 .vyp-hlavni{grid-template-columns:1fr;gap:10px}
+.vyp.v2 .vyp-ctl .vyp-karta{min-height:60px;padding:12px 44px 12px 18px;font:700 1.08rem var(--serif);border-radius:4px}
+.vyp.v2 .vyp-ctl .vyp-karta.primary{background:linear-gradient(#e2c06e,#b8913f);border:1px solid #f1d9a0;color:#1e140a}
+.vyp.v2 .vyp-ctl .vyp-karta.primary::after{border-color:#1e140a}
+.vyp.v2 .vyp-lista{margin-top:0;padding-top:0;border-top:0;gap:8px}
+.vyp.v2 .vyp-ctl .vyp-mala{padding:9px 16px;border-radius:4px;font:600 .95rem var(--serif);min-height:42px}
+.vyp.v2.boj .vyp-hlavni{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.vyp-discord{margin:16px 0 0;color:var(--muted);font-size:.85rem;font-style:italic}
+@media (max-width:860px){
+  .vyp-telo{grid-template-columns:1fr;gap:14px;margin-top:12px}
+  .vyp.v2 .vscene,.vyp.v2.boj .vscene{aspect-ratio:auto;height:clamp(230px,56vw,420px)}
+  .vyp.v2.boj .vscene{height:clamp(300px,80vw,460px)}
+  .vyp.v2 .vtitle{padding:30px 14px 10px}
+  .vyp.v2 .vtitle h2{font-size:1.5rem}.vyp.v2 .vtitle small{font-size:.88rem}
+  .vyp.v2:not(.boj) .vparty{right:2%;left:auto;top:3%;bottom:auto;max-width:60%}
+  .vyp-pergamen{padding:16px 16px 14px}
+  .vyp-pergamen .vtext{font-size:1rem;line-height:1.55}
+  .vyp.v2.boj .vyp-hlavni{grid-template-columns:1fr 1fr}
+  .vyp.v2.boj .vyp-hlavni .vyp-karta:last-child:nth-child(odd){grid-column:1/-1}
+  .vyp.v2 .vyp-ctl .vyp-karta{min-height:54px;font-size:1.02rem}
+  .vyp.v2 .vyp-lista{display:grid;grid-template-columns:1fr 1fr}
+  .vyp.v2 .vyp-ctl .vyp-mala{width:100%}
+}
+.vyp-pergamen .vyp-nadpis{display:block;font:700 1.25rem var(--serif);color:#5a1510;margin:0 0 .35em;padding-bottom:.3em;border-bottom:1px solid #8a6a3c66}
+@media (max-width:860px){
+  .vyp.v2.boj .vyp-telo{display:flex;flex-direction:column}
+  .vyp.v2.boj .vyp-akce{order:-1}
+  .vyp.v2.boj .vyp-pergamen .vtext{font-size:.95rem}
+}
+@media (min-width:861px){
+  .vyp.v2 .vscene{max-height:calc(100vh - 360px);min-height:300px;width:100%}
+  .vyp.v2.boj .vscene{max-height:calc(100vh - 330px);min-height:340px}
+  .vyp.v2.boj .vfoe{height:72%}
+}
+.vyp-lobby .vyp-pergamen{margin-bottom:14px}
+/* r27-11: výprava na telefonu na šířku — obrázek vlevo, text a volby vpravo vedle sebe */
+@media (orientation:landscape) and (max-height:540px){
+  .vyp.v2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;align-items:start;max-width:none}
+  .vyp.v2 .vscene,.vyp.v2.boj .vscene{position:sticky;top:8px;height:calc(100vh - 90px)!important;min-height:0!important;max-height:none!important;aspect-ratio:auto}
+  .vyp.v2 .vyp-telo{display:flex;flex-direction:column;gap:10px;margin-top:0}
+  .vyp.v2 .vyp-akce{order:-1}
+  .vyp.v2 .vtitle{padding:24px 12px 8px}.vyp.v2 .vtitle h2{font-size:1.3rem}
+  .vyp.v2 .vyp-hlavni,.vyp.v2.boj .vyp-hlavni{grid-template-columns:1fr 1fr}
+  .vyp.v2 .vyp-ctl .vyp-karta{min-height:46px;font-size:.95rem;padding:8px 34px 8px 12px}
+  .vyp.v2 .vyp-pergamen{padding:12px 14px}.vyp.v2 .vyp-pergamen .vtext{font-size:.92rem}
+}
+@media (min-width:861px){.vyp.v2.boj .vscene{max-height:calc(100vh - 420px);min-height:330px}.vyp.v2 .vscene{max-height:calc(100vh - 400px);min-height:280px}}
+@media (orientation:landscape) and (max-height:540px){.vyp.v2:not(.boj) .vyp-akce{order:0}}
