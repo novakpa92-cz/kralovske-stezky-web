@@ -451,6 +451,8 @@ async function zalozitPostavu(view) {
 }
 
 function render() {
+  if (typeof zavriList === "function") zavriList();
+  document.documentElement.classList.remove("bez-menu");   // r27-12: spodní menu se skryje jen na probíhající výpravě
   const view = $("#view");
   if (!S.me) { view.innerHTML = ""; return; }
   { const nb = document.querySelector('[data-tab="novy"]'); if (nb) nb.hidden = !!S.me.has_character;   // r27-6: záložka jen bez postavy
@@ -463,6 +465,7 @@ function render() {
   if ((S.me.pet_umrti || []).length) { const mrtva = S.me.pet_umrti; S.me.pet_umrti = []; setTimeout(() => alert(L([`Tvůj mazlíček ${mrtva.join(", ")} uhynul — dlouho neměl jídlo ani péči.`, `Your pet ${mrtva.join(", ")} died of neglect.`])), 300); }   // r27-6: zkušební režim správce — výrazný pruh nahoře
   view.dataset.tab = S.tab; view.classList.toggle("kniha", ["hero", "bag", "more", "pet", "denik"].includes(S.tab));   // příručka má vlastní knihu                         // r27-4: vzhled podle záložky (Noc nad městem / Kronika)
   view.classList.toggle("wide", ["mesto", "misto", "obchod", "hra", "vyprava", "panel", "domov", "kohouti", "statek", "hraci", "aukce", "souboje", "hrbitov"].includes(S.tab));
+  view.classList.toggle("rozdel", ["misto", "panel", "obchod", "truhla", "napoje", "vydaje", "obyvatele", "dar", "poradi", "zverinec", "dilna", "erb", "povoz", "vyhlasky", "hrbitov", "kroniky", "domov"].includes(S.tab));   // r27-12: na PC obraz vlevo, volby vpravo — bez scrollování
   const stejna = S._lastRoute === S.tab + "/" + (S.arg || ""), y = window.scrollY;   // r27-11: po akci zůstaň, kde jsi byl
   S._lastRoute = S.tab + "/" + (S.arg || "");
   if (stejna && y > 0) view.style.minHeight = view.offsetHeight + "px";
@@ -534,7 +537,7 @@ VIEWS.hero = (view) => {
   const HK = [["stav", L(["Postava", "Character"])],   // r27-5: záložka „Postava“ (dřív Stav a boj) — tělo, boj a pod Do boje i vlastnosti
     ["schop", L(["Schopnosti", "Abilities"])], ["dov", L(["Dovednosti", "Skills"])], ["cesta", L(["Cesta", "Path"])],
     ["uc", L(["Účinky", "Effects"]) + (U.length ? ` <i class="hk-pocet${U.some((x) => x.kind === "postih") ? " zle" : ""}">${U.length}</i>` : "")]];
-  if (!HK.some(([k]) => k === HERO.karta)) HERO.karta = "stav";   // (záložka „boj“ je teď součástí „stav“)
+  if (!HK.some(([k]) => k === HERO.karta) && !(HERO.karta === "vzhled" && jeMobil())) HERO.karta = "stav";   // (záložka „boj“ je teď součástí „stav“)
   const obsah = {
     stav: () => {   // r27-4: stav a boj dohromady — kruhy potřeb a erbovní znaky boje
       // r27-5: znaky boje jako jednotné kulaté pečeti — malá ikona nahoře, hodnota přesně uprostřed
@@ -598,12 +601,12 @@ VIEWS.hero = (view) => {
     ${P.wanted ? `<p class="upozorneni ne">${esc(L(["Hledaný! Odměna ", "Wanted! Bounty "]) + P.wanted.bounty + L([" gr. · pokuta u rychtáře ", " gr. · fine "]) + P.wanted.fine + " gr.")}</p>` : ""}
     ${P.bills_debt ? `<p class="upozorneni">${esc(L(["Dluh na výdajích: ", "Unpaid bills: "]) + P.bills_debt + L([" gr. (Radnice → Rychtář → Výdaje)", " gr."]))}</p>` : ""}
     ${P.debt ? `<p class="upozorneni">${esc(L(["Dluh u apatykáře: ", "Apothecary debt: "]) + P.debt + " gr.")}</p>` : ""}
-    <div class="hero-sheet">
+    <div class="hero-sheet${jeMobil() ? (HERO.karta === "vzhled" ? " m-vzhled" : " m-bez-figury") : ""}">
       <div class="hero-left">
         <div class="hero-fig live" data-img="mesto-pokoj" data-key="pokoj">${Postava.html(m, IMG_BASE)}${pet}</div>
       </div>
       <div class="panel hero-karty">
-        <nav class="hk-zalozky">${HK.map(([k, n]) => `<button class="${HERO.karta === k ? "on" : ""}" data-karta="${k}">${n}</button>`).join("")}</nav>
+        <nav class="hk-zalozky">${(jeMobil() ? [["vzhled", L(["Vzhled", "Look"])], ...HK] : HK).map(([k, n]) => `<button class="${HERO.karta === k ? "on" : ""}" data-karta="${k}">${n}</button>`).join("")}</nav>
         <div class="hk-obsah hk-${HERO.karta}">${obsah[HERO.karta] ? obsah[HERO.karta]() : ""}</div>
       </div>
     </div>`));
@@ -810,9 +813,12 @@ VIEWS.bag = (view) => {
   };
   const prazdne = (n) => Array.from({ length: Math.max(0, n) }, () => `<div class="item volno"><span class="icon prazdne"></span><div class="muted">${esc(L(["volné místo", "empty slot"]))}</div></div>`).join("");
   const blok = (nadpis, pocet, obsah) => `<div class="panel"><div class="spread"><h3>${esc(nadpis)}</h3>${pocet ? `<span class="pill">${esc(pocet)}</span>` : ""}</div><div class="items">${obsah}</div></div>`;
+  const BZ = S.batohZal || "kapsy";   // r27-12: na telefonu jen jeden oddíl naráz (bez dlouhého scrollování)
+  const zal = [["nasazeno", L(["Na sobě", "Worn"]), m.equipped.length], ["opasek", L(["Opasek", "Belt"]), N.belt.length], ["kapsy", L(["Kapsy", "Pockets"]), N.pockets.length], ["batoh", L(["Batoh", "Backpack"]), N.backpack.length]];
   view.replaceChildren(h(`
     ${m.on_raid ? `<div class="panel notice" style="margin-bottom:16px">🗺️ ${esc(t("on_raid"))}</div>` : ""}
-    <div class="grid g2 batoh" style="align-items:start">
+    ${jeMobil() ? `<div class="m-zalozky batoh-zal">${zal.map(([k, n, c]) => `<button class="${BZ === k ? "on" : ""}" data-bz="${k}">${esc(n)}<small>${c}</small></button>`).join("")}</div>` : ""}
+    <div class="grid g2 batoh${jeMobil() ? " m-jen-" + BZ : ""}" style="align-items:start">
       <div class="grid">
         ${blok(t("equipped"), "", m.equipped.length ? m.equipped.map((e) => `<div class="item eq">${icon(e.id)}
           <div><div class="nm">${esc(e.name)}${e.enh ? ` <span class="muted">+${e.enh}</span>` : ""}${barvaStitek(e.color_name, e.color)}</div><div class="meta">${esc(e.slot_name)}</div>${opotrebeni(e)}</div>
@@ -828,6 +834,7 @@ VIEWS.bag = (view) => {
       </div>
     </div>`));
   view.querySelectorAll("[data-f]").forEach((b) => b.onclick = () => { S.bagFilter = b.dataset.f; render(); });
+  view.querySelectorAll("[data-bz]").forEach((b) => b.onclick = () => { S.batohZal = b.dataset.bz; Zvuk.sfx("klik"); render(); });
   const act = (op, data, msg) => call(op, data).then((r) => { toast(msg ? msg(r) : t("done")); render(); }).catch(() => {});
   view.querySelectorAll("[data-unequip]").forEach((b) => b.onclick = () => act("unequip", { slot: b.dataset.unequip }));
   view.querySelectorAll("[data-equip]").forEach((b) => b.onclick = () => act("equip", { item: b.dataset.equip, color: b.dataset.barva || "" }));
@@ -836,6 +843,7 @@ VIEWS.bag = (view) => {
     if (confirm(t("sell_q", b.dataset.name, t("coins", b.dataset.price)))) act("sell", { item: b.dataset.sell, shop: b.dataset.shop, color: b.dataset.barva || "" }, (r) => t("sold", r.price));
   });
   loadIcons([...m.inventory.map((i) => i.id), ...m.equipped.map((e) => e.id)]);
+  mobilniSeznam(view.querySelector(".batoh"));
 };
 
 // r27-4: kroniky z Discordu na radnici — kniha se záložkami (jako deník)
@@ -1955,8 +1963,29 @@ function nabidniPlochu() {
     e.userChoice.then((r) => { if (r && r.outcome === "accepted") store.set("plocha", "1"); }).catch(() => {});
     return;
   }
-  toast(plochaIos() ? L(["Na iPhonu: dole klepni na **Sdílet** (čtvereček se šipkou) → **Přidat na plochu**.", "On iPhone: tap **Share** → **Add to Home Screen**."])
-    : L(["V prohlížeči otevři nabídku **⋮** → **Přidat na plochu** (nebo **Instalovat aplikaci**).", "Open the browser menu **⋮** → **Add to Home screen**."]));
+  plochaNavod();
+}
+/** r27-12: když prohlížeč sám okno „Přidat na plochu“ nenabídne, ukáže se jasný návod přesně pro ten prohlížeč. */
+function plochaNavod() {
+  const ua = navigator.userAgent;
+  const vApce = /; wv\)|Discord|FBAN|FBAV|Instagram|Messenger/i.test(ua);     // vestavěný prohlížeč (např. odkaz otevřený z Discordu)
+  const samsung = /SamsungBrowser/i.test(ua), firefox = /Firefox/i.test(ua);
+  const kroky = plochaIos() ? [["Dole klepni na <b>Sdílet</b> (čtvereček se šipkou nahoru).", "Tap <b>Share</b> at the bottom."], ["Vyber <b>Přidat na plochu</b>.", "Choose <b>Add to Home Screen</b>."], ["Potvrď <b>Přidat</b>.", "Confirm <b>Add</b>."]]
+    : vApce ? [["Tahle stránka je otevřená <b>uvnitř Discordu</b> — odtud ikona na plochu nejde.", "This page is open <b>inside Discord</b> — no home icon from here."],
+               ["Vpravo nahoře klepni na <b>⋮</b> a zvol <b>Otevřít v prohlížeči</b> (Chrome nebo Samsung Internet).", "Tap <b>⋮</b> top right → <b>Open in browser</b>."], ["Tam se přihlas a znovu klepni na <b>Ikona hry na ploše</b>.", "Log in there and tap the home icon option again."]]
+    : samsung ? [["Dole vpravo klepni na <b>≡</b> (tři čárky).", "Tap <b>≡</b> bottom right."], ["Zvol <b>Přidat stránku na</b> → <b>Domovská obrazovka</b>.", "Choose <b>Add page to</b> → <b>Home screen</b>."], ["Potvrď <b>Přidat</b>.", "Confirm <b>Add</b>."]]
+    : firefox ? [["Klepni na <b>⋮</b> (tři tečky).", "Tap <b>⋮</b>."], ["Zvol <b>Přidat na domovskou obrazovku</b>.", "Choose <b>Add to Home screen</b>."], ["Potvrď <b>Přidat</b>.", "Confirm <b>Add</b>."]]
+    : [["Vpravo nahoře klepni na <b>⋮</b> (tři tečky).", "Tap <b>⋮</b> top right."], ["Zvol <b>Přidat na plochu</b> nebo <b>Instalovat aplikaci</b>.", "Choose <b>Add to Home screen</b> or <b>Install app</b>."], ["Potvrď <b>Přidat</b> / <b>Instalovat</b>.", "Confirm <b>Add</b> / <b>Install</b>."]];
+  const el = document.createElement("div");
+  el.className = "m-list plocha-navod";
+  el.innerHTML = `<div class="m-list-pozadi"></div><div class="m-list-okno" role="dialog"><span class="m-list-uchyt"></span>
+    <div class="pn-hlava"><img src="ikona-192.png" alt=""><div><b>${esc(L(["Ikona hry na ploše", "Game icon on home screen"]))}</b><small>${esc(L(["Ikona jen otevře tuto stránku. Nic se neinstaluje, přihlášení zůstane.", "The icon only opens this page."]))}</small></div></div>
+    <ol class="pn-kroky">${kroky.map((k) => `<li>${L(k)}</li>`).join("")}</ol>
+    <button class="btn m-list-zavrit">${esc(L(["Rozumím", "Got it"]))}</button></div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("otevreno"));
+  const zavri = () => el.remove();
+  el.querySelector(".m-list-pozadi").onclick = zavri; el.querySelector(".m-list-zavrit").onclick = zavri;
 }
 if (plochaMobil() && !plochaMa()) { const b = document.getElementById("plocha-login"); if (b) b.hidden = false; }
 const IMG = (name) => `<picture><source media="(max-width: 760px)" srcset="${IMG_BASE}${name}-m.webp"><img src="${IMG_BASE}${name}.webp" alt="" loading="lazy" decoding="async"></picture>`;
@@ -2126,6 +2155,77 @@ function sceneHead(img, title, say, small = false) {
   return `<div class="scene live${small ? " short" : ""}" data-img="${esc(img)}">
     <div class="scene-cap"><h2>${esc(title)}</h2>${say ? `<p>${esc(say)}</p>` : ""}</div></div>`;
 }
+// ------------------------------------------------------------------ r27-12: mobilní režim (zvláštní rozložení pro telefon)
+const ZOBR = { pref: (typeof store !== "undefined" && store.get("zobrazeni")) || "auto" };
+function jeMobil() {
+  if (ZOBR.pref === "pc") return false;
+  if (ZOBR.pref === "tel") return true;
+  return matchMedia("(max-width:760px)").matches || (matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 540);
+}
+function nastavZobrazeni() {
+  const m = jeMobil(), byl = document.documentElement.classList.contains("mobil");
+  document.documentElement.classList.toggle("mobil", m);
+  document.documentElement.classList.toggle("mobil-vynucen", m && ZOBR.pref === "tel");
+  const nav = document.querySelector(".tabs");
+  if (nav) document.documentElement.style.setProperty("--nav-h", (m ? nav.offsetHeight : 0) + "px");
+  return m !== byl;
+}
+nastavZobrazeni();
+addEventListener("resize", () => { if (nastavZobrazeni() && typeof render === "function" && S.me) render(); });
+addEventListener("load", nastavZobrazeni);
+
+/** r27-12: spodní okno (na telefonu) — podrobnosti věci a akce na dosah palce. Akce se do okna přesunou i s obsluhou. */
+const LIST = { el: null, zpet: null };
+function zavriList() {
+  if (!LIST.el) return;
+  if (LIST.zpet) LIST.zpet.forEach(([uzel, kam]) => { if (kam && kam.isConnected) kam.appendChild(uzel); });
+  LIST.el.remove(); LIST.el = null; LIST.zpet = null;
+}
+function otevriList(item) {
+  zavriList();
+  const acts = item.querySelector(".acts"); if (!acts) return;
+  const hlava = item.cloneNode(true);
+  hlava.querySelectorAll(".acts,.kup-vyber,.kup-barva,.m-sipka,.m-cena").forEach((x) => x.remove());
+  hlava.className = "item list-hlava";
+  const el = document.createElement("div");
+  el.className = "m-list";
+  el.innerHTML = `<div class="m-list-pozadi"></div><div class="m-list-okno" role="dialog"><span class="m-list-uchyt"></span><div class="m-list-telo"></div>
+    <button class="btn m-list-zavrit">${esc(L(["Zavřít", "Close"]))}</button></div>`;
+  el.querySelector(".m-list-telo").appendChild(hlava);
+  const kam = el.querySelector(".m-list-telo");
+  const zpet = [[acts, item]];
+  kam.appendChild(acts);
+  document.body.appendChild(el);
+  LIST.el = el; LIST.zpet = zpet;
+  if (typeof Zvuk !== "undefined") Zvuk.sfx("klik");
+  requestAnimationFrame(() => el.classList.add("otevreno"));
+  el.querySelector(".m-list-pozadi").onclick = zavriList;
+  el.querySelector(".m-list-zavrit").onclick = zavriList;
+  acts.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => setTimeout(zavriList, 0)));
+}
+/** Na telefonu: řádky věcí bez tlačítek — klepnutím se otevře spodní okno s akcemi. */
+function mobilniSeznam(root) {
+  if (!jeMobil() || !root) return;
+  root.querySelectorAll(".item").forEach((it) => {
+    const acts = it.querySelector(".acts");
+    if (!acts || !acts.querySelector("button") || it.classList.contains("m-radek")) return;
+    it.classList.add("m-radek");
+    const cena = acts.querySelector(".price");
+    it.insertAdjacentHTML("beforeend", `${cena ? `<span class="m-cena">${esc(cena.textContent)}</span>` : ""}<span class="m-sipka" aria-hidden="true"></span>`);
+    it.addEventListener("click", (e) => { if (e.target.closest("button,input,select,label,a")) return; otevriList(it); });
+  });
+}
+
+// r27-11: na telefonu se horní lišta při scrollování dolů schová a při pohybu nahoru zase ukáže
+{ let posl = 0;
+  addEventListener("scroll", () => {
+    const y = window.scrollY, g = document.getElementById("game"); if (!g) return;
+    const mobil = matchMedia("(max-width:760px)").matches;
+    if (!mobil || y < 60) g.classList.remove("tb-skryt");
+    else if (y > posl + 8) g.classList.add("tb-skryt");
+    else if (y < posl - 8) g.classList.remove("tb-skryt");
+    posl = y;
+  }, { passive: true }); }
 Scena.setBase(IMG_BASE);
 Zvuk.setBase(document.documentElement.dataset.zvuk || IMG_BASE.replace(/img\/$/, "zvuk/"));
 // Hudba podle místa; jinde město ve dne nebo v noci.
@@ -2167,9 +2267,11 @@ function zpravyHtml(m) {
 const PODNIK_MISTA = { kovar: ["kovar", ["Kovárnu", "smithy", "Kovárna"]], apatyka: ["apatykar", ["Apatyku", "apothecary", "Apatyka"]], dilna: ["lovci", ["Střelmistrovu dílnu", "bowyer's workshop", "Střelmistrova dílna"]] };
 const PODNIK_ZAMEK = Object.fromEntries(Object.entries(PODNIK_MISTA).map(([id, [o]]) => [id, () => !(S.me.origin === o && S.me.business)]));
 VIEWS.mesto = (view) => {
+  const MP = store.get("mestoPohled") || "mapa";   // r27-12: telefon — Mapa nebo Místa (každé na jednu obrazovku)
   view.replaceChildren(h(`
     ${S.me.on_raid ? `<div class="panel notice" style="margin-bottom:16px">🗺️ ${esc(t("on_raid"))}</div>` : ""}
-    <div class="mesto-plocha"><div class="mesto-mapa"><div class="townmap live" data-img="mesto-mapa"></div></div>
+    ${jeMobil() ? `<div class="m-zalozky mesto-zal"><button class="${MP === "mapa" ? "on" : ""}" data-mp="mapa">${esc(L(["Mapa", "Map"]))}</button><button class="${MP === "mista" ? "on" : ""}" data-mp="mista">${esc(L(["Místa", "Places"]))}</button><button class="${MP === "zpravy" ? "on" : ""}" data-mp="zpravy">${esc(L(["Kronika", "Chronicle"]))}</button></div>` : ""}
+    <div class="mesto-plocha${jeMobil() ? " m-pohled-" + MP : ""}"><div class="mesto-mapa"><div class="townmap live" data-img="mesto-mapa"></div></div>
       <aside class="mesto-zpravy">${zpravyHtml(S.me) || `<div class="zpravy"><section class="kronika"><div class="sect">${esc(L(["Kronika událostí", "Chronicle of events"]))}</div><p class="muted">${esc(L(["Ve městě je zatím klid.", "All quiet in town."]))}</p></section></div>`}</aside></div>`));
   const sc = mountLive(view, { still: true, contain: true });
   view.querySelector(".townmap").style.setProperty("--maska", `url('${IMG_BASE}${innerWidth <= 760 ? "mesto-mapa-m" : "mesto-mapa"}.webp')`);
@@ -2183,10 +2285,15 @@ VIEWS.mesto = (view) => {
   sc.pic.insertAdjacentHTML("beforeend", SPOTS.map((p) => `<button class="spot${PLACES[p.id] ? "" : " later"}${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}" data-kraj="${p.x < 13 ? "l" : p.x > 87 ? "r" : ""}" style="left:${p.x}%;top:${p.y}%"><span>${esc(L(p.n))}</span></button>`).join(""));
   { // r27-11: na mobilu seznam míst pod mapou (mapa se dá posouvat prstem do stran)
     const mm = view.querySelector(".mesto-mapa");
-    mm.insertAdjacentHTML("afterend", `<div class="mesto-mista">${SPOTS.filter((p) => PLACES[p.id]).sort((a, b) => zamceno(a.id) - zamceno(b.id))
-      .map((p) => `<button class="chip${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}">${esc(L(p.n))}</button>`).join("")}</div>`);
+    const mista = SPOTS.filter((p) => PLACES[p.id]).sort((a, b) => zamceno(a.id) - zamceno(b.id));
+    mm.insertAdjacentHTML("afterend", jeMobil()   // r27-12: na telefonu dlaždice s obrázkem místa
+      ? `<div class="sect m-mista-nadpis">${esc(L(["Kam ve městě", "Where to go"]))}</div><div class="m-mista">${mista.map((p) => { const pl = PLACES[p.id];
+          return `<button class="m-misto${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}"><span class="m-misto-obr" style="background-image:url('${IMG_BASE}${pl.img || "mesto-trziste"}-m.webp')"></span>
+            <b>${esc(L(p.n))}</b>${zamceno(p.id) ? `<small>${esc(L(["zamčeno", "locked"]))}</small>` : ""}</button>`; }).join("")}</div>`
+      : `<div class="mesto-mista">${mista.map((p) => `<button class="chip${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}">${esc(L(p.n))}</button>`).join("")}</div>`);
     if (innerWidth <= 760) requestAnimationFrame(() => { mm.scrollLeft = (mm.scrollWidth - mm.clientWidth) / 2; });
   }
+  view.querySelectorAll("[data-mp]").forEach((b) => b.onclick = () => { store.set("mestoPohled", b.dataset.mp); Zvuk.sfx("klik"); render(); });
   view.querySelectorAll("[data-spot]").forEach((b) => b.onclick = () => {
     if (zamceno(b.dataset.spot)) { if (typeof Zvuk !== "undefined") Zvuk.sfx("klik"); toast(L(ZAMEK_TXT[b.dataset.spot])); return; }
     const p = PLACES[b.dataset.spot];
@@ -3158,6 +3265,7 @@ VIEWS.obchod = async (view) => {
       call("sell", { item: b.dataset.sell, shop: shopId, count: n, color: b.dataset.barva || "" }).then((r) => { Zvuk.sfx("mince"); toast(t("sold", r.price)); render(); }).catch(() => { b.disabled = false; });
     });
     loadIcons([...rows, ...mine].map((i) => i.id));
+    mobilniSeznam(box);
   };
   const mins = data.restock_min || 0;
   const left = mins >= 60 ? t("hm", Math.floor(mins / 60), mins % 60) : t("m", mins);
@@ -3582,18 +3690,59 @@ function controlsHtml(list, cls = "") {
 }
 
 // r27-5: tlačítka výpravy — hlavní volby (cesty, boj) jako velké karty, pomocné akce jako lišta pod nimi
-function raidControlsHtml(list, busy, boj = false) {
+/** r27-12: tlačítka výpravy po kategoriích — každá má svůj vzhled a znak:
+ *  mimo boj: Cesta (se šipkou směru) · Akce · Dovednost · Výzva (pán místa) · drobnosti · Odejít do města
+ *  v boji:  Útok · Obrana · Podpora · Ústup */
+const VYP_DRUH = (id, boj) => {
+  const a = String(id || "").split(":").pop();
+  if (boj) {
+    if (/^(attack|heavy|quick|counter|flee_no)$/.test(a)) return "utok";
+    if (/^(defend|dodge|guard)$/.test(a)) return "obrana";
+    if (/^(flee|withdraw)$/.test(a)) return "ustup";
+    return "drobne";
+  }
+  if (/^go\d+$/.test(a)) return "cesta";
+  if (/^(extract|return)$/.test(a)) return "domu";
+  if (a === "withdraw" || a === "lpgive") return "ustup";
+  if (/^na-boss$|^boss$/.test(a)) return "vyzva";
+  if (/^na-(hunt|stalk|skin|gather|fish|dig)$|^lp\d+$/.test(a)) return "dovednost";
+  if (/^(useitem|gift|journal|abilities|panel)$/.test(a) || /^ks:party:/.test(id)) return "drobne";
+  return "akce";
+};
+const VYP_ZNAK = {
+  akce: '<svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>',
+  dovednost: '<svg viewBox="0 0 24 24"><path d="M5 19l9-9"/><path d="M14 4l6 6-3 1-4-4z"/><path d="M4 20l2-2"/></svg>',
+  vyzva: '<svg viewBox="0 0 24 24"><path d="M4 20L18 6M18 6h-5M18 6v5"/><path d="M20 20L6 6M6 6h5M6 6v5"/></svg>',
+  domu: '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/></svg>',
+  utok: '<svg viewBox="0 0 24 24"><path d="M5 19L19 5M19 5h-5M19 5v5"/><path d="M4 16l4 4"/></svg>',
+  obrana: '<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/></svg>',
+  ustup: '<svg viewBox="0 0 24 24"><path d="M10 6l-6 6 6 6"/><path d="M4 12h16"/></svg>',
+};
+const SIPKA = (d) => `<svg viewBox="0 0 24 24" style="transform:rotate(${(d || 0) * 45}deg)"><path d="M12 4v16"/><path d="M6 10l6-6 6 6"/></svg>`;
+const SVET = [["S", "N"], ["SV", "NE"], ["V", "E"], ["JV", "SE"], ["J", "S"], ["JZ", "SW"], ["Z", "W"], ["SZ", "NW"]];
+
+function raidControlsHtml(list, busy, boj = false, dirs = []) {
   if (!list || !list.length) return "";
   const tl = list.filter((c) => c.t !== "select");
-  const hl = tl.filter((c) => c.style !== "secondary"), ved = tl.filter((c) => c.style === "secondary");
-  if (!hl.length) { hl.push(...ved.splice(0, Math.min(ved.length, 2))); }
-  const btn = (c, cls) => `<button class="btn vbtn ${esc(c.style)} ${cls}" data-cid="${esc(c.id)}"${c.disabled ? " disabled" : ""}><span>${esc(noEmoji(c.label).trim())}</span></button>`;
-  // r27-11: nový vzhled — oddíly s nadpisem jako v ostatních místech hry
-  const nad = (t) => `<div class="sect vyp-sect">${esc(t)}</div>`;
-  return `<div class="vctl vyp-ctl${busy ? " busy" : ""}">
-    ${hl.length ? nad(boj ? L(["Tvůj tah", "Your move"]) : L(["Co uděláš", "What will you do"])) : ""}
-    <div class="vyp-hlavni${hl.length === 1 ? " jedna" : ""}">${hl.map((c) => btn(c, "vyp-karta")).join("")}</div>
-    ${ved.length ? nad(boj ? L(["Obrana a jiné", "Defence and more"]) : L(["Další možnosti", "More options"])) + `<div class="vyp-lista">${ved.map((c) => btn(c, "vyp-mala")).join("")}</div>` : ""}
+  const sk = { cesta: [], akce: [], dovednost: [], vyzva: [], utok: [], obrana: [], drobne: [], ustup: [], domu: [] };
+  tl.forEach((c) => sk[VYP_DRUH(c.id, boj)].push(c));
+  const cena = (raw) => { const x = /⚡\s*(\+?\d+)/.exec(raw || ""); return x ? `<em class="vb-vydrz" title="${esc(L(["výdrž", "stamina"]))}">${x[1].startsWith("+") ? x[1] : "−" + x[1]}</em>` : ""; };
+  const text = (c) => esc(noEmoji(String(c.label).replace(/⚡\s*\+?\d+/, "")).replace(/^[↩\s]+/, "").trim());
+  const btn = (c, druh) => {
+    let znak = VYP_ZNAK[druh] || "";
+    if (druh === "cesta") {
+      const i = Number((/go(\d+)$/.exec(c.id) || [])[1]), d = dirs[i];
+      const zpet = /^\s*↩|Zpět:/.test(c.label);
+      znak = zpet ? VYP_ZNAK.ustup : d == null ? SIPKA(0) : SIPKA(d);
+      return `<button class="btn vbtn vb vb-cesta${zpet ? " zpet" : ""}" data-cid="${esc(c.id)}"${c.disabled ? " disabled" : ""}><i class="vb-znak">${znak}</i>`
+        + `<span>${text(c)}</span>${d != null && !zpet ? `<small class="vb-svet">${esc(L(SVET[d]))}</small>` : ""}</button>`;
+    }
+    return `<button class="btn vbtn vb vb-${druh}" data-cid="${esc(c.id)}"${c.disabled ? " disabled" : ""}>${znak ? `<i class="vb-znak">${znak}</i>` : ""}<span>${text(c)}</span>${cena(c.label)}</button>`;
+  };
+  const rada = (druh, cls = "") => sk[druh].length ? `<div class="vb-rada vb-r-${druh}${cls}">${sk[druh].map((c) => btn(c, druh)).join("")}</div>` : "";
+  return `<div class="vctl vyp-ctl vb-ctl${busy ? " busy" : ""}${boj ? " vb-boj" : ""}">
+    ${boj ? rada("utok") + rada("obrana") + rada("drobne") + rada("ustup")
+          : rada("vyzva") + rada("cesta") + rada("akce") + rada("dovednost") + rada("ustup") + rada("drobne") + rada("domu")}
     ${controlsHtml(list.filter((c) => c.t === "select"))}</div>`;
 }
 
@@ -3628,29 +3777,34 @@ VIEWS.vyprava = async (view) => {
 function drawRaid(view) {
   const st = RAID.st || {}, m = st.mission;
   const sc = raidScene(m);
+  document.documentElement.classList.toggle("bez-menu", !!m && m.status !== "lobby" && S.tab === "vyprava");   // r27-12: na výpravě a v boji bez spodního menu
   if (!m) { drawRaidSetup(view, st); return; }
   if (m.status === "lobby") { drawLobby(view, m); return; }
   const e = m.enemy, combat = m.phase === "combat" && e;
   const busy = m.busy_until && m.busy_until * 1000 > Date.now();
   const myTurn = !combat || !m.turn || m.turn === m.me;
+  // r27-12: v obraze bary — v boji životy a energie, mimo boj hlad a žízeň (plný bar = sytý / napitý)
+  const radek = (nazev, v, max, cls) => `<div class="vm-r ${cls}${max && v / max <= .25 ? " malo" : ""}"><span class="vm-n">${esc(nazev)}</span>${bar(v, max, cls)}<span class="vm-v">${combat ? v + "/" + max : Math.round(100 * v / Math.max(1, max)) + " %"}</span></div>`;
   const members = (m.members || []).map((p) => `<div class="vmem${combat && m.turn === p.id ? " turn" : ""}"><b>${esc(p.name)}</b>
-    <span class="vval">❤️ ${p.health}/${p.max_health}</span>${bar(p.health, p.max_health, "hp")}
-    ${p.stamina ? `<span class="vval">⚡ ${p.stamina[0]}/${p.stamina[1]}</span>${bar(p.stamina[0], p.stamina[1], "st")}` : ""}</div>`).join("");
+    ${combat ? radek(L(["Životy", "Health"]), p.health, p.max_health, "hp") + (p.stamina ? radek(L(["Energie", "Energy"]), p.stamina[0], p.stamina[1], "st") : "")
+      : `${p.satiety != null ? radek(L(["Sytost", "Food"]), p.satiety, 100, "jidlo") : ""}${p.hydration != null ? radek(L(["Napití", "Water"]), p.hydration, 100, "voda") : ""}
+         <div class="vm-zivoty">${esc(L(["životy ", "health "]) + p.health + "/" + p.max_health)}</div>`}</div>`).join("");
   const foe = combat ? `<div class="vfoe${e.boss ? " boss" : ""}">${IMG("bytosti/" + enemyArt(e.name))}</div>
     <div class="vfoehud"><b>${e.boss ? "👑 " : ""}${esc(e.name.split(" — ")[0])}</b>${bar(e.health, e.max_health, "hp big")}<span class="vval">${e.health}/${e.max_health}</span>
       ${e.intent ? `<div class="vintent">${esc(e.intent)}</div>` : ""}
       ${e.pack && e.pack.length ? `<div class="vpack">${e.pack.map((p) => `<span>${esc(p.name.split(" — ")[0])}${p.health != null ? " · ❤️ " + p.health : ""}</span>`).join("")}</div>` : ""}</div>` : "";
+  const vp = vypJenPribeh(m.content, m);   // r27-12: jen příběh; počítadla a varování do obrazu
+  const hud = !combat && vp.info.prozkoumano ? `<div class="vhud">${vp.info.prozkoumano ? `<span title="${esc(L(["Prozkoumáno", "Explored"]))}">${esc(L(["prozkoumáno ", "explored "]) + vp.info.prozkoumano)}</span>` : ""}${vp.info.nalez ? `<span>${esc(L(["nálezy ", "finds "]) + vp.info.nalez)}</span>` : ""}</div>` : "";
   const sit = !combat && m.situation && SIT_ART[m.situation] ? `<div class="vsit">${IMG("situace/" + SIT_ART[m.situation])}</div>` : "";
   view.replaceChildren(h(`<div class="vyp v2${combat ? " boj" : ""}">
     <div class="vscene live${combat ? " fight" : ""}" data-img="${esc(sc.img)}" data-key="${esc(sc.key)}">
       <div class="vtitle"><h2>${esc(m.node || m.location)}</h2><small>${esc(m.location)}${m.weather ? " · " + esc(m.weather) : ""}</small></div>
-      ${foe}${sit}<div class="vparty">${members}</div>
+      ${foe}${sit}${hud}<div class="vparty">${members}</div>
       ${combat ? `<div class="vturn${myTurn && !busy ? " moje" : ""}">${busy ? esc(L(["Probíhá tah…", "Turn in progress…"])) : myTurn ? esc(L(["Jsi na tahu", "Your turn"])) : esc(L(["Na tahu je jiný člen družiny", "Another member's turn"]))}</div>` : ""}
     </div>
     <div class="vyp-telo">
-      <article class="vyp-pergamen"><div class="vtext">${dmd(m.content)}</div></article>
-      <div class="vyp-akce">${raidControlsHtml(m.controls, busy, combat)}
-        <p class="vyp-discord">${esc(L(["Stejná výprava běží i v tvém kanálu na Discordu — můžeš kdykoli přejít.", "The same expedition runs in your Discord channel — switch any time."]))}</p></div>
+      ${vp.text ? `<article class="vyp-pergamen"><div class="vtext">${dmd(vp.text)}</div></article>` : ""}
+      <div class="vyp-akce">${raidControlsHtml(m.controls, busy, combat, m.exit_dirs || [])}</div>
     </div></div><div id="vpanel"></div>`));
   vypPergamen(view.querySelector(".vyp-pergamen"), m);
   const s = mountLive(view, { still: m.phase === "combat" });
@@ -3661,6 +3815,37 @@ function drawRaid(view) {
   wireRaid(view);
   if (!MINI.inAct && !RAID.busy) miniSync(st.mini, RAID.panel, "raid");
   if (busy) setTimeout(async () => { if (S.tab === "vyprava") { const r = await raidLoad(); if (r) { animateDiff(RAID.st, r); RAID.st = r; drawRaid($("#view")); } } }, Math.max(500, m.busy_until * 1000 - Date.now() + 300));
+}
+
+/** r27-12: z textu výpravy (stejného jako na Discordu) nechá jen příběh a to, co se právě stalo.
+ *  Hlavičku, počítadla, hody kostkou, nápovědy a pokyny „vyber tlačítkem“ vynechá — co je důležité, ukáže obraz (HUD). */
+function vypJenPribeh(content, m) {
+  const info = { prozkoumano: "", nalez: "", varovani: [] };
+  const uzel = noEmoji(m.node || "").trim().toLowerCase();
+  const pryc = [
+    /^#\s/, /výprava\*\*\s*·/, /^\S*\s*\*\*[^*]+výprava\*\*/i,
+    /^🥾/, /^👥/, /👉/, /^🎲 Pořadí/, /^✔️ Už jednali/, /^⚡ Výdrž/, /^❤️ Nepřítel/, /^🧭 \*\*Úsek/,
+    /^\*Hádanka:/, /^\*?Vyrážíte/, /^\*\*(Kudy dál\?|Co uděláš\?|Tvůj tah:|Na tahu:)\*\*/, /^🌦️/, /^-# V družině/, /^-# Tvůj postoj/, /^-# Pán tohoto místa/,
+  ];
+  const ven = [];
+  String(content || "").split("\n").forEach((raw) => {
+    const l = raw.trim();
+    if (!l) { ven.push(""); return; }
+    let x;
+    if ((x = /prozkoumáno\s+(\d+\/\d+)(?:.*?nalezeno\s+(\d+))?/.exec(l)) && /^📍/.test(l)) { info.prozkoumano = x[1]; info.nalez = x[2] || ""; return; }
+    if (/❤️\s*\d+\/\d+\s*·\s*💤/.test(l)) {                       // řádek potřeb — jen varování, když je zle
+      [["odpočatost", L(["únava", "tired"])], ["nasycení", L(["hlad", "hungry"])], ["žízeň", L(["žízeň", "thirst"])]].forEach(([k, n]) => {
+        const r = new RegExp(k + "\\s+\\d+\\s*(🔴|🟠)").exec(l); if (r) info.varovani.push(n); });
+      return;
+    }
+    if (/^✨/.test(l) || /^🔥 Svítí|^🌑/.test(l)) return;
+    if (pryc.some((r) => r.test(l))) return;
+    if (/^-#/.test(l) && !/🍖|gr\.|získ|našel|našla|zkušenost|kořist|ztratil|ztratila|zraněn|odměn|\+\d/i.test(l)) return;   // drobné písmo: hody, nápovědy
+    if (/^##\s/.test(l) && noEmoji(l.replace(/^##\s*/, "")).trim().toLowerCase() === uzel) return;   // název místa je v obraze
+    ven.push(noEmoji(l.replace(/^-#\s*/, "")).replace(/^(#{1,3})\s*/, "$1 "));
+  });
+  const text = ven.join("\n").replace(/\n{3,}/g, "\n\n").trim();
+  return { text, info };
 }
 
 /** r27-11: text výpravy jako list pergamenu — bez opakovaného názvu místa, údaje o výpravě jako štítky. */
@@ -3679,14 +3864,14 @@ function vypPergamen(el, m) {
       tmp.innerHTML = r; const t = cist(tmp.textContent);
       if (!t || jmena.includes(t)) return false;                  // název místa je už v obrázku
       if (!stitky && /výprava|expedition/.test(t) && t.includes(" · ") && t.length < 160) {   // „Lehká výprava · 41. den · 18:38 · Počasí: déšť“
-        stitky = `<div class="vyp-stitky">${noEmoji(tmp.textContent).split(" · ").map((x) => x.trim().replace(/^Počasí:\s*/i, "")).filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("")}</div>`;
+        stitky = " ";   // r27-12: obtížnost, den, čas a počasí jsou v horní liště — tady nic
         return false;
       }
       return true;
     });
     if (radky.length) out.push(`<p>${radky.join("<br>")}</p>`);
   });
-  vt.innerHTML = stitky + out.join("");
+  vt.innerHTML = out.join("");
   const p1 = vt.querySelector("p");
   if (p1) { tmp.innerHTML = p1.innerHTML.split(/<br/i)[0]; const b = tmp.querySelector("b");
     if (b && cist(b.textContent) === cist(tmp.textContent) && cist(b.textContent).length < 70) p1.innerHTML = p1.innerHTML.replace(/^\s*<b>(.*?)<\/b>\s*(<br\s*\/?>)?/i, '<span class="vyp-nadpis">$1</span>'); }
@@ -4022,8 +4207,12 @@ async function farmClick(id, values = [], el = null) {
 
 // --- více
 VIEWS.more = (view) => {
-  view.replaceChildren(h(`<div class="grid g2" style="align-items:start">
+  const jeAdmin = !(document.querySelector('.tabs [data-tab="admin"]') || {}).hidden;   // r27-11: na mobilu je Admin tady (ne ve spodním menu)
+  view.replaceChildren(h(`${jeAdmin ? `<p class="more-admin"><button class="btn primary" data-go-admin>⚙ ${esc(L(["Správa hry (admin)", "Game admin"]))}</button></p>` : ""}<div class="grid g2" style="align-items:start">
     <div class="panel"><h3>${esc(t("settings"))}</h3>
+      <div class="row zobr-volba"><span class="muted">${esc(L(["Zobrazení", "Layout"]))}</span>
+        ${[["auto", ["Automaticky", "Automatic"]], ["pc", ["Počítač", "Computer"]], ["tel", ["Telefon", "Phone"]]].map(([k, n]) =>
+          `<button class="chip${ZOBR.pref === k ? " on" : ""}" data-zobr="${k}">${esc(L(n))}</button>`).join("")}</div>
       <div class="row"><span class="muted">${esc(t("language"))}</span>
         <button class="chip${S.lang === "cs" ? " on" : ""}" data-l="cs">Čeština</button>
         <button class="chip${S.lang === "en" ? " on" : ""}" data-l="en">English</button>
@@ -4036,10 +4225,11 @@ VIEWS.more = (view) => {
       <div class="row"><input class="search" id="del" placeholder="SMAZAT" autocomplete="off" style="max-width:180px">
         <button class="btn danger" id="delbtn">${esc(t("delete"))}</button></div>
     </div>
-    ${plochaMobil() ? `<div class="panel"><h3>${esc(L(["Ikona na ploše", "Home screen icon"]))}</h3>
-      <label class="row plocha-chk"><input type="checkbox" id="plocha-chk"${plochaMa() ? " checked" : ""}> ${esc(L(["Ikona hry na ploše telefonu", "Game icon on the phone's home screen"]))}</label>
-      <p class="plocha-zamek"><svg class="zamek-ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> ${esc(L(["Jen zástupce této stránky. Přihlášení zůstává v tomto zařízení.", "Just a shortcut to this page. Your login stays on this device."]))}</p>
-      <p class="muted small" id="plocha-pozn"></p></div>` : ""}
+    ${plochaMobil() ? `<div class="panel plocha-panel"><h3>${esc(L(["Zástupce na ploše", "Home screen shortcut"]))}</h3>
+      <button class="plocha-tl" id="plocha-tl"${plochaMa() ? " disabled" : ""}><img src="ikona-192.png" alt="">
+        <span><b>${esc(plochaMa() ? L(["Zástupce už na ploše máš", "Shortcut already added"]) : L(["Přidat Královské stezky na plochu", "Add Royal Trails to home screen"]))}</b>
+        <small>${esc(L(["Ikona s pečetí hru spustí přímo, bez hledání odkazu.", "The seal icon starts the game directly."]))}</small></span></button>
+      <p class="plocha-zamek"><svg class="zamek-ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> ${esc(L(["Jen zástupce této stránky. Přihlášení zůstává v tomto zařízení.", "Just a shortcut to this page. Your login stays on this device."]))}</p></div>` : ""}
     <div class="panel"><h3>🔊 ${esc(t("sound"))}</h3>
       <label class="row"><input type="checkbox" id="snd-on"${Zvuk.V.on ? " checked" : ""}> ${esc(t("sound_on"))}</label>
       ${[["master", "sound_master"], ["mus", "sound_mus"], ["amb", "sound_amb"], ["sfx", "sound_sfx"]].map(([k, l]) =>
@@ -4081,11 +4271,9 @@ VIEWS.more = (view) => {
     b.classList.toggle("on", !off); b.textContent = t(off ? "sound_off" : "sound_on_short");
   });
   $("#out").onclick = () => logout();
-  const pch = $("#plocha-chk");
-  if (pch) pch.onchange = () => {
-    if (pch.checked) { nabidniPlochu(); setTimeout(() => { pch.checked = plochaMa(); }, 1500); }
-    else { pch.checked = plochaMa(); $("#plocha-pozn").textContent = L(["Ikonu odebereš v telefonu: podrž ji prstem → Odebrat.", "Remove it on the phone: long-press the icon → Remove."]); }
-  };
+  { const ab = view.querySelector("[data-go-admin]"); if (ab) ab.onclick = () => go("admin"); }
+  view.querySelectorAll("[data-zobr]").forEach((b) => b.onclick = () => { ZOBR.pref = b.dataset.zobr; store.set("zobrazeni", ZOBR.pref); nastavZobrazeni(); render(); });
+  { const pt = $("#plocha-tl"); if (pt) pt.onclick = () => nabidniPlochu(); }   // r27-12: zástupce s logem jedním klepnutím
   $("#out-vse").onclick = () => { if (confirm(L(["Odhlásit web i aplikaci na všech zařízeních? Přihlásíš se znovu kódem z /aplikace.", "Sign out on all devices?"])))
     call("logout_all").then(() => logout(true)).catch(() => {}); };
   const sp = $("#smaz-post");   // r27-6: smazat postavu — ano/ne, pak nabídka nové postavy
