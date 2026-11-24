@@ -3688,13 +3688,17 @@ function darts(view) {   // r27-4: trénink — po jedné šipce do zvolené zó
 }
 
 // --- výprava a boj (r26-2): stejná výprava jako na Discordu — text, volby i tah jdou přes server stejnou cestou
-const AREA_ART = { rataje: "rataje", kutna_hora: "kanek", nebakov: "lezeni", trosky: "malesov", sedlec: "sedlec" };
+const AREA_ART = { rataje: "rataje", kutna_hora: "kanek", nebakov: "lezeni", trosky: "malesov", sedlec: "sedlec", posazavi: "posazavi" };
 const SIT_ART = { CORPSE: "sit-mrtvy-poutnik", B: "sit-prepadeni", C: "sit-past", D: "sit-hadanka", E: "sit-odpocinek", F: "sit-odpocinek",
   G: "sit-zaval", FORD: "sit-brod", H: "sit-zaval", I: "sit-noc", J: "sit-truhla-zavrena", K: "sit-obchodnik", A: "sit-truhla-otevrena",
   ROPE: "sit-brod", FERRY: "sit-brod", N: "sit-zaval", O: "sit-noc", P: "sit-obchodnik",
   XKUPEC: "sit-obchodnik", XRANENY: "sit-mrtvy-poutnik", XVYTI: "sit-noc", XSTUDNA: "sit-truhla-zavrena", XMED: "sit-odpocinek", XHROB: "sit-hadanka",   // r27-6
-  XDEZERTER: "sit-prepadeni", XOTRESY: "sit-zaval", XHOUBY: "sit-odpocinek", XVUZ: "sit-truhla-otevrena", XOLTAR: "sit-hadanka", XMLHA: "sit-noc" };
-const ENEMY_ART = [[/Černý rytíř/, "boss-cerny-rytir"], [/Dutohlav/, "boss-dutohlav"], [/Falešný kat/, "boss-falesny-kat"], [/hejtman/i, "boss-hejtman"],
+  XDEZERTER: "sit-prepadeni", XOTRESY: "sit-zaval", XHOUBY: "sit-odpocinek", XVUZ: "sit-truhla-otevrena", XOLTAR: "sit-hadanka", XMLHA: "sit-noc",
+  Z_ALKUIN: "sit-alkuin", Z_ZVONY: "sit-zvony", Z_SIFRA: "sit-sifra", Z_VAHY: "sit-vahy", Z_OPAT: "sit-vahy", Z_BLUDISTE: "sit-bludiste",   // r27-10: Posázaví
+  Z_RELIKVIAR: "sit-relikviar", Z_STIN: "sit-stin", Z_POUSTEVNIK: "sit-hadanka", Z_DVUR: "sit-truhla-otevrena", Z_KAPLE: "sit-setkani",
+  Z_UHLIR: "sit-setkani", Z_MLYN: "sit-setkani", Z_LEZENI: "sit-prepadeni", Z_BRANA: "sit-prepadeni", Z_FINALE: "sit-vitezstvi" };
+const ENEMY_ART = [[/Setník Benedek/, "boss-setnik-benedek"], [/Rybí oko/, "boss-simon-rybi-oko"], [/Odpadlý písař/, "boss-odpadly-pisar"],
+  [/Hejtman Imre/, "boss-hejtman-imre"], [/Uherský žoldnéř/, "nepritel-uhersky-zoldner"], [/Černý rytíř/, "boss-cerny-rytir"], [/Dutohlav/, "boss-dutohlav"], [/Falešný kat/, "boss-falesny-kat"], [/hejtman/i, "boss-hejtman"],
   [/Krvavý kapitán/, "boss-krvavy-kapitan"], [/Krysař/, "boss-krysar"], [/Odpadlý mnich/, "boss-odpadly-mnich"], [/Polníškůdce/, "boss-polniskudce"],
   [/Přerostlá krysa/, "boss-prerostla-krysa"], [/Kuba|Převozník/, "boss-prevoznik-kuba"], [/Ješek|Purkrabí/, "boss-purkrabi-jesek"],
   [/Rozzuřený medvěd/, "boss-rozzureny-medved"], [/Vlk zabiják/, "boss-vlk-zabijak"], [/Vzteklý vlk/, "boss-vztekly-vlk"],
@@ -3745,6 +3749,8 @@ const VYP_DRUH = (id, boj) => {
     return "drobne";
   }
   if (/^go\d+$/.test(a)) return "cesta";
+  if (/^sc-(skip|back|leave|ustup)$/.test(a)) return "ustup";      // r27-15: situace — odejít / vrátit se
+  if (/^sc-(fight|attack|boss)$/.test(a)) return "vyzva";            // situace — boj
   if (/^(extract|return)$/.test(a)) return "domu";
   if (a === "withdraw" || a === "lpgive") return "ustup";
   if (/^na-boss$|^boss$/.test(a)) return "vyzva";

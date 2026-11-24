@@ -2973,3 +2973,5 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 .pet-doma{margin:10px 0 4px;grid-template-columns:1fr 1fr}
 .zv-zivot{display:block;margin-top:2px;font-style:italic;color:#c9b48a!important;font-size:.74rem}
 .pet-fig-obal{position:relative;min-width:0}
+/* r27-15: obrázek situace na telefonu vlevo dole, ať nezakrývá ukazatele */
+@media (max-width:760px){.vyp.v2 .vsit{right:auto;left:3%;top:auto;bottom:24%;width:38%}}
