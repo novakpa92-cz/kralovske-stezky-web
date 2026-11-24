@@ -716,7 +716,7 @@ VIEWS.bag = (view) => {
     const i = row[id] || { id, name: id, slot_name: "" };
     return `<div class="item">${icon(id)}
       <div><div class="nm">${esc(i.name)}${q > 1 ? ` <span class="muted">× ${esc(q)}</span>` : ""}</div>
-      <div class="meta">${esc(i.slot_name)}${i.merchant_name ? " · " + esc(t("sell_to", i.merchant_name)) : ""}</div>${opotrebeni(i)}</div>
+      <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.merchant_name ? " · " + esc(t("sell_to", i.merchant_name)) : ""}</div>${opotrebeni(i)}</div>
       <div class="acts">
         ${i.use ? `<button class="btn small" data-use="${esc(id)}">${esc(t("use"))}</button>` : ""}
         ${i.equip ? `<button class="btn small" data-equip="${esc(id)}">${esc(t("equip"))}</button>` : ""}
@@ -1328,7 +1328,7 @@ VIEWS.napoje = async (view) => {
       <div class="grid g2 truhla-sloupce" style="align-items:start">
         <div class="panel"><h3>${esc(L(["Co nalít", "What to pour"]))}</h3>
           <div class="items">${r.napoje.map((n) => `<div class="item">${icon(n.id)}
-            <div><div class="nm">${esc(n.name)}</div><div class="meta">${esc(L(["síla ", "strength "]) + "+" + n.sila + " % · " + L(["napojí ", "quench "]) + n.napoji)}</div></div>
+            <div><div class="nm">${esc(n.name)}</div><div class="meta">${n.fx ? `<b class="fx">${esc(n.fx)}</b>` : esc(L(["síla ", "strength "]) + "+" + n.sila + " %")}</div></div>
             <div class="acts"><span class="price">${esc(t("coins", n.price))}</span>
               <button class="btn small primary" data-pij="${esc(n.id)}"${n.price > r.coins ? " disabled" : ""}>${esc(host ? L(["Pozvat", "Treat"]) : L(["Vypít", "Drink"]))}</button></div></div>`).join("")}</div></div>
         <div class="panel"><h3>${esc(L(["Pozvat na žejdlík", "Treat a player"]))}</h3>
@@ -1912,7 +1912,7 @@ VIEWS.mesto = (view) => {
     ...Object.fromEntries(Object.entries(PODNIK_MISTA).map(([id, [o, jm]]) => [id, S.me.origin === o
       ? ["Zamčeno. " + jm[0] + " si koupíš na radnici (Nemovitosti → Koupit podnik).", "Locked. Buy the " + jm[1] + " at the town hall."]
       : [jm[2] + " je podnik pro jiný původ postavy." + (id === "kovar" ? " Kováře a jeho zboží najdeš na tržišti." : ""), "This business belongs to another origin."]])) };
-  sc.pic.insertAdjacentHTML("beforeend", SPOTS.map((p) => `<button class="spot${PLACES[p.id] ? "" : " later"}${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}" style="left:${p.x}%;top:${p.y}%"><span>${esc(L(p.n))}</span></button>`).join(""));
+  sc.pic.insertAdjacentHTML("beforeend", SPOTS.map((p) => `<button class="spot${PLACES[p.id] ? "" : " later"}${zamceno(p.id) ? " zamceno" : ""}" data-spot="${p.id}" data-kraj="${p.x < 13 ? "l" : p.x > 87 ? "r" : ""}" style="left:${p.x}%;top:${p.y}%"><span>${esc(L(p.n))}</span></button>`).join(""));
   view.querySelectorAll("[data-spot]").forEach((b) => b.onclick = () => {
     if (zamceno(b.dataset.spot)) { if (typeof Zvuk !== "undefined") Zvuk.sfx("klik"); toast(L(ZAMEK_TXT[b.dataset.spot])); return; }
     const p = PLACES[b.dataset.spot];
@@ -2791,7 +2791,7 @@ VIEWS.obchod = async (view) => {
     const ik = hxv ? `<span class="ikona-barva${/zbroj|štít|stit/i.test(i.slot_name || "") ? " kov" : ""}" style="--b:${hxv};--m:url('${IMG_BASE}predmety/ikony/${Postava.slug(i.id)}.webp')">${icon(i.id)}<i></i></span>` : icon(i.id);
     return `<div class="item">${ik}
       <div><div class="nm">${esc(i.name)}${i.level > lvl ? `<span class="tag lock">${esc(t("from_level", i.level))}</span>` : ""}</div>
-      <div class="meta">${esc(i.slot_name)}${i.count ? " · " + esc(t("have", i.count)) : ""}</div></div>
+      <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.count ? " · " + esc(t("have", i.count)) : ""}</div></div>
       <div class="acts">${mnoz(mx, cena(i))}<span class="price" data-cena-txt>${esc(t("coins", cena(i)))}</span>
         <button class="btn small primary" data-buy="${esc(i.id)}"${i.colors ? ` data-barva="${esc(zvol[i.id] || "Přírodní")}"` : ""}${i.level > lvl || cena(i) > S.me.coins ? " disabled" : ""}>${esc(t("buy"))}</button></div>
       ${i.colors ? (() => { const c = zvol[i.id] || "Přírodní", hx = i.colors[c];

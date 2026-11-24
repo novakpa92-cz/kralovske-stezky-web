@@ -2108,3 +2108,50 @@ body.mh-otevreno{overflow:hidden}
 .velin .vl-logo small{color:#c9b48a}
 .pravni{margin:10px 0;padding:8px 12px;border-left:3px solid #8a6a3c88;opacity:.85;line-height:1.5;font-size:.84rem}
 .o-projektu-pozn{font-size:.82rem;line-height:1.5;opacity:.8;border-left:3px solid #8a6a3c88;padding-left:10px;margin:10px 0}
+.meta .fx{color:#7fb05a;font-weight:600}
+
+/* r27-6: mobil na výšku i na šířku — pohodlné ovládání prstem */
+.spot[data-kraj="l"] span{transform:translateX(calc(50% - 14px))}
+.spot[data-kraj="r"] span{transform:translateX(calc(-50% + 14px))}
+@media (max-width:760px){
+  .tabs{padding:8px 0 calc(6px + env(safe-area-inset-bottom))}
+  .tabs button{flex:1 1 0!important;min-width:0!important;min-height:50px;padding:0 1px 2px}
+  .tabs button b{font-size:.74rem;white-space:nowrap;overflow:visible;text-overflow:clip;max-width:none;letter-spacing:0}
+  .tabs button[data-tab="admin"] b{padding:1px 6px;font-size:.7rem}
+  body{padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+}
+@media (pointer:coarse){
+  .btn{min-height:44px}
+  .btn.small,.chip,.erb-karta{min-height:40px}
+  .chip{padding-left:12px;padding-right:12px}
+  input,select,textarea{font-size:16px!important}         /* iPhone pak při psaní nepřibližuje stránku */
+  input.search,input[type=text],input[type=password],input[type=number],select{min-height:42px}
+  input[type=range]{height:34px}
+  input[type=range]::-webkit-slider-thumb{width:26px;height:26px}
+  input[type=checkbox],input[type=radio]{width:22px;height:22px}
+  .spot::before{width:46px!important;height:46px!important}
+  .row{gap:8px}
+}
+@media (orientation:landscape) and (max-height:540px){
+  body{padding-left:88px}
+  .tabs{width:88px;justify-content:flex-start;gap:0;padding-top:max(6px,env(safe-area-inset-top))}
+  .tabs button{min-height:46px;padding:2px 2px!important;justify-content:center}
+  .tabs button b{font-size:.72rem!important;white-space:nowrap;overflow:visible;max-width:none}
+  .tabs button>span{margin:0 0 3px!important}
+  .tabs button.on>span{width:22px;height:22px;margin:0 0 2px!important}
+  .tabs button[data-tab="admin"] b{padding:1px 6px}
+  body{padding-left:calc(88px + env(safe-area-inset-left))}
+}
+@media (orientation:landscape) and (max-height:540px) and (max-width:1000px){
+  .item{grid-template-columns:44px minmax(0,1fr)}.item .icon{width:44px;height:44px}
+  .item .acts{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap}
+}
+@media (orientation:landscape) and (max-height:540px){
+  .mesto-mapa .townmap .spot span{font-size:.72rem;padding:1px 5px;margin-top:10px;letter-spacing:0}
+  .mesto-mapa .townmap .spot span svg,.spot.zamceno span:before{width:9px;height:10px}
+}
+@media (max-width:760px){
+  .sb-kurz{flex-wrap:wrap;gap:2px 8px}.sb-kurz small{flex-basis:100%;font-size:10px}
+  .sb-sazky .btn.small{min-height:38px;padding:4px 2px}
+  .sb-plocha{height:420px}
+}
