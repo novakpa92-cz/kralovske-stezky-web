@@ -260,11 +260,30 @@ const CelaObr = {
       if (CelaObr.je()) await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
       else { const el = document.documentElement; await (el.requestFullscreen ? el.requestFullscreen({ navigationUI: "hide" }) : el.webkitRequestFullscreen());
         try { if (navigator.keyboard && navigator.keyboard.lock) await navigator.keyboard.lock(["Escape"]); } catch {} }   // r27-8: Chrome pak nevysouvá lištu u horního okraje (ven podržením Esc nebo tlačítkem)
-    } catch { toast(L(["Celou obrazovku teď prohlížeč nepovolil.", "Fullscreen was blocked by the browser."])); }
+    } catch { CelaObr.nejde(); return; }
+    setTimeout(() => { if (!CelaObr.je() && !matchMedia("(display-mode: fullscreen)").matches) CelaObr.nejde(); }, 700);   // r27-12: okno z Discordu požadavek tiše ignoruje
+  },
+  /** r27-12: v okně otevřeném z Discordu (nebo jiné aplikace) celá obrazovka nejde — nabídni cestu, která funguje. */
+  nejde: () => {
+    if (typeof plochaNavod !== "function") { toast(L(["Celou obrazovku tady prohlížeč nepovolil.", "Fullscreen is blocked here."])); return; }
+    const el = document.createElement("div");
+    el.className = "m-list plocha-navod";
+    el.innerHTML = `<div class="m-list-pozadi"></div><div class="m-list-okno" role="dialog"><span class="m-list-uchyt"></span>
+      <div class="pn-hlava"><img src="ikona-192.png" alt=""><div><b>${esc(L(["Celá obrazovka tady nejde", "Fullscreen isn't available here"]))}</b>
+      <small>${esc(L(["Hra je otevřená v okně z Discordu (nahoře křížek a šipka) — to celou obrazovku nepovolí.", "The game is open in Discord's browser window, which blocks fullscreen."]))}</small></div></div>
+      <ol class="pn-kroky"><li>${L(["Nejlepší: <b>ikona hry na ploše</b> — spustí hru na celý displej, bez lišty prohlížeče.", "Best: a <b>home screen icon</b> starts the game without the browser bar."])}</li>
+      <li>${L(["Nebo vpravo nahoře klepni na <b>⋮</b> → <b>Otevřít v Chrome</b> a tam tlačítko celé obrazovky.", "Or tap <b>⋮</b> → <b>Open in Chrome</b> and use the button there."])}</li></ol>
+      <button class="plocha-tl" data-pn-plocha><img src="ikona-192.png" alt=""><span><b>${esc(L(["Přidat ikonu hry na plochu", "Add the game icon"]))}</b></span></button>
+      <button class="btn m-list-zavrit">${esc(L(["Zavřít", "Close"]))}</button></div>`;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("otevreno"));
+    const zavri = () => el.remove();
+    el.querySelector(".m-list-pozadi").onclick = zavri; el.querySelector(".m-list-zavrit").onclick = zavri;
+    el.querySelector("[data-pn-plocha]").onclick = () => { zavri(); nabidniPlochu(); };
   },
 };
 { const b = $("#tb-full");
-  if (b) { b.hidden = !CelaObr.umi() || /iPhone|iPad/.test(navigator.userAgent); b.onclick = CelaObr.prepni; }
+  if (b) { b.hidden = !CelaObr.umi() || /iPhone|iPad/.test(navigator.userAgent) || matchMedia("(display-mode: standalone)").matches; b.onclick = CelaObr.prepni; }   // z ikony na ploše už hra běží bez lišty
   const zmena = () => { document.body.classList.toggle("cela", CelaObr.je()); if (b) b.title = CelaObr.je() ? L(["Ukončit celou obrazovku (F)", "Exit fullscreen (F)"]) : L(["Celá obrazovka (F)", "Fullscreen (F)"]); };
   document.addEventListener("fullscreenchange", zmena); document.addEventListener("webkitfullscreenchange", zmena);
   document.addEventListener("keydown", (e) => { if ((e.key === "f" || e.key === "F") && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || "") && !e.target.isContentEditable && !document.querySelector(".mh")) CelaObr.prepni(); });
@@ -496,8 +515,12 @@ VIEWS.hero = (view) => {
   };
   const sg = (n) => (n >= 0 ? "+" : "") + n;
   // r27-4: mazlíček vedle postavy (malované zvíře podle stupně růstu)
-  const pet = P.pet ? `<figure class="hero-pet${P.pet.hungry ? " hlad" : ""}" style="--vel:${[0.62, 0.8, 1, 1.06][P.pet.stage]}">
-      ${IMG("bytosti/zvire-" + (ZVIRE_SLUG[P.pet.kind] || Postava.slug(P.pet.kind)) + "-" + P.pet.stage)}</figure>` : "";   // jen pro efekt; podrobnosti má záložka Mazlíček
+  const pet = P.pet ? (() => { const sl = ZVIRE_SLUG[P.pet.kind] || Postava.slug(P.pet.kind), poz = PET_POZ[sl] || PET_POZ.pes;
+    const vel = [0.62, 0.8, 1, 1.06][P.pet.stage] || 1, h = poz.h * vel;
+    const y = poz.typ === "ptak" ? 50 : 4 - poz.pod * h;                    // ptáci výš u ramene, ostatní na zemi
+    return `<figure class="hero-pet pet-${poz.typ}${poz.za ? " za" : ""}${P.pet.hungry ? " hlad" : ""}" style="--h:${h.toFixed(1)};--y:${y.toFixed(1)};--x:${poz.x}">`; })() + `
+      ${IMG("bytosti/zvire-" + (ZVIRE_SLUG[P.pet.kind] || Postava.slug(P.pet.kind)) + "-" + P.pet.stage)}</figure>` : "";
+  // (r27-12: velikost podle skutečné výšky zvířete vůči postavě, místo podle druhu: zem vlevo / pták u ramene / velké zvíře za postavou vpravo)   // jen pro efekt; podrobnosti má záložka Mazlíček
   const ZN = (d) => `<svg viewBox="-12 -12 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
   const ZNAKY = {
     mec: ZN(`<path d="M-7 7 L6 -6 M3 -7 L7 -7 L7 -3 M-8 4 L-4 8 M-9 9 L-6 6"/>`),
@@ -2575,6 +2598,14 @@ function wireLazebna(box) {
 
 /** r27-4: zvěřinec — malovaná zvířata (img/bytosti/zvire-<druh>-<stupeň>) místo holého seznamu. */
 const ZVIRE_SLUG = { "Cvičený medvěd": "medved", "Ochočená liška": "liska" };
+/** r27-12: mazlíček u postavy — h = výška obrázku v % výšky rámu (podle skutečné velikosti, postava ≈ 1,8 m),
+ *  pod = prázdné místo pod zvířetem v obrázku, x = odsazení od kraje v %, typ = zem (vlevo u nohou) / ptak (u ramene) / velky (za postavou vpravo). */
+const PET_POZ = {
+  mys: { h: 17, pod: 0, x: 8, typ: "zem" }, fretka: { h: 28, pod: .267, x: 4, typ: "zem" }, kocka: { h: 21, pod: .025, x: 3, typ: "zem" },
+  liska: { h: 30, pod: .124, x: 0, typ: "zem", za: 1 }, pes: { h: 32, pod: .036, x: -2, typ: "zem", za: 1 }, "honici-pes": { h: 41.5, pod: .095, x: -4, typ: "zem", za: 1 },
+  "valecny-pes": { h: 46, pod: .1, x: -6, typ: "zem", za: 1 }, havran: { h: 20.5, pod: 0, x: -1, typ: "ptak" }, sova: { h: 24, pod: 0, x: -3, typ: "ptak" },
+  sokol: { h: 23.5, pod: 0, x: -3, typ: "ptak" }, medved: { h: 76, pod: .115, x: -20, typ: "velky" }, mula: { h: 74, pod: 0, x: -22, typ: "velky" },
+};
 const ZVIRE_STUPEN = [["zkušen", 3], ["dospěl", 2], ["dospívaj", 1], ["mládě", 0]];
 function zverinecHtml(controls) {
   const sels = (controls || []).filter((c) => c.t === "select" && (c.id === "ks:pet:buy" || c.id === "ks:pet:set"));
@@ -3783,12 +3814,13 @@ function drawRaid(view) {
   const e = m.enemy, combat = m.phase === "combat" && e;
   const busy = m.busy_until && m.busy_until * 1000 > Date.now();
   const myTurn = !combat || !m.turn || m.turn === m.me;
-  // r27-12: v obraze bary — v boji životy a energie, mimo boj hlad a žízeň (plný bar = sytý / napitý)
-  const radek = (nazev, v, max, cls) => `<div class="vm-r ${cls}${max && v / max <= .25 ? " malo" : ""}"><span class="vm-n">${esc(nazev)}</span>${bar(v, max, cls)}<span class="vm-v">${combat ? v + "/" + max : Math.round(100 * v / Math.max(1, max)) + " %"}</span></div>`;
-  const members = (m.members || []).map((p) => `<div class="vmem${combat && m.turn === p.id ? " turn" : ""}"><b>${esc(p.name)}</b>
-    ${combat ? radek(L(["Životy", "Health"]), p.health, p.max_health, "hp") + (p.stamina ? radek(L(["Energie", "Energy"]), p.stamina[0], p.stamina[1], "st") : "")
-      : `${p.satiety != null ? radek(L(["Sytost", "Food"]), p.satiety, 100, "jidlo") : ""}${p.hydration != null ? radek(L(["Napití", "Water"]), p.hydration, 100, "voda") : ""}
-         <div class="vm-zivoty">${esc(L(["životy ", "health "]) + p.health + "/" + p.max_health)}</div>`}</div>`).join("");
+  // r27-12: v obraze malé kruhové ukazatele — v boji životy a energie, mimo boj životy, sytost a napití
+  const kruh = (nazev, v, max, cls, txt) => { const p = Math.max(0, Math.min(100, Math.round(100 * v / Math.max(1, max))));
+    return `<div class="vk ${cls}${p <= 25 ? " malo" : ""}" style="--p:${p}" title="${esc(nazev)}: ${esc(txt)}"><i><b>${esc(txt)}</b></i><small>${esc(nazev)}</small></div>`; };
+  const members = (m.members || []).map((p) => `<div class="vmem${combat && m.turn === p.id ? " turn" : ""}"><b>${esc(p.name.split(" ")[0])}</b><div class="vk-rada">
+    ${kruh(L(["Životy", "Health"]), p.health, p.max_health, "hp", String(p.health))}
+    ${combat ? (p.stamina ? kruh(L(["Energie", "Energy"]), p.stamina[0], p.stamina[1], "st", String(p.stamina[0])) : "")
+      : `${p.satiety != null ? kruh(L(["Sytost", "Food"]), p.satiety, 100, "jidlo", p.satiety + "%") : ""}${p.hydration != null ? kruh(L(["Napití", "Water"]), p.hydration, 100, "voda", p.hydration + "%") : ""}`}</div></div>`).join("");
   const foe = combat ? `<div class="vfoe${e.boss ? " boss" : ""}">${IMG("bytosti/" + enemyArt(e.name))}</div>
     <div class="vfoehud"><b>${e.boss ? "👑 " : ""}${esc(e.name.split(" — ")[0])}</b>${bar(e.health, e.max_health, "hp big")}<span class="vval">${e.health}/${e.max_health}</span>
       ${e.intent ? `<div class="vintent">${esc(e.intent)}</div>` : ""}
@@ -3828,9 +3860,28 @@ function vypJenPribeh(content, m) {
     /^\*Hádanka:/, /^\*?Vyrážíte/, /^\*\*(Kudy dál\?|Co uděláš\?|Tvůj tah:|Na tahu:)\*\*/, /^🌦️/, /^-# V družině/, /^-# Tvůj postoj/, /^-# Pán tohoto místa/,
   ];
   const ven = [];
-  String(content || "").split("\n").forEach((raw) => {
+  // r27-12: blok „co se stalo“ (### nadpis…) z jiného místa po přesunu nezobrazovat — patří k místu, kde se stal
+  const bloky = [];
+  let blok = null;
+  String(content || "").split("\n").forEach((raw, i) => {
     const l = raw.trim();
+    if (/^###\s/.test(l)) { blok = { od: i, klic: noEmoji(l).trim() }; bloky.push(blok); }
+    else if (blok && (/^##\s/.test(l) || /^🥾/.test(l))) { blok.do = i; blok = null; }
+  });
+  const skryt = new Set();
+  bloky.forEach((b) => {
+    const k = b.klic + "|" + (m.id || "");
+    RAID.videno = RAID.videno || {};
+    if (RAID.videno[k] == null) RAID.videno[k] = m.node_id;
+    if (RAID.videno[k] !== m.node_id && m.phase !== "combat") for (let i = b.od; i < (b.do ?? 1e9); i++) skryt.add(i);
+  });
+  String(content || "").split("\n").forEach((raw, i) => {
+    const l = raw.trim();
+    if (skryt.has(i)) return;
     if (!l) { ven.push(""); return; }
+    if (/počasí:|vzduch\s*[+−-]?\d+\s*°C/i.test(l)) return;                      // počasí je v obraze
+    if (/^\S*\s*\*{0,2}(plný sil|hladov|žízniv|unaven|vyčerpan|prochladl|zmrzl|přehřát|opil)/i.test(noEmoji(l))) return;   // stav postavy je v barech
+    if (/\d+\s*[+−-]\s*\d+\s*=\s*\d+|\b\d*k\d+\b|proti\s+OČ/.test(l) && !/[a-zá-ž]{4,}.*[a-zá-ž]{4,}.*[a-zá-ž]{4,}/i.test(l.replace(/proti\s+OČ|zásah|vedle|kritick\S*/gi, ""))) return;   // hody kostkou
     let x;
     if ((x = /prozkoumáno\s+(\d+\/\d+)(?:.*?nalezeno\s+(\d+))?/.exec(l)) && /^📍/.test(l)) { info.prozkoumano = x[1]; info.nalez = x[2] || ""; return; }
     if (/❤️\s*\d+\/\d+\s*·\s*💤/.test(l)) {                       // řádek potřeb — jen varování, když je zle
@@ -3927,9 +3978,12 @@ function drawRaidSetup(view, st) {
     <p><button class="btn" data-go="misto/brana">← ${esc(t("back"))}</button></p><div id="vpanel"></div>`));
   mountLive(view);
   Zvuk.music(townMusic());
-  view.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { VYP.mode = b.dataset.mode; drawRaid(view); });
-  view.querySelectorAll("[data-loc]").forEach((b) => b.onclick = () => { VYP.loc = b.dataset.loc; drawRaid(view); });
-  view.querySelectorAll("[data-diff]").forEach((b) => b.onclick = () => { VYP.diff = b.dataset.diff; drawRaid(view); });
+  if (jeMobil()) vypListy(view);   // r27-12: na telefonu příprava po listech (Kdo · Kam · Obtížnost · Služby), bez scrollování
+  const dal = (k) => { if (jeMobil() && VYP.krok === k) VYP.krok = k + 1; };
+  view.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { VYP.mode = b.dataset.mode; dal(0); drawRaid(view); });
+  view.querySelectorAll("[data-loc]").forEach((b) => b.onclick = () => { const camp = String(b.dataset.loc).includes("@"); VYP.loc = b.dataset.loc;
+    const ma_tabory = (st.camps || []).some((c) => c.id.split("@")[0] === String(VYP.loc).split("@")[0]); if (camp || !ma_tabory) dal(1); drawRaid(view); });
+  view.querySelectorAll("[data-diff]").forEach((b) => b.onclick = () => { VYP.diff = b.dataset.diff; dal(2); drawRaid(view); });
   view.querySelectorAll("[data-tgl]").forEach((b) => b.onclick = () => { VYP[b.dataset.tgl] = !VYP[b.dataset.tgl]; drawRaid(view); });
   $("#vp-go").onclick = async (ev) => {
     const btn = ev.currentTarget; if (RAID.busy) return;
@@ -3948,6 +4002,38 @@ function drawRaidSetup(view, st) {
     finally { RAID.busy = false; drawRaid($("#view")); }
   };
   wireRaid(view);
+}
+
+/** r27-12: příprava výpravy na telefonu jako listy — nahoře záložky kroků, vidět je jen jeden krok, dole Zpět / Dál / Vyrazit. */
+function vypListy(view) {
+  const box = view.querySelector(".vyp-priprava"); if (!box) return;
+  VYP.krok = Math.max(0, Math.min(3, VYP.krok || 0));
+  const kroky = [...box.querySelectorAll(".vp-krok")];
+  if (kroky.length < 4) return;
+  const listy = kroky.map((k, i) => {                      // vše od nadpisu kroku po další nadpis = jeden list
+    const l = document.createElement("div"); l.className = "vp-list" + (i === VYP.krok ? " on" : "");
+    k.before(l);
+    let n = k; const stop = kroky[i + 1];
+    while (n && n !== stop && !n.classList.contains("vp-start")) { const dalsi = n.nextElementSibling; l.appendChild(n); n = dalsi; }
+    return l;
+  });
+  const hotovo = [true, !!VYP.loc, !!VYP.diff, true];
+  const nazvy = [L(["Kdo", "Who"]), L(["Kam", "Where"]), L(["Obtížnost", "Difficulty"]), L(["Služby", "Services"])];
+  const zal = document.createElement("div");
+  zal.className = "m-zalozky vp-zal";
+  zal.innerHTML = nazvy.map((n, i) => `<button class="${i === VYP.krok ? "on" : ""}" data-vkrok="${i}">${i + 1}. ${esc(n)}<small>${i === 1 && VYP.loc ? "✓" : i === 2 && VYP.diff ? "✓" : "&nbsp;"}</small></button>`).join("");
+  box.prepend(zal);
+  box.querySelector("h3")?.remove();
+  const start = box.querySelector(".vp-start");
+  if (start && VYP.krok < 3) {
+    const go = start.querySelector("#vp-go");
+    const d = document.createElement("button");
+    d.className = "btn primary big vp-dal"; d.textContent = L(["Dál →", "Next →"]);
+    d.disabled = !hotovo[VYP.krok];
+    d.onclick = () => { VYP.krok++; drawRaid(view); };
+    if (go && !(VYP.loc && VYP.diff)) go.replaceWith(d); else if (go) start.prepend(d);
+  }
+  box.querySelectorAll("[data-vkrok]").forEach((b) => b.onclick = () => { VYP.krok = Number(b.dataset.vkrok); drawRaid(view); });
 }
 
 // r27-4: družina před vyražením — nastavení, role, pozvání hráče, vyrazit

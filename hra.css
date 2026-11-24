@@ -2809,3 +2809,91 @@ html.mobil.bez-menu body{padding-bottom:env(safe-area-inset-bottom)!important;pa
   .vb-ctl .vb{font-size:.88rem;min-height:42px}
   .vb-vydrz{font-size:.66rem}
 }
+/* r27-12: mazlíček u postavy — velikost podle skutečné výšky, každé zvíře na svém místě */
+.hero-fig>.hero-pet{width:auto!important;height:calc(var(--h) * 1%);bottom:calc(var(--y) * 1%)!important;top:auto;left:calc(var(--x) * 1%);right:auto;z-index:0;margin:0}
+.hero-fig>.hero-pet picture,.hero-fig>.hero-pet img{display:block;height:100%!important;width:auto!important;max-width:none;margin:0!important}
+.hero-fig>.hero-pet.pet-velky{left:auto;right:calc(var(--x) * 1%)}
+.hero-fig>.hero-pet.pet-velky img{filter:drop-shadow(0 8px 10px #000c) brightness(.92)}
+.hero-fig>.hero-pet.pet-ptak{z-index:3}
+.hero-fig>.hero-pet.pet-zem{z-index:3}
+@media (max-width:760px){.hero-fig>.hero-pet{width:auto!important}}
+/* ================================================================ r27-12: kruhové ukazatele a nepřítel bez zakrývání */
+.vyp.v2 .vmem{min-width:0!important;padding:5px 7px!important;background:#120c08cc}
+.vyp.v2 .vmem>b{display:block;font-size:.78rem;margin:0 0 3px;text-align:center}
+.vk-rada{display:flex;gap:6px}
+.vk{display:flex;flex-direction:column;align-items:center;gap:1px}
+.vk>i{--c:#d84a32;position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;
+  background:conic-gradient(var(--c) calc(var(--p) * 1%),#2a1810 0);box-shadow:0 2px 6px #000a}
+.vk>i::before{content:"";position:absolute;inset:4px;border-radius:50%;background:#120c08}
+.vk>i b{position:relative;font:700 .72rem var(--serif);color:#f6e7c4;letter-spacing:-.02em}
+.vk small{font:600 .6rem var(--serif);color:#cbb994;letter-spacing:.02em}
+.vk.st>i{--c:#e9c86a}.vk.jidlo>i{--c:#d9a441}.vk.voda>i{--c:#4f9fd6}
+.vk.malo>i{animation:pulseI 1.6s ease-in-out infinite;box-shadow:0 0 0 2px #e0533f,0 0 10px #e0533f}
+.vk.malo small{color:#ff9a84}
+/* nepřítel: jméno a životy v rohu, záměr malým štítkem pod tím — obličej zůstane volný */
+.vyp.v2 .vfoehud{left:3%;top:3%;transform:none;text-align:left;min-width:0;max-width:56%;padding:6px 10px;border-radius:4px;background:#120c08c4;border:1px solid #8a6a3c99}
+.vyp.v2 .vfoehud b{font-size:.95rem;display:inline}
+.vyp.v2 .vfoehud .vbar.big{width:150px;height:7px;margin:4px 0 2px}
+.vyp.v2 .vfoehud .vval{font-size:.7rem;margin-left:4px}
+.vyp.v2 .vintent{display:block;margin-top:4px;padding:2px 8px;font-size:.74rem;border-radius:3px;animation:none;background:#5a1510d9;border-color:#c0533f;color:#ffe3d6;max-width:100%}
+.vyp.v2 .vpack{justify-content:flex-start;font-size:.68rem}
+.vyp.v2 .vfoe{bottom:4%;height:80%}
+.vyp.v2.boj .vparty{left:auto;right:2%;bottom:3%;flex-direction:column;align-items:flex-end;max-width:40%}
+.plocha-navod .plocha-tl{margin:12px 0 0}
+/* r27-12: výprava na telefonu na jednu obrazovku — bez horní lišty i spodního menu, text se posouvá jen uvnitř pergamenu */
+@media (max-width:760px){
+  html.mobil.bez-menu .topbar{display:none!important}
+  html.mobil.bez-menu main{padding-top:8px!important}
+  html.mobil.bez-menu .vyp.v2{display:flex;flex-direction:column;height:calc(100dvh - 20px);gap:8px}
+  html.mobil.bez-menu .vyp.v2 .vscene,html.mobil.bez-menu .vyp.v2.boj .vscene{flex:none;height:34dvh!important;min-height:200px!important}
+  html.mobil.bez-menu .vyp.v2.boj .vscene{height:40dvh!important}
+  html.mobil.bez-menu .vyp.v2 .vyp-telo{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:8px;margin:0}
+  html.mobil.bez-menu .vyp.v2 .vyp-pergamen{flex:1 1 auto;min-height:60px;overflow:auto;padding:12px 14px;order:1}
+  html.mobil.bez-menu .vyp.v2 .vyp-pergamen .vtext{font-size:.95rem;line-height:1.45}
+  html.mobil.bez-menu .vyp.v2 .vyp-akce{flex:none;order:2;padding:8px!important;max-height:52dvh;overflow:auto}
+  html.mobil.bez-menu .vyp.v2.boj .vyp-akce{order:0}
+  html.mobil.bez-menu .vb-ctl{gap:6px}
+  html.mobil.bez-menu .vb-ctl .vb{min-height:44px}
+  html.mobil.bez-menu .vb-rada{gap:6px}
+  html.mobil.bez-menu .vyp.v2 .vtitle{padding:24px 12px 8px}.vyp.v2 .vtitle h2{font-size:1.35rem}
+}
+/* r27-12: příprava výpravy na telefonu po listech */
+html.mobil .vyp-priprava .vp-list{display:none}
+html.mobil .vyp-priprava .vp-list.on{display:block;min-height:0}
+html.mobil .vyp-priprava .vp-list .vp-krok{display:none}
+html.mobil .vyp-priprava .vp-list .vp-volby{grid-template-columns:1fr 1fr!important;gap:8px}
+html.mobil .vyp-priprava .vp-list .vp-volba{padding:10px 12px;min-height:64px}
+html.mobil .vyp-priprava .vp-list .vp-volba small{font-size:.78rem;line-height:1.25}
+html.mobil .vyp-priprava .vp-sk-hl{margin:8px 0 6px}
+html.mobil .vyp-priprava .vp-sk-hl small{display:none}
+html.mobil .vyp-priprava>p.dim{display:none}
+html.mobil .vyp-priprava .vp-start{position:sticky;bottom:calc(var(--nav-h,64px) + 6px);z-index:5;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+html.mobil .vyp-priprava .vp-start .btn{flex:1 1 100%;min-height:52px}
+html.mobil .vyp-priprava .vp-start span{display:none}
+html.mobil #view[data-tab="vyprava"] .scene.live{height:110px!important;min-height:0!important}
+html.mobil #view[data-tab="vyprava"] .scene-cap p{display:none}
+html.mobil .vyp-priprava .vp-volby.lok .vp-volba{min-height:0;padding:8px 10px}
+html.mobil .vyp-priprava .vp-volby.lok .vp-volba b{font-size:.95rem;line-height:1.15}
+html.mobil .vyp-priprava .vp-volby.lok .vp-volba small{font-size:.7rem}
+html.mobil .vyp-druziny{padding:10px 12px}
+@media (max-width:760px){html.mobil.bez-menu .vyp.v2>.vscene{width:100%!important;align-self:stretch}html.mobil.bez-menu .vyp.v2>.vyp-telo{width:100%}}
+.vb-ctl .vb-ustup,.vb-ctl .vb-ustup:hover,.vb-ctl .vb-ustup:focus{background:#120c08!important;color:#e9d6a8!important}
+@media (max-width:760px){
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl{flex-direction:row;flex-wrap:wrap}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl>.vb-rada{flex:1 1 100%}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl>.vb-r-drobne{flex:1 1 55%;flex-wrap:nowrap}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl>.vb-r-domu{flex:1 1 40%;margin:0;padding:0;border:0}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl .vb{min-height:40px;padding:4px 8px 4px 4px;font-size:.9rem}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-znak{width:26px;height:26px}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-znak svg{width:15px;height:15px}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl .vb-drobne{min-height:40px;padding:4px 6px;font-size:.8rem}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-domu{gap:4px}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vscene{height:30dvh!important}
+}
+@media (max-width:760px){
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl>.vb-r-drobne{flex:1.3 1 0;min-width:0}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-ctl>.vb-r-domu{flex:1 1 0;min-width:0}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-r-drobne .vb{flex:1 1 0;min-width:0;white-space:normal;line-height:1.1}
+  html.mobil.bez-menu .vyp.v2:not(.boj) .vb-domu>span{white-space:normal;line-height:1.1;font-size:.82rem;flex:1 1 auto!important;text-align:left}
+}
+.hero-fig>.hero-pet.za{z-index:0}
