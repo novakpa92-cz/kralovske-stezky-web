@@ -2664,7 +2664,7 @@ html.mobil .opt .ic{display:none}
 html.mobil .opt b{font-size:.98rem!important;line-height:1.15}
 html.mobil .opt small{font-size:.68rem!important;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:.04em}
 html.mobil #view .sect{margin:10px 0 4px}
-html.mobil .hospoda-reci{max-height:30vh}
+html.mobil .hospoda-reci{max-height:none}
 /* spodní okno: posuvník čitelně */
 .m-list .acts .mnoz b{color:#2e1d0e!important}
 /* PC: výprava širší, v boji bez nadpisu přes družinu */
@@ -2992,7 +2992,8 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 .schop-karta.vybrano{box-shadow:0 0 0 2px #b8913f inset}
 .sk-vybrat{margin-left:auto}
 .sk-cena{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.tabs button.ma-volbu{position:relative}.tabs button.ma-volbu::after{content:"";position:absolute;top:6px;right:22%;width:10px;height:10px;border-radius:50%;background:#c0392b;box-shadow:0 0 0 2px #0d0906,0 0 8px #e0533f}
+/* r27-22: nevyřízené body nebo volba schopnosti — červený kosočtverec Postavy (bez puntíku) */
+.tabs button.ma-volbu>span,.tabs button.ma-volbu>span:empty{background:#c0392b!important;border-color:#ff9a84!important;box-shadow:0 0 8px #e0533f!important}
 .hero-fig>.hero-pet{max-width:46%}.hero-fig>.hero-pet img{object-fit:contain;object-position:left bottom}.hero-fig>.hero-pet.pet-velky img{object-position:right bottom}
 /* r27-18: medvěd a mula v popředí */
 .hero-fig>.hero-pet.pet-velky{z-index:3}.hero-fig>.hero-pet.pet-velky img{filter:drop-shadow(0 8px 10px #000c)}
@@ -3029,3 +3030,50 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 /* r27-21: hospodské řeči — pevná výška (nastaví hospodaVyska), zprávy se posouvají uvnitř */
 .chat.hospoda .chat-list{display:block;overflow-y:auto;overscroll-behavior:contain}
 .chat.hospoda .chat-list li{margin:0 0 3px}
+/* r27-22: obchod na výpravě jako ve městě */
+.rs-panel{max-height:min(80vh,760px);display:flex;flex-direction:column}
+.rs{display:flex;flex-direction:column;min-height:0}
+.rs .rs-list{overflow:auto;min-height:0;max-height:min(58vh,560px);padding-right:4px}
+.rs .rs-item{grid-template-columns:48px minmax(0,1fr) auto;align-items:center}
+.rs .rs-item .acts .btn{white-space:nowrap}
+.rs .pill{font-size:.9rem;padding:3px 10px;border:1px solid #c9a55a66;border-radius:12px}
+/* r27-22: v boji průhledné ukazatele — nepřítel i družina bez podkladu, obraz nepřítele zůstane vidět */
+.vyp.v2.boj .vfoehud{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;max-width:44%;
+  text-shadow:0 1px 2px #000,0 0 6px #000,0 0 10px #000}
+.vyp.v2.boj .vfoehud .vbar.big{width:min(130px,34vw);height:6px;opacity:.9}
+.vyp.v2.boj .vfoehud .vval{color:#f3e6c8}
+.vyp.v2.boj .vfoehud .vintent,.vyp.v2.boj .vfoehud .vzamer{background:#7a1f14aa!important;border-color:#e0533f88!important;font-size:.7rem;padding:1px 7px}
+.vyp.v2.boj .vmem{background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
+.vyp.v2.boj .vmem>b{text-shadow:0 1px 2px #000,0 0 6px #000;font-size:.75rem}
+.vyp.v2.boj .vmem.turn>b{color:#ffd77a}
+.vyp.v2.boj .vk-rada{gap:5px}
+.vyp.v2.boj .vk>i{width:36px;height:36px;box-shadow:0 1px 4px #000c}
+.vyp.v2.boj .vk>i::before{inset:3px;background:#120c08a6}
+.vyp.v2.boj .vk>i b{font-size:.66rem;text-shadow:0 1px 2px #000}
+.vyp.v2.boj .vmem.turn .vk>i{box-shadow:0 0 0 2px #ffd77a99,0 0 10px #ffd77a66}
+.vyp.v2.boj .vk small{text-shadow:0 1px 2px #000,0 0 6px #000}
+.vyp.v2.boj .vfoehud .vintent{font-size:.74rem!important;line-height:1.25!important;background:#7a1f1470!important;padding:2px 8px!important;max-width:100%}
+.rs .rs-ic{display:grid;place-items:center;width:44px;height:44px;font-size:1.5rem;border:1px solid #8a6a3c66;border-radius:6px;background:#0003}
+html.mobil .rs .rs-item,.rs .rs-item{display:grid!important;grid-template-columns:44px minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important}
+.rs .rs-item>.acts{grid-column:auto!important;grid-row:auto!important;margin:0!important;justify-content:flex-end}
+.rs .rs-item .icon{width:44px;height:44px}
+/* r27-22: náhled mapy (Rozhlédnout se) */
+.vmodal .panel.s-mapou{max-width:min(96vw,900px)}
+.vmapa-nahled{display:block;width:100%;height:auto;max-height:62vh;object-fit:contain;margin:8px 0;border:1px solid #8a6a3c88;border-radius:4px;cursor:zoom-in;background:#0a0705}
+.vmapa-cela{position:fixed;inset:0;z-index:9999;background:#000e;display:grid;place-items:center;cursor:zoom-out;padding:8px}
+.vmapa-cela img{max-width:100%;max-height:100%;object-fit:contain}
+/* r27-22: pergamen s rekapitulací výpravy */
+.rekap-obal{position:fixed;inset:0;z-index:9000;background:#0009;display:grid;place-items:center;padding:14px;overflow:auto}
+.rekap{max-width:560px;width:100%;max-height:calc(100vh - 28px);overflow:auto;box-shadow:0 10px 40px #000c}
+.rekap h2{margin:0 0 4px;font:700 1.5rem var(--serif);color:#6a1a10;text-align:center}
+.rekap .rk-kde{margin:0 0 10px;text-align:center;font:italic .95rem var(--serif);color:#5a4024}
+.rekap .rk-uvod{margin:0 0 10px;font-size:1rem}
+.rekap .rk-druzina{margin:0 0 8px;font-size:.9rem;color:#5a4024}
+.rekap .rk-zisk{display:flex;justify-content:center;gap:18px;margin:6px 0 12px;padding:8px 0;border-top:1px solid #8a6a3c55;border-bottom:1px solid #8a6a3c55}
+.rekap .rk-zisk span{display:flex;flex-direction:column;align-items:center;font:600 .8rem var(--serif);color:#5a4024}
+.rekap .rk-zisk i{font:700 1.5rem var(--serif);font-style:normal;color:#2e1d0e}
+.rekap .rk-r{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:5px 0;font-size:.95rem}
+.rekap .rk-r b{color:#6a1a10;white-space:nowrap}
+.rekap .rk-r.pozor b{color:#8a4a14}
+.rekap.pad h2{color:#4a1008}
+html.mobil .rekap .rk-r{grid-template-columns:1fr}
