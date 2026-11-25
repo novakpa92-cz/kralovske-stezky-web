@@ -10,12 +10,12 @@ const T = {
   app_title: ["Královské stezky", "Royal Trails"],
   app_sub: ["Tahová hra z českého středověku", "A turn-based game of medieval Bohemia"],
   login_1: ["Otevři <b>náš Discord server</b> Královské stezky (v aplikaci Discord nebo v prohlížeči).", "Open <b>our Discord server</b> Royal Trails."],
-  login_2: ["Do pole pro zprávu napiš <b>lomítko /</b>, pak <b>aplikace</b> a v nabídce, která vyskočí, klikni na příkaz <b>/aplikace</b>. Odešli Enterem.<span class=\"krok-pozor\">Nestačí napsat slovo „aplikace“ jako zprávu — musí to být příkaz z nabídky. Když se nabídka neukáže, otevři kanál <b>#webové-stránky</b> a klikni na tlačítko <b>Kód pro přihlášení do hry</b>.</span>", "In the message box type <b>/</b>, then <b>aplikace</b>, and click the <b>/aplikace</b> command in the menu that pops up. Press Enter.<span class=\"krok-pozor\">Typing the word as a normal message won't work — pick the command from the menu. If no menu appears, open <b>#webové-stránky</b> and click <b>Kód pro přihlášení do hry</b>.</span>"],
+  login_2: ["V kanálu <b>úvod</b> klikni na tlačítko <b>🔑 Aktivační kód</b>.", "In the <b>úvod</b> channel click the <b>🔑 Activation code</b> button."],
   login_3: ["Bot ti odpoví zprávou, kterou <b>vidíš jen ty</b>. Je v ní kód ze 6 znaků, třeba <b>ABC123</b>. Opiš ho sem dolů. Platí 10 minut.", "The bot replies with a message <b>only you can see</b> containing a 6-character code like <b>ABC123</b>. Enter it below. Valid 10 minutes."],
   home_icon: ["Přidat ikonu hry na plochu", "Add the game icon to your home screen"],
   home_safe_login: ["Ikona jen otevře tuto stránku, nic se neinstaluje. Kód platí 10 minut a jen jednou — nikomu ho nedávej.", "The icon only opens this page, nothing gets installed. The code works once, for 10 minutes — never share it."],
-  login_note: ["Hraješ se stejnou postavou jako na Discordu — co uděláš tady, uvidíš i tam.",
-    "You play the same character as on Discord — whatever you do here shows up there too."],
+  login_note: ["Postava patří k tvému Discord účtu. Kód dostaneš v kanálu úvod tlačítkem 🔑 Aktivační kód.",
+    "Your character belongs to your Discord account. Get the code in the úvod channel with the 🔑 button."],
   code: ["Kód z Discordu", "Code from Discord"],
   login: ["Přihlásit", "Log in"],
   connecting: ["Připojuji…", "Connecting…"],
@@ -30,8 +30,8 @@ const T = {
   unspent: ["Volné body k přidělení: {0} — přiděl je v Postavě u Vlastností (tlačítko +).", "Unspent points: {0} — assign them under Attributes (+)."],
   combat: ["Boj", "Combat"], armor_class: ["Obrana (OČ)", "Armour class"], attack: ["Útok", "Attack"], damage: ["Zranění", "Damage"],
   origin: ["Původ", "Origin"], time: ["Herní čas", "Game time"], refresh: ["Obnovit", "Refresh"],
-  no_char: ["Ještě nemáš postavu. Vytvoř si ji na Discordu v kanálu #úvod a pak tady klikni na Obnovit.",
-    "You don't have a character yet. Create one on Discord in the #úvod channel, then click Refresh here."],
+  no_char: ["Ještě nemáš postavu. Klikni na Obnovit a založ si ji.",
+    "You don't have a character yet. Click Refresh and create one."],
   on_raid: ["Jsi na výpravě — obchod a hry v hostinci počkají, až se vrátíš. Pokračovat ve výpravě můžeš i tady: Město → Brána.", "You're on an expedition — shops and inn games will wait until you return. Continue it here: Town → Gate."],
   equipped: ["Vybaveno", "Equipped"], backpack: ["Batoh a kapsy · {0}", "Backpack & pockets · {0}"],
   empty: ["Nic tu není.", "Nothing here."], all: ["Vše", "All"], search: ["Hledat…", "Search…"],
@@ -40,7 +40,7 @@ const T = {
   sell_q: ["Prodat {0} za {1}?", "Sell {0} for {1}?"],
   sell_to: ["vykoupí {0}", "{0} buys it"],
   restock: ["Nové zboží za {0}", "New stock in {0}"], hm: ["{0} h {1} min", "{0} h {1} min"], m: ["{0} min", "{0} min"],
-  stock_note: ["Nabídka se mění každý herní den, jako na Discordu.", "Stock changes every game day, just like on Discord."],
+  stock_note: ["Nabídka se mění každý herní den.", "Stock changes every game day."],
   from_level: ["od úr. {0}", "level {0}+"], have: ["máš {0}", "you have {0}"], buys_for: ["vykoupí za {0}", "buys for {0}"],
   done: ["Hotovo.", "Done."], card_alt: ["Karta postavy", "Character card"],
   card_note: ["Stejná karta jako v kanálu Tvá postava na Discordu.", "The same card as in your character channel on Discord."],
@@ -60,17 +60,17 @@ const T = {
   settings: ["Nastavení", "Settings"], language: ["Jazyk", "Language"],
   logout: ["Odhlásit tento prohlížeč", "Log out this browser"],
   delete: ["Smazat účet a postavu", "Delete account and character"],
-  delete_help: ["Postava i propojení se trvale smažou (i na Discordu). Pro potvrzení napiš SMAZAT.",
-    "Your character and link will be permanently deleted (on Discord too). Type SMAZAT to confirm."],
+  delete_help: ["Postava se trvale smaže. Pro potvrzení napiš SMAZAT.",
+    "Your character will be permanently deleted. Type SMAZAT to confirm."],
   delete_ok: ["Účet je smazaný.", "Your account has been deleted."],
   privacy: ["Zásady ochrany soukromí", "Privacy policy"], about: ["O hře", "About"],
-  about_text: ["Královské stezky jsou původní hra komunity Libri Civitatis z prostředí Kutnohorska 15. století. Web hraje ve stejném světě jako Discord — stejná postava, groše i batoh.",
-    "Royal Trails is an original game by the Libri Civitatis community, set around Kutná Hora in the 15th century. The web plays in the same world as Discord — same character, coins and bag."],
-  coming: ["Na webu jde celé město, výpravy i hry s hráči. Družinu založíš nebo se k ní přidáš u Brány — tady i na Discordu ve shromaždišti.",
-    "The whole town, expeditions and player games are on the web. Found or join a party at the Town gate — here or on Discord."],
+  about_text: ["Královské stezky jsou původní hra komunity Libri Civitatis z prostředí Kutnohorska 15. století. Hraje se v prohlížeči na počítači i v mobilu; na Discordu se potkáváme v hostinci a U krbu.",
+    "Royal Trails is an original game by the Libri Civitatis community, set around Kutná Hora in the 15th century. Play in your browser on PC or mobile."],
+  coming: ["Družinu založíš nebo se k ní přidáš u Brány.",
+    "Found or join a party at the Town gate."],
   confirm: ["Potvrdit", "Confirm"], cancel: ["Zrušit", "Cancel"],
   nav_town: ["Město", "Town"], back_map: ["Zpět na mapu", "Back to the map"], back: ["Zpět", "Back"],
-  soon: ["Sem se zatím chodí jen na Discordu. Na web to přijde brzy.", "For now this is only on Discord. It's coming to the web soon."],
+  soon: ["Připravuje se.", "Coming soon."],
   soon_short: ["Brzy", "Soon"], places: ["Místa ve městě", "Places in town"], merchants: ["Obchodníci", "Merchants"],
   map_hint: ["Klikni na místo na mapě.", "Click a place on the map."],
   rank: [{ S: "Sp", Q: "Sv", K: "K", A: "E" }, { S: "U", Q: "O", K: "K", A: "A" }],
@@ -415,6 +415,12 @@ setInterval(async () => {
 }, 60000);
 
 function setMe(me) {
+  if (me && me.vzkazy && me.vzkazy.length && !setMe._vz) {   // v1.0: zprávy hráči (dřív do vlákna na Discordu)
+    setMe._vz = true; const vz = me.vzkazy.slice();
+    vz.forEach((v, i) => setTimeout(() => toast(noEmoji(v.text)), 400 + i * 4200));
+    setTimeout(() => { setMe._vz = false; }, 400 + vz.length * 4200);
+    call("vzkazy_precteno", {}, true).catch(() => {});
+  }
   if (me && me.has_arms && ERBSTIT.url) me.erbStit = ERBSTIT.url;   // r27-6: erb na štítu zůstane i po obnově profilu
   S.me = me;
   if (me && me.has_arms && !ERBSTIT.url) setTimeout(erbNaStit, 300);
@@ -891,7 +897,7 @@ VIEWS.admin = async (view) => {
         <button class="btn" data-pocasi="">Vrátit počasí podle období</button></div>`,
     udalosti: () => (U.kategorie || []).map((k) => `<h4 class="vl-kat">${esc(k.n)}</h4><div class="vl-ud">${k.e.map((e) => `<button class="vl-udalost${e.k === U.ted ? " on" : ""}" data-ud="${esc(e.k)}"><b>${esc(e.t)}</b><em class="vl-sez">${esc(e.s ? e.s.join(", ") : "celý rok")}</em><small>${dmd(e.d).replace(/^<p>|<\/p>$/g, "")}</small></button>`).join("")}</div>`).join("")
       + `<div class="vl-form"><label>Délka (herní hodiny) <input type="number" id="a-ud-h" min="1" max="48" value="12"></label><button class="btn" data-ud="">Ukončit událost (klid)</button></div>
-      <p class="muted small">Vyhlášení se zapíše i do kroniky na Discordu. Samy od sebe přicházejí jen události, které sedí k ročnímu období (u každé je napsáno kdy); ručně jde vyhlásit kterákoli.</p>`,
+      <p class="muted small">Vyhlášení se zapíše i do kanálu dění na Discordu. Samy od sebe přicházejí jen události, které sedí k ročnímu období (u každé je napsáno kdy); ručně jde vyhlásit kterákoli.</p>`,
     zk: () => `<p class="muted">Hraješ za kopii své postavy bez omezení: milion grošů, úroveň 30, měšťan, pověst, vlastnosti 20, zboží bez ohledu na sklad. Nic se nepropíše do skutečné postavy ani do hospodářství. Výpravy, aukce, sázky, dary a hry s hráči jsou vypnuté.</p>
       <div class="vl-form"><label class="prepinac${r.zkusebni ? " on" : ""}"><input type="checkbox" role="switch" id="adm-zk"${r.zkusebni ? " checked" : ""}><span class="prep-draha"><i></i></span>
           <span class="prep-stav"><b>${r.zkusebni ? "Zapnuto" : "Vypnuto"}</b><small>${r.zkusebni ? "hraješ za zkušební kopii — kliknutím se vrátíš ke skutečné postavě" : "hraješ za skutečnou postavu — kliknutím zapneš zkušební režim"}</small></span></label>
@@ -1808,7 +1814,7 @@ VIEWS.obyvatele = async (view) => {
     <div class="oby-tabulka"><div class="oby-radek hlava"><span></span><span>${esc(L(["Jméno", "Name"]))}</span><span>${esc(L(["Úr.", "Lv"]))}</span><span>${esc(L(["Původ", "Origin"]))}</span><span>${esc(L(["Pověst", "Renown"]))}</span><span>${esc(L(["Majetek", "Property"]))}</span><span>${esc(L(["Kde / naposledy", "Where / last seen"]))}</span></div>
       <div class="oby-telo"></div></div>
     <div class="oby-pata"><small class="oby-pocet"></small><div class="oby-strany"></div></div>
-    <p class="muted small">${esc(L([`„Ve hře“ = hrál na webu nebo na Discordu v posledních ${D.online_min} minutách.`, `"In game" = played in the last ${D.online_min} minutes.`]))}</p></div>`;
+    <p class="muted small">${esc(L([`„Ve hře“ = hrál v posledních ${D.online_min} minutách.`, `"In game" = played in the last ${D.online_min} minutes.`]))}</p></div>`;
   box.querySelector("#oby-q").oninput = (e) => { OBY.q = e.target.value; OBY.strana = 0; kresli(); };
   box.querySelector("#oby-puv").onchange = (e) => { OBY.puvod = e.target.value; OBY.strana = 0; kresli(); };
   box.querySelector("#oby-raz").onchange = (e) => { OBY.razeni = e.target.value; kresli(); };
@@ -2019,7 +2025,7 @@ VIEWS.souboje = async (view) => {
           ${d.my_bet ? " · <b>" + esc(L(["tvá sázka: ", "your bet: "]) + d.my_bet.amount + " gr. " + L(["na ", "on "]) + d[d.my_bet.side].name) + "</b>" : ""}</p>
         ${d.log || d.result ? `<div class="sb-log">${dmd(d.result || d.log)}</div>` : ""}
         ${chatHtml("souboj:" + d.id, d.chat)}
-        ${d.betting && d.fighting ? `<p class="muted small">${esc(L(["Bojuješ v tomhle souboji — vsadit můžeš jen sám na sebe (na Discordu).", "You are fighting in this duel."]))}</p>` : ""}
+        ${d.betting && d.fighting ? `<p class="muted small">${esc(L(["Bojuješ v tomhle souboji — sám na sebe nesázíš.", "You are fighting in this duel."]))}</p>` : ""}
       </article>`;
     }).join("") + `<p class="muted small">${esc(L(["Kurz se mění podle sázek — čím víc lidí sází na jednoho, tím méně se na něm vydělá. Na jeden souboj nejvýš ", "Odds follow the bets. Max per duel: "]) + r.max + " gr.")}</p>`,
       Object.fromEntries(r.souboje.map((d) => ["souboj:" + d.id, d.chat])))) return;

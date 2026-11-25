@@ -12,7 +12,7 @@
 <!-- r27-5: bezpečnost — stránka smí spouštět jen vlastní skripty a mluvit jen s herním serverem a úložištěm obrázků -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://novakpa92-cz.github.io; media-src 'self' blob: https://novakpa92-cz.github.io; connect-src 'self' https://libricivitatis.eu https://novakpa92-cz.github.io; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-src 'none'">
 <meta name="referrer" content="no-referrer">
-<meta name="description" content="Královské stezky — tahová hra z Kutnohorska 15. století. Stejná postava jako na Discordu.">
+<meta name="description" content="Královské stezky — tahová hra z Kutnohorska 15. století. Hraje se v prohlížeči na počítači i v mobilu.">
 <title>Královské stezky</title>
 <link rel="icon" href="ikona-192.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -34,7 +34,7 @@
       <h1 data-t="app_title">Královské stezky</h1>
       <p class="sub" data-t="app_sub">Tahová hra z českého středověku</p>
       <ol class="steps">
-        <li data-t="login_1">Na Discordu napiš příkaz <b>/aplikace</b></li>
+        <li data-t="login_1">Na Discordu v kanálu <b>úvod</b> klikni na <b>🔑 Aktivační kód</b></li>
         <li><span data-t="login_2">Bot ti soukromě pošle šestimístný kód</span>
           <div class="dc-ukazka" aria-hidden="true">
             <div class="dc-nabidka"><small>PŘÍKAZY</small><div class="dc-prikaz"><img class="dc-ik" src="logo-ks.png" alt=""><b>/aplikace</b><em>Kód pro přihlášení na webu…</em></div></div>
@@ -52,7 +52,7 @@
         <p id="login-msg" class="msg" role="alert"></p>
       </form>
       <div class="login-discord" id="login-discord" hidden>
-        <p><b>Ještě tu nehraješ?</b> Hra tě pozná podle účtu na našem Discordu. Připoj se, založ si postavu a příkazem <b>/aplikace</b> dostaneš kód pro přihlášení.</p>
+        <p><b>Ještě tu nehraješ?</b> Hra tě pozná podle účtu na našem Discordu. Připoj se a v kanálu <b>úvod</b> si tlačítkem <b>🔑 Aktivační kód</b> vezmi kód. Postavu pak založíš tady.</p>
         <a class="btn discord" id="login-discord-a" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.3 5.3A17 17 0 0 0 15 4l-.5 1a15.6 15.6 0 0 0-5 0L9 4a17 17 0 0 0-4.3 1.3C2 9.3 1.3 13.2 1.6 17a17.3 17.3 0 0 0 5.3 2.7l1.1-1.8c-.6-.2-1.2-.5-1.8-.9l.4-.3a12.3 12.3 0 0 0 10.8 0l.4.3c-.6.4-1.2.7-1.8.9l1.1 1.8a17.2 17.2 0 0 0 5.3-2.7c.4-4.4-.7-8.2-3.1-11.7zM8.7 14.7c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1zm6.6 0c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1z"/></svg> Přidat se na náš Discord</a>
       </div>
       <details class="login-heslo" id="login-heslo" hidden><summary>Přihlásit jménem a heslem</summary>
@@ -71,7 +71,7 @@
         <button type="button" class="link" data-lang="sk">Slovenčina</button> ·
         <button type="button" class="link" data-lang="pl">Polski</button>
       </div>
-      <p class="fine" data-t="login_note">Hraješ se stejnou postavou jako na Discordu — co uděláš tady, uvidíš i tam.</p>
+      <p class="fine" data-t="login_note">Postava patří k tvému Discord účtu.</p>
     </div>
   </section>
 
