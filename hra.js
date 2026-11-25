@@ -372,6 +372,15 @@ function pozvankyUkaz() {
   document.body.appendChild(o);
 }
 
+// r27-39: odpočet časového limitu výpravy (pod 10 minut zčervená, pod 3 bliká)
+setInterval(() => {
+  document.querySelectorAll(".vcas[data-deadline]").forEach((el) => {
+    const s = Math.max(0, Math.round(Number(el.dataset.deadline) - Date.now() / 1000));
+    el.querySelector("b").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    el.classList.toggle("malo", s <= 600); el.classList.toggle("kriticky", s <= 180);
+  });
+}, 1000);
+
 // r27-16: herní hodiny nahoře běží samy (1 h reálně = 6 h ve hře); datum, doba dne a počasí se doptají serveru každou minutu
 const HODINY = { min: null, t: 0, rychlost: 6 };
 setInterval(() => {
@@ -3108,6 +3117,7 @@ function bankaRozvrzeni(box) {
     c.textContent = t.trim().replace(/^\S+\s*/, "").replace(/\s*gr\.?$/, "") || t;
     radky[k].querySelector(".bk-castky").append(c);
   });
+  wrap.querySelectorAll('[data-cid="ks:bank:jina"]').forEach((b) => b.remove());   // r27-39: na webu je políčko přímo v řádku
   // r27-37: v každém řádku i vlastní částka (políčko + OK) — nejen pevné 10 / 50 / 100 / 500
   Object.entries(radky).forEach(([k, r]) => {
     const prvni = r.querySelector("button[data-cid]"); if (!prvni) return;
@@ -4245,6 +4255,7 @@ function drawRaid(view) {
   view.replaceChildren(h(`<div class="vyp v2${combat ? " boj" : ""}">
     <div class="vscene live${combat ? " fight" : ""}" data-img="${esc(sc.img)}" data-key="${esc(sc.key)}">
       <div class="vtitle"><h2>${esc(m.node || m.location)}</h2><small>${esc(m.location)}${m.weather ? " · " + esc(m.weather) : ""}</small></div>
+      ${m.deadline ? `<div class="vcas" data-deadline="${m.deadline}" title="${esc(L(["Do té doby se musíš vrátit do města, jinak přijdeš o groše u sebe a o všechno, co neseš.", "Return to town before this, or lose what you carry."]))}">⌛ <b></b></div>` : ""}
       ${foe}${sit}${hud}<div class="vparty">${members}</div>
       ${combat ? `<div class="vturn${myTurn && !busy ? " moje" : ""}">${busy ? esc(L(["Probíhá tah…", "Turn in progress…"])) : myTurn ? esc(L(["Jsi na tahu", "Your turn"])) : esc(L(["Na tahu je jiný člen družiny", "Another member's turn"]))}</div>` : ""}
     </div>

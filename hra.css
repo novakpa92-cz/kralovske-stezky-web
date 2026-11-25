@@ -3234,3 +3234,11 @@ html.mobil .chat-online li{font-size:13px}
 .bk-vlastni{display:inline-flex;gap:4px;align-items:center;margin-left:4px}
 .bk-vlastni input{width:86px;padding:6px 8px;border:1px solid #8a6a3c;border-radius:4px;background:#120c08;color:#f0e2c0;font:inherit;font-size:.95rem}
 .bk-vlastni .bk-castka{min-width:46px!important;width:auto!important;padding:6px 10px!important}
+/* r27-39: časový limit výpravy — jen výrazný odpočet v rohu obrazu, kde nic jiného není (PC vpravo nahoře, telefon vpravo dole) */
+.vyp .vscene>.vcas{position:absolute!important;top:12px!important;right:16px!important;left:auto!important;bottom:auto!important;width:auto!important;transform:none;
+  z-index:6;display:block;padding:0;border:0;background:none;box-shadow:none;white-space:nowrap;
+  font:700 2.2rem/1 var(--serif);font-variant-numeric:tabular-nums;color:#fff1c8;text-shadow:0 2px 3px #000,0 0 12px #000,0 0 24px #000c}
+.vyp .vscene>.vcas small{display:none}
+.vyp .vscene>.vcas.malo{color:#ff9d8a}
+.vyp .vscene>.vcas.kriticky{animation:pulseI 1s ease-in-out infinite}
+@media (max-width:760px){.vyp .vscene>.vcas{top:118px!important;bottom:auto!important;right:12px!important;font-size:1.6rem}}
