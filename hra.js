@@ -127,30 +127,68 @@ const h = (html) => { const d = document.createElement("template"); d.innerHTML 
 
 // ------------------------------------------------------------------ API
 let pending = 0;
-async function call(op, data = {}, quiet = false) {
-  pending++; $("#busy").hidden = false;
+// r27-24: spolehlivější spojení na telefonu — každý dotaz má časový limit (zaseklé spojení po přepnutí sítě nebo z pozadí
+// už neblokuje hru), stejné souběžné dotazy (obnovy na pozadí) se slučují, čtení se při výpadku jednou zopakuje
+// a točící se ukazatel se ukáže jen u akcí hráče, které trvají déle než chvilku.
+const SPOJ = { letici: new Map(), ovladace: new Set(), busyT: 0 };
+const CTENI = new Set(["me", "raid", "mini", "chat", "cas", "place", "shop", "icons", "card", "mapa_obr", "vyhlasky", "denik", "zverinec", "napoje", "hraci", "cock",
+  "auctions", "duels", "people", "poradi", "kroniky", "farm", "truhla", "admin_check", "status"]);
+const LIMIT = (op) => (["card", "mapa_obr", "icons"].includes(op) ? 45000 : op === "raid_click" ? 30000 : 15000);
+function busyUkaz(zap) {
+  clearTimeout(SPOJ.busyT);
+  if (zap) SPOJ.busyT = setTimeout(() => { if (pending > 0) $("#busy").hidden = false; }, 350);
+  else $("#busy").hidden = true;
+}
+async function fetchApi(op, data) {
+  const ac = new AbortController(); SPOJ.ovladace.add(ac);
+  const tm = setTimeout(() => ac.abort(), LIMIT(op));
   try {
-    let res;
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, signal: ac.signal, cache: "no-store",
+      body: JSON.stringify({ op, token: S.token, lang: S.lang === "pl" ? "en" : S.lang === "sk" ? "cs" : S.lang, ...data }) });
+    return await r.json();
+  } finally { clearTimeout(tm); SPOJ.ovladace.delete(ac); }
+}
+async function call(op, data = {}, quiet = false) {
+  const klic = quiet && CTENI.has(op) ? op + JSON.stringify(data) : null;
+  if (klic && SPOJ.letici.has(klic)) return SPOJ.letici.get(klic);          // obnova na pozadí už běží — počkat na ni
+  const prace = (async () => {
+    pending++; if (!quiet) busyUkaz(true);
     try {
-      const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ op, token: S.token, lang: S.lang === "pl" ? "en" : S.lang === "sk" ? "cs" : S.lang, ...data }) });
-      res = await r.json();
+      let res;
+      for (let pokus = 0; ; pokus++) {
+        try { res = await fetchApi(op, data); break; }
+        catch (e) {
+          if (pokus === 0 && CTENI.has(op) && !(e instanceof SyntaxError)) { await new Promise((r) => setTimeout(r, 600)); continue; }
+          throw new Error(t(e instanceof SyntaxError ? "bad_reply" : "net_error"));
+        }
+      }
+      if (!res.ok) {
+        if (res.auth === "login" && op !== "link") { logout(true, res.error); }
+        throw new Error(res.error || t("bad_reply"));
+      }
+      if (res.me) setMe(res.me);
+      else if (op === "me") setMe(res);              // „me“ vrací postavu přímo, ne pod klíčem me
+      return res;
     } catch (e) {
-      throw new Error(t(e instanceof SyntaxError ? "bad_reply" : "net_error"));
+      if (!quiet) toast(e.message, true);
+      throw e;
+    } finally {
+      if (--pending <= 0) { pending = 0; busyUkaz(false); }
+      if (klic) SPOJ.letici.delete(klic);
     }
-    if (!res.ok) {
-      if (res.auth === "login" && op !== "link") { logout(true, res.error); }
-      throw new Error(res.error || t("bad_reply"));
-    }
-    if (res.me) setMe(res.me);
-    else if (op === "me") setMe(res);              // „me“ vrací postavu přímo, ne pod klíčem me
-    return res;
-  } catch (e) {
-    if (!quiet) toast(e.message, true);
-    throw e;
-  } finally {
-    if (--pending <= 0) { pending = 0; $("#busy").hidden = true; }
-  }
+  })();
+  if (klic) SPOJ.letici.set(klic, prace);
+  return prace;
+}
+/** Po návratu aplikace z pozadí: zrušit visící dotazy a uvolnit zámky tlačítek (jinak by hra zůstala „načítat“). */
+function spojeniObnov() {
+  SPOJ.ovladace.forEach((a) => { try { a.abort(); } catch {} });
+  SPOJ.ovladace.clear(); SPOJ.letici.clear();
+  pending = 0; busyUkaz(false);
+  try { RAID.busy = false; } catch {}
+  try { MINI.busy = false; MINI.inAct = false; } catch {}
+  try { HRACI.busy = false; } catch {}
+  try { FARM.busy = false; } catch {}
 }
 
 let toastTimer;
@@ -645,7 +683,7 @@ VIEWS.hero = (view) => {
         <div class="sb-sekce" data-vysv="boj" title="${esc(L(["Zásah = k20 + útok + zdatnost proti obraně nepřítele; 20 je kritický zásah.", "Hit = d20 + attack + proficiency vs defence."]))}"><small>${esc(L(["Do boje", "In battle"]))} ⓘ</small></div>
         <div class="znaky">
           ${znak("stit", m.armor_class, t("armor_class"), L(["čím víc, tím hůř tě zasáhnou", "harder to hit"]))}
-          ${znak("mec", sg(P.attack_base ?? m.attack), t("attack"), L(["k hodu na zásah", "to hit"]))}
+          ${znak("mec", sg(m.attack), t("attack"), L(["k hodu na zásah", "to hit"]))}
           ${znak("hvezda", sg(P.proficiency || 0), L(["Zdatnost", "Proficiency"]), L(["k útoku i zkouškám", "attack and checks"]))}
           ${znak("kostka", m.damage, t("damage"), L(["kostky zbraně + bonus", "weapon dice + bonus"]))}
         </div>
@@ -4684,7 +4722,12 @@ applyTexts();
 // r27-5: bezpečnost — z odkazu (adresy) se jen otevře stránka; „panel/=…“ by rovnou zmáčklo tlačítko ve hře, to z odkazu nejde
 if (location.hash.length > 1) { const z = decodeURIComponent(location.hash.slice(1)); if (!z.startsWith("panel/=")) store.set("tab", z); else history.replaceState(null, "", location.pathname + location.search); }
 window.addEventListener("popstate", () => { if (S.token && S.me) go(decodeURIComponent(location.hash.slice(1)) || "mesto"); });
+let skrytoOd = 0;
+document.addEventListener("visibilitychange", () => { if (document.visibilityState !== "visible") skrytoOd = Date.now(); });
+window.addEventListener("online", () => { spojeniObnov(); if (S.token && S.me) call("me", {}, true).then(() => render()).catch(() => {}); });
+window.addEventListener("pageshow", (e) => { if (e.persisted) { spojeniObnov(); if (S.token && S.me) call("me", {}, true).then(() => render()).catch(() => {}); } });
 document.addEventListener("visibilitychange", () => {      // po návratu na kartu načíst čerstvý stav (mohl hrát na Discordu)
+  if (document.visibilityState === "visible" && skrytoOd && Date.now() - skrytoOd > 3000) spojeniObnov();   // r27-24: z pozadí — visící dotazy pryč
   if (document.visibilityState === "visible" && S.token && S.me) {
     S.inn = null;
     call("me", {}, true).then(() => { if (!["obchod"].includes(S.tab)) render(); }).catch(() => {});
@@ -5020,3 +5063,27 @@ function miniVysledek(panel, kod) {
   MINI.el.querySelector("[data-konec]").onclick = () => { if (MINI.ctx === "raid") RAID.panel = null; miniZavri(); };
   if (MINI.ctx === "raid" && MINI.st && byl !== "fishpre") { /* stav výpravy se obnovil v miniAct */ }
 }
+
+// r27-24: na telefonu přejetí prstem do strany = další / předchozí záložka spodní lišty (Město · Postava · Batoh · Mazlíček · Deník · Ostatní)
+(() => {
+  let x0 = 0, y0 = 0, t0 = 0, ok = false;
+  const PORADI = () => [...document.querySelectorAll(".tabs button[data-tab]")].filter((b) => !b.hidden && b.dataset.tab !== "admin").map((b) => b.dataset.tab);
+  const zakaz = (el) => !el || el.closest("input,textarea,select,.vmodal,.minihra,.rekap-obal,.vmapa-cela,.m-zalozky,.obchod-prepinac,.vp-zal,.hk-zalozky,.vyp-lista,#erb-cv,.tahni,canvas,[data-noswipe]")
+    || [...(function* () { let e = el; while (e && e !== document.body) { yield e; e = e.parentElement; } })()].some((e) => e.scrollWidth > e.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(e).overflowX));
+  document.addEventListener("touchstart", (e) => {
+    ok = jeMobil() && e.touches.length === 1 && !document.documentElement.classList.contains("bez-menu") && !zakaz(e.target);
+    if (!ok) return;
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
+  }, { passive: true });
+  document.addEventListener("touchend", (e) => {
+    if (!ok) return; ok = false;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+    if (Date.now() - t0 > 700 || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+    const p = PORADI(), hlavni = TAB_OF[S.tab] || S.tab, i = p.indexOf(hlavni);
+    if (i < 0) return;
+    const n = p[i + (dx < 0 ? 1 : -1)];
+    if (!n) return;
+    Zvuk.sfx("stranka");
+    go(n);
+  }, { passive: true });
+})();

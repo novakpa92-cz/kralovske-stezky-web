@@ -3122,3 +3122,12 @@ button.znak{appearance:none;background:none;border:0;padding:0;font:inherit;colo
 .dpanel .banka .bk-b .bk-castky{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px}
 .dpanel .banka .bk-b .btn.bk-castka{width:100%!important;min-width:0!important;padding:8px 2px!important;display:flex;justify-content:center;align-items:center}
 .dpanel .banka .bk-b .bk-radek{width:100%}
+/* r27-24: prší na telefonu — vyšší stůl (na výšku), ať se střed s balíčkem a vyloženou kartou nepřekrývá s kartami v ruce */
+@media (max-width:760px){
+  .stul:has(.karty-plocha.prsi){aspect-ratio:3/4!important;max-height:none!important}
+  .karty-plocha.prsi{grid-template-rows:1fr auto 1.2fr!important;row-gap:4%;padding:4% 3% 5%!important}
+  .prsi .ruka.hostinsky>.karta{flex:0 1 17%!important}
+  .prsi .ruka.hrac .prsi-karta{flex:0 1 21%!important}
+  .prsi-stred .balicek{width:20%!important}
+  .prsi-vrch{width:21%!important}
+}
