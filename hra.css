@@ -3131,3 +3131,106 @@ button.znak{appearance:none;background:none;border:0;padding:0;font:inherit;colo
   .prsi-stred .balicek{width:20%!important}
   .prsi-vrch{width:21%!important}
 }
+
+/* r27-28: hráči ve hře — sloupec vpravo vedle hospodských řečí, stejná výška, posun svisle */
+.chat-telo{display:flex;align-items:stretch}
+.chat-telo .chat-list{flex:1;min-width:0}
+.chat-online{flex:none;width:150px;display:flex;flex-direction:column;border-left:1px solid #6b522855;background:#00000026;min-height:0}
+.chat-online b{flex:none;color:#7fbf6a;font-family:Cinzel,serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px 4px;font-weight:600}
+.chat-online ul{list-style:none;margin:0;padding:0 10px 6px;overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin}
+.chat-online li{font-size:14px;color:#e6d6b0;padding:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-online li.ja{color:#f0d896;font-weight:600}
+html.mobil .chat-online{width:112px}
+html.mobil .chat-online li{font-size:13px}
+/* r27-30: na PC v boji je družina vpravo dole (pravidlo z úpravy pro telefon) — „Jsi na tahu“ jde doprostřed dolů, ať portréty nepřekrývá */
+.vyp.v2.boj .vturn{right:auto!important;left:50%;transform:translateX(-50%);bottom:3%;white-space:nowrap}
+
+/* r27-31: mazlíček na PC — jeden panel na zvíře (obraz + údaje) a dole přepínač zvířat; vejde se bez posouvání */
+.pet-i{margin-left:6px;border:0;background:none;color:#8a6a3c;font-size:.95em;cursor:var(--k-klik);padding:0 2px;vertical-align:middle}
+.pet-pc{display:flex;flex-direction:column;gap:12px;height:calc(100vh - 232px);min-height:520px}
+.pet-pc-karta{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:0;border:1px solid #8a6a3c;border-radius:3px;overflow:hidden;
+  box-shadow:0 8px 24px #000a;background:linear-gradient(#f3e3bd,#e6cf9c)}
+.pet-pc .pet-fig{aspect-ratio:auto;height:100%;border-radius:0;box-shadow:none}
+.pet-pc-info{overflow-y:auto;scrollbar-width:thin;padding:16px 22px!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;display:flex;flex-direction:column;gap:10px}
+.pp-hlava{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pp-hlava h2{margin:0;font-size:1.7rem;color:#7a1f14}
+.pp-hlava p{margin:2px 0 0;color:#6b5236;font-size:.95rem}
+.pp-sekce{border-top:1px solid #b8924a88;padding-top:8px}
+.pp-sekce h3{margin:0 0 6px;font-family:Cinzel,serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#6b5236}
+.pp-sekce p{margin:4px 0}
+.pp-bar{display:grid;grid-template-columns:110px 1fr 46px;align-items:center;gap:10px;margin:4px 0;font-size:.92rem}
+.pp-bar b{text-align:right;font-weight:600;color:#5a4128}
+.pp-bar .track{margin:0}
+.pet-pc .pet-akce{gap:6px;margin-top:8px;flex-wrap:wrap}
+.pet-pc .pet-akce .btn{padding:6px 12px}
+.pet-pc .pet-bonus{font-size:1.15rem}
+.pet-prepinac{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;flex:none}
+.pet-prepinac button{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 8px;border:1px solid #8a6a3c88;border-radius:3px;background:#1a110ad9;color:#e6d6b0;
+  cursor:var(--k-klik);flex:none;text-align:left}
+.pet-prepinac button img{width:42px;height:42px;object-fit:contain}
+.pet-prepinac button span{display:flex;flex-direction:column;line-height:1.2}
+.pet-prepinac button small{font-size:.72rem;color:#b9a27a}
+.pet-prepinac button.on{border-color:var(--gold);background:linear-gradient(#3a2614,#24170c);box-shadow:inset 0 -3px 0 var(--gold)}
+.pet-prepinac button:hover{border-color:var(--gold)}
+.pet-pc-info>*{flex:none}
+.pet-pc .pet-doma{grid-template-columns:1fr 1fr}
+.pet-pc .pp-sekce{border-top:0;padding-top:0}
+.pet-pc .pp-bar{grid-template-columns:150px 1fr 46px}
+.pet-pc .pp-bar span{white-space:nowrap}
+.pet-pc .pet-zvire img{width:auto;max-width:82%;max-height:86%;object-fit:contain}
+.pet-pc .pet-zvire picture{display:contents}
+.pet-pc .pet-zvire img{width:auto!important;height:auto;max-width:82%;max-height:84%}
+.pet-pc .pet-zvire{transform:translateY(calc(var(--pod-px,0px) * .9 - 3%))!important}
+.pet-pc .pet-zvire{position:absolute!important;inset:0!important;height:auto!important;max-height:100%}
+.pet-pc .pet-vek{position:absolute!important;top:12px;right:12px;left:auto;width:auto;z-index:3}
+
+/* r27-31: cesta pověsti na radnici */
+.povest{margin:0 0 10px;padding:10px 18px 6px;cursor:help}
+.povest .spread b{font-family:var(--serif)}
+.pv-cesta{position:relative;height:8px;margin:12px 3% 24px;background:#3a281466;border:1px solid #8a6a3c;border-radius:6px}
+.pv-fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#8a5a1c,#e8c77a);border-radius:6px}
+.pv-stupen{position:absolute;top:50%;transform:translate(-50%,-50%)}
+.pv-stupen i{display:block;width:14px;height:14px;border-radius:50%;background:#2a1c10;border:2px solid #8a6a3c}
+.pv-stupen.on i{background:#e8c77a;border-color:#fff1c8;box-shadow:0 0 8px #e8c77a99}
+.pv-stupen em{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-style:normal;font-size:.78rem;white-space:nowrap;text-align:center;line-height:1.1}
+.pv-stupen em small{font-size:.65rem;opacity:.7}
+.pv-stupen:nth-child(2) em{left:0;transform:none;text-align:left}.pv-stupen:last-child em{left:auto;right:0;transform:none;text-align:right}
+/* r27-31: PC bez posouvání stránky — místa s obrazem vlevo se vejdou celá (bez spodního okraje navíc) */
+@media (min-width:1100px){
+  html:not(.mobil) #view.rozdel{margin-bottom:0!important;padding-bottom:10px!important}
+  html:not(.mobil) #view.rozdel>.scene{height:calc(100vh - 186px)!important}
+}
+/* r27-31: PC — stránka se neposouvá; lišta a záložky stojí, posouvá se jen obsah pod nimi (a jen když se nevejde) */
+@media (min-width:1100px){
+  html:not(.mobil),html:not(.mobil) body{height:100%;overflow:hidden}
+  html:not(.mobil) #game:not([hidden]){display:flex;flex-direction:column;height:100vh}
+  html:not(.mobil) #game>.topbar,html:not(.mobil) #game>.tabs{flex:none}
+  html:not(.mobil) #game>#view{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;width:100%;align-self:center;scrollbar-width:thin;scrollbar-color:#8a6a3c transparent}
+  html:not(.mobil) #view.rozdel>.scene{top:0;height:calc(100vh - 186px)!important}
+}
+/* r27-34: výprava na PC — pergamen má pevnou velikost (vyplní zbytek sloupce pod tlačítky), text se posouvá uvnitř; nemění se podle délky textu */
+@media (min-width:1100px){
+  html:not(.mobil) .vyp.v2 .vscene,html:not(.mobil) .vyp.v2.boj .vscene{height:calc(100vh - 196px)!important;top:0}
+  html:not(.mobil) .vyp.v2 .vyp-telo{height:calc(100vh - 196px);min-height:420px}
+  html:not(.mobil) .vyp.v2 .vyp-telo>*{flex:none}
+  html:not(.mobil) .vyp.v2 .vyp-telo>.vyp-pergamen{flex:1 1 0!important;min-height:180px;max-height:none;width:100%!important;max-width:none!important;align-self:stretch!important;
+    box-sizing:border-box;overflow-y:auto;scrollbar-width:thin}
+}
+.pv-vyhody{font-size:.85rem;margin:0 0 4px}
+/* r27-35: posuvník množství v truhle */
+.item .kolik{display:flex;align-items:center;gap:8px;margin-top:4px;max-width:220px}
+.item .kolik input{flex:1;accent-color:#8e1b14;cursor:var(--k-klik)}
+.item .kolik b{min-width:2ch;text-align:right;font-size:.9rem}
+/* r27-35: deník — zakázky */
+.dk-zakazky,.dk-zaznamy{list-style:none;margin:6px 0 14px;padding:0;display:grid;gap:8px}
+.dk-zakazky li{display:grid;gap:2px;padding:8px 12px;border:1px solid #b8924a88;border-radius:3px;background:#fff6dd55}
+.dk-zakazky li.hotova{border-color:#4f7a2c;background:#e6f0c855}
+.dk-zakazky small{color:#6b5236}
+.dk-zaznamy li{font-size:.92rem;border-bottom:1px dotted #b8924a66;padding-bottom:4px}
+.dz-cas{color:#7a5a35;font-size:.8rem}
+/* r27-35: v boji zamčené akce, na které nestačí výdrž */
+.vyp .vb:disabled{opacity:.42;filter:grayscale(.7);cursor:not-allowed}
+/* r27-37: banka — vlastní částka */
+.bk-vlastni{display:inline-flex;gap:4px;align-items:center;margin-left:4px}
+.bk-vlastni input{width:86px;padding:6px 8px;border:1px solid #8a6a3c;border-radius:4px;background:#120c08;color:#f0e2c0;font:inherit;font-size:.95rem}
+.bk-vlastni .bk-castka{min-width:46px!important;width:auto!important;padding:6px 10px!important}

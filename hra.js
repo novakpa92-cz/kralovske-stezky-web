@@ -351,6 +351,27 @@ async function erbNaStit() {
   } catch { /* bez erbu */ } finally { ERBSTIT.bezi = false; }
 }
 
+/** r27-36: pozvání na pití — host ho musí přijmout (okénko s Přijmout / Odmítnout). */
+const POZV = { videno: new Set() };
+function pozvankyUkaz() {
+  const p = ((S.me && S.me.pozvanky) || []).find((x) => !POZV.videno.has(x.id));
+  if (!p || document.querySelector(".pozv-obal")) return;
+  POZV.videno.add(p.id);
+  const o = document.createElement("div");
+  o.className = "rekap-obal vysv-obal pozv-obal";
+  o.innerHTML = `<div class="rekap vyp-pergamen vysv"><h2>${esc(L(["Pozvání na pití", "A drink invitation"]))}</h2>
+    <p>${esc(L([`${p.od} tě zve na ${p.napoj.toLowerCase()}. Platí ${p.od}.`, `${p.od} invites you for ${p.napoj}. They pay.`]))}</p>
+    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-pz="1">${esc(L(["Přijmout", "Accept"]))}</button>
+      <button class="btn" data-pz="0">${esc(L(["Odmítnout", "Decline"]))}</button></div></div>`;
+  o.querySelectorAll("[data-pz]").forEach((b) => b.onclick = async () => {
+    o.remove();
+    try { await call("pozvani_odpoved", { id: p.id, ano: b.dataset.pz === "1" }); toast(b.dataset.pz === "1" ? L([`Na zdraví, ${p.od}!`, "Cheers!"]) : L(["Pozvání jsi odmítl(a).", "Declined."])); if (S.tab === "napoje") render(); }
+    catch { /* chyba se ukázala */ }
+    setTimeout(pozvankyUkaz, 300);
+  });
+  document.body.appendChild(o);
+}
+
 // r27-16: herní hodiny nahoře běží samy (1 h reálně = 6 h ve hře); datum, doba dne a počasí se doptají serveru každou minutu
 const HODINY = { min: null, t: 0, rychlost: 6 };
 setInterval(() => {
@@ -366,6 +387,7 @@ setInterval(async () => {
     if (r.speed) HODINY.rychlost = r.speed;
     const zmena = (S.me.kalendar || {}).doba !== r.kalendar.doba || S.me.weather !== r.weather || S.me.night !== r.night;
     S.me.kalendar = { ...(S.me.kalendar || {}), ...r.kalendar }; S.me.weather = r.weather; S.me.night = r.night;
+    if (r.pozvanky) { S.me.pozvanky = r.pozvanky; pozvankyUkaz(); }   // r27-36
     const K = S.me.kalendar;
     $("#tb-clock").innerHTML = `<b class="tb-hod">${esc(K.hodina)}</b> <span class="tb-doba">${esc(K.doba)}</span><span class="tb-datum">${esc(K.text)} · ${esc(K.season)}</span>`;
     const [hh, mm] = K.hodina.split(":").map(Number); HODINY.min = hh * 60 + mm; HODINY.t = Date.now();
@@ -480,7 +502,7 @@ function go(route) {
   if (tab === "vyprava") { RAID.st = null; RAID.panel = null; }                 // hostinec vždy načíst čerstvý (mohl hrát na Discordu)
   document.querySelectorAll(".tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === TAB_OF[tab]));
   if (location.hash !== "#" + r) history.pushState(null, "", "#" + r);
-  window.scrollTo(0, 0);
+  skrolNa(0);
   if ((typeof Zvuk !== "undefined")) { if (!["mesto", "misto", "obchod", "hra", "vyprava", "panel", "domov", "kohouti", "statek"].includes(tab)) { Zvuk.scene([], S.me || {}, true); Zvuk.music(townMusic()); } }
   render();
 }
@@ -548,15 +570,16 @@ function render() {
     if (S.tab !== "novy") { S.tab = "novy"; document.querySelectorAll(".tabs button[data-tab]").forEach((b) => b.classList.toggle("on", b.dataset.tab === "novy")); }
     zalozitPostavu(view); return; }   // r27-6: postavu si založíš přímo na webu
   document.body.classList.toggle("zkusebni", !!S.me.zkusebni);
+  pozvankyUkaz();                                                    // r27-36: čekající pozvání na pití
   if ((S.me.pet_umrti || []).length) { const mrtva = S.me.pet_umrti; S.me.pet_umrti = []; setTimeout(() => alert(L(["Smutná zpráva z domova:\n\n", "Sad news:\n\n"]) + mrtva.map((x) => "🕯️ " + (String(x).includes(" — ") ? x : x + L([" — zemřelo hladem a bez péče.", " — died of neglect."]))).join("\n") + L(["\n\nNajdeš ho na hřbitově zvířátek.", "\n\nSee the pet cemetery."])), 300); }   // r27-14: vždy s důvodem   // r27-6: zkušební režim správce — výrazný pruh nahoře
   view.dataset.tab = S.tab; view.classList.toggle("kniha", ["hero", "bag", "more", "pet", "denik"].includes(S.tab));   // příručka má vlastní knihu                         // r27-4: vzhled podle záložky (Noc nad městem / Kronika)
   view.classList.toggle("wide", ["mesto", "misto", "obchod", "hra", "vyprava", "panel", "domov", "kohouti", "statek", "hraci", "aukce", "souboje", "hrbitov"].includes(S.tab));
   view.classList.toggle("rozdel", ["misto", "panel", "obchod", "truhla", "napoje", "vydaje", "obyvatele", "dar", "poradi", "zverinec", "dilna", "erb", "povoz", "vyhlasky", "hrbitov", "kroniky", "domov"].includes(S.tab));   // r27-12: na PC obraz vlevo, volby vpravo — bez scrollování
-  const stejna = S._lastRoute === S.tab + "/" + (S.arg || ""), y = window.scrollY;   // r27-11: po akci zůstaň, kde jsi byl
+  const stejna = S._lastRoute === S.tab + "/" + (S.arg || ""), y = skrolY();   // r27-11: po akci zůstaň, kde jsi byl
   S._lastRoute = S.tab + "/" + (S.arg || "");
   if (stejna && y > 0) view.style.minHeight = view.offsetHeight + "px";
   const r = VIEWS[S.tab](view);
-  const vrat = () => { if (stejna && y > 0) { window.scrollTo(0, y); requestAnimationFrame(() => window.scrollTo(0, y)); } view.style.minHeight = ""; };
+  const vrat = () => { if (stejna && y > 0) { skrolNa(y); requestAnimationFrame(() => skrolNa(y)); } view.style.minHeight = ""; };
   if (r && r.then) r.then(() => setTimeout(vrat, 30)); else vrat();
   const pvpNote = () => {                          // r27-3: rozehraná hra nebo výzva od jiného hráče
     if (!S.me.pvp || S.tab === "hraci" || document.getElementById("pvpnote")) return;
@@ -918,7 +941,7 @@ VIEWS.prirucka = async (view) => {
       <nav class="dk-zalozky pr-zalozky">${K.map((k, i) => `<button class="${i === PRIR.k ? "on" : ""}${shoda(k) ? "" : " mimo"}" data-pk="${i}"><i>${RIMSKE(i)}</i>${esc(noEmoji(k.title))}</button>`).join("")}</nav></div></div>
     <p><button class="btn" data-go="more">← ${esc(t("back"))}</button></p>`));
   view.querySelector("[data-go]").onclick = () => go("more");
-  view.querySelectorAll("[data-pk]").forEach((b) => b.onclick = () => { PRIR.k = Number(b.dataset.pk); render(); window.scrollTo(0, 0); });
+  view.querySelectorAll("[data-pk]").forEach((b) => b.onclick = () => { PRIR.k = Number(b.dataset.pk); render(); skrolNa(0); });
   const qi = $("#pr-q"); let tm;
   qi.oninput = () => { clearTimeout(tm); tm = setTimeout(() => { PRIR.q = qi.value; render(); const n = $("#pr-q"); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }, 350); };
 };
@@ -1009,7 +1032,9 @@ VIEWS.kroniky = async (view) => {
 VIEWS.truhla = async (view) => {
   let T; try { T = (await call("truhla", {}, true)).truhla; } catch { return; }
   const C = T.chest;
-  const vec = (i, act, lbl, off) => `<div class="item">${icon(i.id)}<div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div></div>
+  // r27-35: u víc kusů posuvník — kolik přesunout (výchozí vše)
+  const vec = (i, act, lbl, off) => `<div class="item">${icon(i.id)}<div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div>
+      ${i.count > 1 && !off ? `<label class="kolik"><input type="range" min="1" max="${i.count}" value="${i.count}" data-kolik><b>${i.count}</b></label>` : ""}</div>
     <div class="acts"><button class="btn small${act === "take" ? " primary" : ""}" data-tr="${act}" data-v="${esc(i.id)}"${off ? " disabled" : ""}>${esc(lbl)}</button></div></div>`;
   const plno = C && C.used >= C.slots;
   view.replaceChildren(h(`${sceneHead("mesto-hostinec", L(["Truhla u hostinského", "Chest at the inn"]), L(["Hostinský: „Co sem dáš, to tu najdeš. Pokud platíš.“", "Innkeeper: \"What you put in, you'll find. If you pay.\""]), true)}
@@ -1046,7 +1071,9 @@ VIEWS.truhla = async (view) => {
     catch {}
     render();
   };
-  view.querySelectorAll("[data-tr]").forEach((b) => b.onclick = () => klik("ks:innchest:" + b.dataset.tr, [b.dataset.v], b));
+  view.querySelectorAll("[data-kolik]").forEach((r) => r.oninput = () => { r.nextElementSibling.textContent = r.value; });
+  view.querySelectorAll("[data-tr]").forEach((b) => b.onclick = () => { const r = b.closest(".item").querySelector("[data-kolik]");
+    klik("ks:innchest:" + b.dataset.tr, r ? [b.dataset.v, r.value] : [b.dataset.v], b); });
   view.querySelectorAll("[data-cid]").forEach((b) => b.onclick = () => klik(b.dataset.cid, [], b));
   loadIcons([...T.carried, ...(C ? C.items : [])].map((i) => i.id));
 };
@@ -1121,10 +1148,16 @@ function chatRebuild(box, html, rooms) {
   box.innerHTML = html;
   return true;
 }
-function chatHtml(room, msgs) {
+/** r27-28: seznam hráčů ve hře v pravé části hospodských řečí — stejná výška jako zprávy, posouvá se svisle. */
+function onlineHtml(lidi) {
+  if (!lidi) return "";
+  const jm = lidi.map((p) => `<li class="${p.ja ? "ja" : ""}" title="${esc(L(["úroveň", "level"]))} ${p.level}">${esc(p.name)}</li>`).join("");
+  return `<div class="chat-online"><b>● ${esc(L(["Ve hře", "Online"]))} ${lidi.length}</b><ul>${jm}</ul></div>`;
+}
+function chatHtml(room, msgs, online) {
   const hospoda = room === "hostinec";
-  return `<div class="chat${hospoda ? " hospoda" : ""}" data-room="${esc(room)}"><div class="chat-h">${esc(hospoda ? L(["Hospodské řeči", "Tavern talk"]) : L(["Pokřik z hlediště", "Shouts from the stands"]))}<small>${esc(hospoda ? L(["propojeno s #na-rynku na Discordu", "linked with #na-rynku on Discord"]) : L(["propojeno s vláknem zápasu na Discordu", "linked with the match thread on Discord"]))}</small></div>
-    <ul class="chat-list">${chatListHtml(room, msgs)}</ul>
+  return `<div class="chat${hospoda ? " hospoda" : ""}" data-room="${esc(room)}"><div class="chat-h">${esc(hospoda ? L(["Hospodské řeči", "Tavern talk"]) : L(["Pokřik z hlediště", "Shouts from the stands"]))}<small>${esc(hospoda ? L(["propojeno s #hostinec-u-zlatého-groše na Discordu", "linked with #hostinec-u-zlatého-groše on Discord"]) : L(["propojeno s vláknem zápasu na Discordu", "linked with the match thread on Discord"]))}</small></div>
+    ${hospoda ? `<div class="chat-telo"><ul class="chat-list">${chatListHtml(room, msgs)}</ul>${onlineHtml(online)}</div>` : `<ul class="chat-list">${chatListHtml(room, msgs)}</ul>`}
     <form class="chat-form"><input maxlength="200" placeholder="${esc(hospoda ? L(["Řekni něco ke stolu…", "Say something…"]) : L(["Fanděj, hecuj, sázej…", "Cheer, jeer, bet…"]))}" value="${esc(CHAT.draft[room] || "")}"><button class="btn small primary">${esc(hospoda ? L(["Říct", "Say"]) : L(["Zakřičet", "Shout"]))}</button></form></div>`;
 }
 // hospodské řeči: obnova každé 4 s, jen dokud je hráč v lokálu
@@ -1133,7 +1166,11 @@ async function hospodaKresli() {
   const box = document.getElementById("hospoda-reci");
   if (!box || S.tab !== "misto" || S.arg !== "hostinec") { clearInterval(HOSPODA.timer); return; }
   let r; try { r = await call("chat", { room: "hostinec" }, true); } catch { return; }
-  if (!chatRebuild(box, chatHtml("hostinec", r.chat), { hostinec: r.chat })) { hospodaVyska(); return; }
+  if (!chatRebuild(box, chatHtml("hostinec", r.chat, r.online), { hostinec: r.chat })) {
+    const ol = box.querySelector(".chat-online"), nove = onlineHtml(r.online);   // píše se — obnoví se aspoň řádek „ve hře“
+    if (ol && nove && ol.outerHTML !== nove) { const top = ol.querySelector("ul").scrollTop; ol.outerHTML = nove; box.querySelector(".chat-online ul").scrollTop = top; }
+    hospodaVyska(); return;
+  }
   hospodaVyska();
   wireChat(box, hospodaKresli);
 }
@@ -1153,6 +1190,8 @@ function hospodaVyska() {
   v = Math.max(120, v);
   if (list.style.height !== v + "px") { const dole = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
     list.style.height = list.style.maxHeight = list.style.minHeight = v + "px"; if (dole) list.scrollTop = list.scrollHeight; }
+  const ol = box.querySelector(".chat-online");                  // r27-28: sloupec „ve hře“ nesmí okno natáhnout
+  if (ol) ol.style.height = ol.style.maxHeight = v + "px";
 }
 window.addEventListener("resize", () => { if (S.tab === "misto" && S.arg === "hostinec") hospodaVyska(); });
 function wireChat(box, after) {
@@ -1776,7 +1815,7 @@ VIEWS.napoje = async (view) => {
       b.disabled = true;
       call("napit", { drink: b.dataset.pij, target: host || null }).then((x) => {
         Zvuk.sfx("mince");
-        toast(x.treat ? L([`${x.guest} si připíjí ${x.drink.toLowerCase()} na tvůj účet.`, `${x.guest} drinks on you.`]) : L([`Na zdraví! Opilost ${x.level} %`, `Cheers! Drunkenness ${x.level} %`]) + (x.stage && !x.treat ? " · " + x.stage : ""));
+        toast(x.pending ? L([`Pozvání pro ${x.guest} odešlo — zaplatíš, až ho přijme.`, `Invitation sent to ${x.guest}.`]) : x.treat ? L([`${x.guest} si připíjí ${x.drink.toLowerCase()} na tvůj účet.`, `${x.guest} drinks on you.`]) : L([`Na zdraví! Opilost ${x.level} %`, `Cheers! Drunkenness ${x.level} %`]) + (x.stage && !x.treat ? " · " + x.stage : ""));
         Object.assign(O, x.opilost); r.coins -= x.price; kresli();
       }).catch(() => { b.disabled = false; });
     });
@@ -1864,10 +1903,77 @@ function statyHtml(i) {
   const tr = (x) => /^OČ \+|^zranění/.test(x) ? " hl" : /\d\+$/.test(x) ? " pozor" : /^hřeje/.test(x) ? " teplo" : "";
   return `<div class="staty">${s.map(([x, d]) => `<span class="stat${tr(x)}" title="${esc(d || "")}">${esc(x)}</span>`).join("")}</div>`;
 }
+/** r27-31: mazlíček na PC — jeden panel na zvíře (obraz vlevo, vše o něm vpravo) a dole přepínač mezi vlastními zvířaty. Bez posouvání stránky. */
+const PETV = { kind: null };
+function petPc(view, Z, A, obr) {
+  const Zs = Z.filter((z) => !z.druhy || z === A).concat(Z.filter((z) => z.druhy && z !== A));
+  const V = Z.find((z) => z.kind === PETV.kind) || A;
+  const s = (V.rank || 0), RANKY = ["nezkušený", "učenlivý", "ostřílený", "zkušený"];
+  const sSebou = V.active || V.druhy;
+  const ne = V === A || V.druhy ? "" : petNeSpolu(A.kind, V.kind);
+  const pruh = (n, v, c, obracene) => `<div class="pp-bar"><span>${esc(n)}</span><div class="track"><div class="fill ${c}${(obracene ? v > 80 : v < 20) ? " nizko" : ""}" style="width:${v}%"></div></div><b>${v}</b></div>`;
+  const ihelp = (t) => `<button type="button" class="pet-i" data-pethelp="${esc(t)}" title="${esc(t)}">ⓘ</button>`;
+  setTimeout(() => postavNaZem(view.querySelector(".pet-zvire")), 0);
+  view.replaceChildren(h(`<div class="pet-pc">
+    <div class="pet-pc-karta">
+      <div class="pet-fig live" data-img="mesto-zverinec"><div class="pet-zvire${V.hungry ? " hlad" : ""}">${obr(V)}</div>
+        ${V.vek ? `<div class="pet-vek${V.stary ? " stary" : ""}"><small>${esc(L(["Věk", "Age"]))}</small><b>${esc(V.vek)}</b></div>` : ""}</div>
+      <div class="pet-pc-info panel">
+        <div class="pp-hlava"><div><h2>${esc(V.name)}</h2><p>${esc(V.kind)} · ${esc(V.stage_name)}${V.vek ? " · " + esc(V.vek) : ""} · ${esc(L(["výpravy ", "runs "]) + (V.runs || 0))}</p></div>
+          <span class="pill gold">${esc(V.rank_name || V.stage_name)}</span></div>
+        ${V.active ? `<div class="nast-seg pet-doma"><button class="${V.doma ? "" : "on"}" data-doma="0">${esc(L(["Na výpravy", "Takes along"]))}</button><button class="${V.doma ? "on" : ""}" data-doma="1">${esc(L(["Nechá doma", "Leaves home"]))}</button></div>`
+          : V.druhy ? `<div class="row"><span class="pill">${esc(L(["jde s tebou (druhé zvíře)", "with you (second)"]))}</span><button class="btn small" data-solo="1">${esc(L(["Nechat doma", "Leave home"]))}</button></div>`
+          : `<div class="row"><button class="btn primary" data-vzit="${esc(V.kind)}">${esc(ne ? L(["Vzít místo ", "Take instead of "]) + A.name : L(["Vzít s sebou", "Take along"]))}</button>${ne ? `<small class="muted">${esc(ne)}</small>` : ""}</div>`}
+        ${V.hungry ? `<p class="upozorneni ne">${esc(L(["Hladoví — nezaplacené krmení (Rychtář → Výdaje).", "Hungry — unpaid feed."]))}</p>` : ""}
+        <div class="pp-sekce"><h3>${esc(L(["Zkušenost", "Experience"]))}${ihelp(L(["Vzhled se mění s věkem. Zkušenost roste jen výpravami, na které ho vezmeš: nezkušený (bonus z poloviny), učenlivý po 5 výpravách (70 %), ostřílený po 15 (celý bonus), zkušený po 30 (ještě víc).", "Experience grows only on expeditions."]))}</h3>
+          <div class="stupne">${RANKY.map((w, i) => `<span class="${i <= s ? "on" : ""}${i === s ? " ted" : ""}">${esc(w)}</span>`).join("")}</div>
+          ${V.rank_dalsi ? `<div class="pp-bar"><span>${esc(L(["do stupně ", "to "]) + RANKY[s + 1])}</span><div class="track"><div class="fill xp" style="width:${Math.min(100, 100 * Math.max(0, V.rank_dalsi[0]) / V.rank_dalsi[1])}%"></div></div><b>${Math.max(0, V.rank_dalsi[0])}/${V.rank_dalsi[1]}</b></div>` : ""}</div>
+        <div class="pp-sekce"><h3>${esc(L(["Jak se má", "How it's doing"]))}${ihelp(L(["Hlad roste o 1 a spokojenost opadá o půl bodu za hodinu hraní. Když nehraješ, čas pro zvíře stojí. Hladové (hlad nad 80) nebo smutné zvíře (spokojenost pod 20) nedává bonusy a ubývá mu zdraví; když zdraví dojde, uhyne. Opečovanému se zdraví vrací.", "Needs drop only while you play."]))}</h3>
+          ${pruh(L(["Zdraví", "Health"]), V.zdravi ?? 100, "hp")}${pruh(L(["Hlad", "Hunger"]), Math.max(0, 100 - V.sytost), "food", true)}${pruh(L(["Spokojenost", "Content"]), V.spokojenost, "mood")}
+          ${V.napul ? `<p class="upozorneni ne">${esc(L(["Hladové nebo smutné zvíře nedává bonusy.", "A hungry or sad animal gives no bonuses."]))}</p>` : ""}
+          ${V.umira != null ? `<p class="upozorneni ne"><b>${esc(L([`Strádá — bez péče uhyne asi za ${V.umira} h hraní.`, `Will die in about ${V.umira} h.`]))}</b></p>` : ""}
+          <div class="row pet-akce"><button class="btn primary" data-krmit="">${esc(L(["Nakrmit (3 gr.)", "Feed (3 gr.)"]))}</button>
+            ${(V.foods || []).map(([f, n]) => `<button class="btn" data-krmit="${esc(f)}">${esc(L(["Dát: ", "Give: "]) + f)} <small>×${n}</small></button>`).join("")}
+            <button class="btn" data-mazlit>${esc(L(["Pomazlit se", "Cuddle"]))}</button>
+            <button class="btn danger" data-prodat>${esc(L(["Prodat · ", "Sell · "]) + (V.prodej || 0) + " gr.")}</button></div></div>
+        <div class="pp-sekce"><h3>${esc(L(["Schopnost", "Ability"]))}</h3>
+          <p class="pet-bonus">${esc(V.bonus)}</p><p class="muted">${esc(V.desc)}</p>
+          ${(V.vlastnosti || []).length ? `<div class="pet-vlastnosti"><small>${esc(L(["Naučil se na výpravách", "Learned"]))}</small>${V.vlastnosti.map((v) => `<span>${esc(v)}</span>`).join("")}</div>` : ""}
+          ${s < 3 ? `<p class="muted small">${esc(L(["Jako zkušený: ", "As veteran: "]) + V.full_bonus)}</p>` : ""}</div>
+      </div>
+    </div>
+    ${Z.length > 1 ? `<nav class="pet-prepinac">${Zs.map((z) => `<button type="button" class="${z === V ? "on" : ""}" data-ukaz="${esc(z.kind)}">${obr(z)}<span><b>${esc(z.name)}</b><small>${esc(z.kind)}${z.active || z.druhy ? " · " + esc(L(["s tebou", "with you"])) : ""}</small></span></button>`).join("")}</nav>` : ""}
+  </div>`));
+  mountLive(view, { still: true });
+  const zv = (data, msg) => call("zvire", { kind: V.kind, ...data }).then(() => { Zvuk.sfx("klik"); toast(msg); render(); }).catch(() => {});
+  view.querySelectorAll("[data-ukaz]").forEach((b) => b.onclick = () => { PETV.kind = b.dataset.ukaz; render(); });
+  view.querySelectorAll("[data-doma]").forEach((b) => b.onclick = () => zv({ act: "doma", doma: b.dataset.doma === "1" }, b.dataset.doma === "1" ? L(["Zůstane doma.", "Stays home."]) : L(["Půjde s tebou na výpravy.", "Joins your expeditions."])));
+  const pr = view.querySelector("[data-prodat]");
+  if (pr) pr.onclick = () => { if (confirm(L([`Opravdu prodat ${V.name} do zvěřince za ${V.prodej} gr.? Zvíře už nevrátíš.`, `Sell ${V.name} for ${V.prodej} gr.?`]))) call("zvire", { kind: V.kind, act: "prodat" }).then((r) => { Zvuk.sfx("mince"); toast(L([`Prodáno za ${r.price} gr.`, `Sold for ${r.price} gr.`])); PETV.kind = null; render(); }).catch(() => {}); };
+  view.querySelectorAll("[data-krmit]").forEach((b) => b.onclick = () => { b.disabled = true; zv({ act: "krmit", food: b.dataset.krmit || null }, L([`${V.name} se pustil(a) do jídla.`, `${V.name} eats.`])); });
+  const mz = view.querySelector("[data-mazlit]");
+  if (mz) mz.onclick = () => { mz.disabled = true; zv({ act: "pomazlit" }, L([`${V.name} spokojeně vrní.`, `${V.name} is pleased.`])); };
+  const so = view.querySelector("[data-solo]");
+  if (so) so.onclick = async () => { so.disabled = true; try { await call("raid_click", { id: "ks:pet:solo" }); await call("me"); toast(L(["Zůstane doma.", "Stays home."])); render(); } catch { so.disabled = false; } };
+  view.querySelectorAll("[data-vzit]").forEach((b) => b.onclick = async () => {
+    b.disabled = true;
+    try { await call("raid_click", { id: "ks:pet:set", values: [b.dataset.vzit] }); await call("me"); toast(L(["Vzal sis ", "Now with you: "]) + b.dataset.vzit); render(); }
+    catch { b.disabled = false; }
+  });
+  view.querySelectorAll("[data-pethelp]").forEach((b) => b.onclick = (e) => {
+    e.stopPropagation();
+    const o = document.createElement("div");
+    o.className = "rekap-obal vysv-obal";
+    o.innerHTML = `<div class="rekap vyp-pergamen vysv"><p>${esc(b.dataset.pethelp)}</p><div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-ok>${esc(L(["Zavřít", "Close"]))}</button></div></div>`;
+    o.onclick = (ev) => { if (ev.target === o || ev.target.closest("[data-ok]")) o.remove(); };
+    document.body.appendChild(o);
+  });
+}
 VIEWS.pet = (view) => {
   const Z = S.me.zvirata || [], A = Z.find((z) => z.active) || Z[0];
   const obr = (z) => IMG("bytosti/zvire-" + (ZVIRE_SLUG[z.kind] || Postava.slug(z.kind)) + "-" + z.stage);
   const PRAH = [7, 21];
+  if (A && !jeMobil() && innerWidth >= 1100) return petPc(view, Z, A, obr);
   if (!A) {
     view.replaceChildren(h(`<div class="panel pet-zadny"><h2>${esc(L(["Zatím nemáš žádné zvíře", "No companion yet"]))}</h2>
       <p>${esc(L(["Mládě koupíš ve Zvěřinci. Roste každým herním dnem a každou výpravou, na kterou ho vezmeš — a s ním i jeho bonus.", "Buy a young animal at the menagerie."]))}</p>
@@ -1880,12 +1986,16 @@ VIEWS.pet = (view) => {
   const rust = A.rank_dalsi ? { a: A.rank_dalsi[0], b: A.rank_dalsi[1], co: L(["výpravy do stupně ", "runs to "]) + RANKY[(A.rank || 0) + 1] } : null;
   const stupne = RANKY;
   setTimeout(() => postavNaZem(view.querySelector(".pet-zvire")), 0);
-  view.replaceChildren(h(`
+  const ihelp = (t) => `<button type="button" class="pet-i" data-pethelp="${esc(t)}" title="${esc(t)}">ⓘ</button>`;   // r27-31: na PC nápověda v okénku
+  const H_POTR = L(["Hlad roste o 1 a spokojenost opadá o půl bodu za hodinu hraní. Když nehraješ, čas pro zvíře stojí. Hladové (hlad nad 80) nebo smutné zvíře (spokojenost pod 20) nedává bonusy a ubývá mu zdraví; když zdraví dojde, uhyne a pohřbí se na hřbitově zvířátek. Opečovanému se zdraví vrací.", "Needs drop only while you play. A neglected animal gives no bonus and may die."]);
+  const H_STAT = L(["Vzhled se mění s věkem zvířete. Zkušenost roste jen výpravami, na které ho vezmeš: nezkušený (bonus z poloviny), učenlivý po 5 výpravách (70 %), ostřílený po 15 (celý bonus), zkušený po 30 (ještě o kus víc).", "Looks change with age. Experience grows only on expeditions."]);
+  const H_DALSI = L(["S sebou smíš mít nejvýš dvě zvířata, každé z jiné třídy (ptáci, psovité, kočka, fretka, myš, medvěd, mula). Myš nejde s ptákem, kočkou, fretkou ani liškou, medvěd ne s mulou.", "Up to two companions, each of a different class."]);
+  view.replaceChildren(h(`<div class="pet-rozlozeni">
     <div class="grid pet-grid">
       <div class="pet-fig-obal"><div class="pet-fig live" data-img="mesto-zverinec"><div class="pet-zvire${A.hungry ? " hlad" : ""}">${obr(A)}</div></div>
         ${A.vek ? `<div class="pet-vek${A.stary ? " stary" : ""}"><small>${esc(L(["Věk", "Age"]))}</small><b>${esc(A.vek)}</b>${A.stary ? `<em>${esc(L(["v letech", "old"]))}</em>` : ""}</div>` : ""}</div>
-      <div class="grid">
-        <div class="panel">
+      <div class="grid pet-panely">
+        <div class="panel pet-hlava">
           <div class="spread"><h2>${esc(A.name)}</h2><span class="pill gold">${esc(A.rank_name || A.stage_name)}</span></div>
           <p class="muted">${esc(A.kind)} · ${esc(A.stage_name)}${A.vek ? " · " + esc(A.vek) : ""}</p>
           ${A.active ? `<div class="nast-seg pet-doma"><button class="${A.doma ? "" : "on"}" data-doma="0">${esc(L(["Bere ho na výpravy", "Takes it along"]))}</button><button class="${A.doma ? "on" : ""}" data-doma="1">${esc(L(["Nechá ho doma", "Leaves it home"]))}</button></div>
@@ -1896,7 +2006,7 @@ VIEWS.pet = (view) => {
             <div class="track"><div class="fill xp" style="width:${Math.min(100, 100 * Math.max(0, rust.a) / rust.b)}%"></div></div></div>` : ""}
           <p class="muted small">${esc(A.progress)}</p>
         </div>
-        <div class="panel pet-potreby"><h3>${esc(L(["Jak se má", "How it's doing"]))}</h3>
+        <div class="panel pet-potreby"><h3>${esc(L(["Jak se má", "How it's doing"]))}${ihelp(H_POTR)}</h3>
           ${[[L(["Zdraví", "Health"]), A.zdravi ?? 100, "hp"], [L(["Hlad", "Hunger"]), Math.max(0, 100 - A.sytost), "food", true], [L(["Spokojenost", "Content"]), A.spokojenost, "mood"]].map(([n, v, c, obr]) => `<div class="bar"><div class="spread"><span>${esc(n)}</span><span class="muted">${v} / 100</span></div>
             <div class="track"><div class="fill ${c}${(obr ? v > 80 : v < 20) ? " nizko" : ""}" style="width:${v}%"></div></div></div>`).join("")}
           ${A.napul ? `<p class="upozorneni ne">${esc(L(["Hladové nebo smutné zvíře nedává žádné bonusy. Nakrm ho a pomazli se s ním.", "A hungry or sad animal gives no bonuses."]))}</p>` : ""}
@@ -1906,32 +2016,40 @@ VIEWS.pet = (view) => {
             ${(A.foods || []).map(([f, n]) => `<button class="btn" data-krmit="${esc(f)}">${esc(L(["Dát: ", "Give: "]) + f)} <small>×${n}</small></button>`).join("")}
             <button class="btn" data-mazlit>${esc(L(["Pomazlit se", "Cuddle"]))}</button>
             <button class="btn danger" data-prodat>${esc(L(["Prodat do zvěřince · ", "Sell · "]) + (A.prodej || 0) + " gr.")}</button></div>
-          <p class="muted small">${esc(L(["Hlad roste o 1 a spokojenost opadá o půl bodu za hodinu hraní. Když nehraješ, čas pro zvíře stojí. Hladové (hlad nad 80) nebo smutné zvíře (spokojenost pod 20) nedává bonusy a ubývá mu zdraví; když zdraví dojde, uhyne a pohřbí se na hřbitově zvířátek. Opečovanému se zdraví vrací.", "Needs drop only while you play. A neglected animal gives no bonus and may die."]))}</p>
+          <p class="muted small pet-help">${esc(H_POTR)}</p>
         </div>
-        <div class="panel"><h3>${esc(L(["Schopnost", "Ability"]))}</h3>
+        <div class="panel pet-schop"><h3>${esc(L(["Schopnost", "Ability"]))}</h3>
           <p class="pet-bonus">${esc(A.bonus)}</p>
           <p>${esc(A.desc)}</p>
           ${(A.vlastnosti || []).length ? `<div class="pet-vlastnosti"><small>${esc(L(["Naučil se na výpravách", "Learned on expeditions"]))}</small>${A.vlastnosti.map((v) => `<span>${esc(v)}</span>`).join("")}</div>` : `<p class="muted small">${esc(L(["Na každém stupni zkušenosti se naučí jednu náhodnou vlastnost svého druhu.", "Learns a random trait at each experience stage."]))}</p>`}
           ${(A.rank || 0) < 3 ? `<p class="muted small">${esc(L(["Jako zkušený: ", "As veteran: "]) + A.full_bonus)}</p>` : ""}
         </div>
-        <div class="panel"><h3>${esc(L(["Staty", "Stats"]))}</h3>
+        <div class="panel pet-staty"><h3>${esc(L(["Staty", "Stats"]))}${ihelp(H_STAT)}</h3>
           <div class="bojstaty">
             <div><small>${esc(L(["Vzhled", "Look"]))}</small><b>${esc(A.stage_name)}</b></div>
             <div><small>${esc(L(["Věk", "Age"]))}</small><b>${esc(A.vek || "—")}</b></div>
             <div><small>${esc(L(["Zkušenost", "Experience"]))}</small><b>${esc(A.rank_name || "")}</b></div>
             <div><small>${esc(L(["Výpravy", "Runs"]))}</small><b>${esc(A.runs)}</b></div>
           </div>
-          <p class="muted small">${esc(L(["Vzhled se mění s věkem zvířete. Zkušenost roste jen výpravami, na které ho vezmeš: nezkušený (bonus z poloviny), učenlivý po 5 výpravách (70 %), ostřílený po 15 (celý bonus), zkušený po 30 (ještě o kus víc).", "Looks change with age. Experience grows only on expeditions."]))}</p>
+          <p class="muted small pet-help">${esc(H_STAT)}</p>
         </div>
       </div>
     </div>
-    ${Z.length > 1 ? `<div class="panel" style="margin-top:18px"><h3>${esc(L(["Tvá další zvířata", "Your other animals"]))}</h3>
-      <p class="muted small">${esc(L(["S sebou smíš mít nejvýš dvě zvířata, každé z jiné třídy (ptáci, psovité, kočka, fretka, myš, medvěd, mula). Myš nejde s ptákem, kočkou, fretkou ani liškou, medvěd ne s mulou.", "Up to two companions, each of a different class."]))}</p>
+    ${Z.length > 1 ? `<div class="panel pet-dalsi" style="margin-top:18px"><h3>${esc(L(["Tvá další zvířata", "Your other animals"]))}${ihelp(H_DALSI)}</h3>
+      <p class="muted small pet-help">${esc(H_DALSI)}</p>
       <div class="zvirata">${Z.filter((z) => z !== A).map((z) => { const ne = petNeSpolu(A.kind, z.kind);
         return z.druhy ? `<div class="zvire vybrano">${obr(z)}<b>${esc(z.name)}</b><small>${esc(z.kind + " · " + z.stage_name + " · " + z.bonus)}</small>
           <small class="vzit">${esc(L(["jde s tebou", "with you"]))}</small><span class="zv-tl"><button type="button" class="btn small" data-vzit="${esc(z.kind)}">${esc(L(["Pečovat", "Care"]))}</button><button type="button" class="btn small" data-solo="1">${esc(L(["Nechat doma", "Leave home"]))}</button></span></div>`
         : `<button type="button" class="zvire" data-vzit="${esc(z.kind)}">${obr(z)}<b>${esc(z.name)}</b>
-        <small>${esc(z.kind + " · " + z.stage_name + " · " + z.bonus)}</small><small class="vzit">${esc(ne ? L(["Vzít místo ", "Take instead of "]) + A.name : L(["Vzít s sebou", "Take along"]))}</small>${ne ? `<small class="dim">${esc(ne)}</small>` : ""}</button>`; }).join("")}</div></div>` : ""}`));
+        <small>${esc(z.kind + " · " + z.stage_name + " · " + z.bonus)}</small><small class="vzit">${esc(ne ? L(["Vzít místo ", "Take instead of "]) + A.name : L(["Vzít s sebou", "Take along"]))}</small>${ne ? `<small class="dim">${esc(ne)}</small>` : ""}</button>`; }).join("")}</div></div>` : ""}</div>`));
+  view.querySelectorAll("[data-pethelp]").forEach((b) => b.onclick = (e) => {   // r27-31: nápověda v okénku
+    e.stopPropagation();
+    const o = document.createElement("div");
+    o.className = "rekap-obal vysv-obal";
+    o.innerHTML = `<div class="rekap vyp-pergamen vysv"><p>${esc(b.dataset.pethelp)}</p><div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-ok>${esc(L(["Zavřít", "Close"]))}</button></div></div>`;
+    o.onclick = (ev) => { if (ev.target === o || ev.target.closest("[data-ok]")) o.remove(); };
+    document.body.appendChild(o);
+  });
   mountLive(view, { still: true });
   const zv = (data, msg) => call("zvire", { kind: A.kind, ...data }).then(() => { Zvuk.sfx("klik"); toast(msg); render(); }).catch(() => {});
   view.querySelectorAll("[data-doma]").forEach((b) => b.onclick = () => zv({ act: "doma", doma: b.dataset.doma === "1" }, b.dataset.doma === "1" ? L(["Zůstane doma.", "Stays home."]) : L(["Půjde s tebou na výpravy.", "Joins your expeditions."])));
@@ -1953,6 +2071,22 @@ VIEWS.pet = (view) => {
 const DENIK = { sekce: "vypravy", data: null, otevrena: null };
 // r27-6: odznaky — vlastní kovaný znak pro každý (tvar, kov, stužka a symbol podle tématu)
 const ODZNAKY = {
+  // r27-37: nové odznaky
+  "Svazek před oltářem": ["kruh", "zlato", "#8e1b14", `<circle cx="-3" cy="1" r="5"/><circle cx="3" cy="1" r="5"/><path d="M-1 -7 L1 -7 L0 -5 Z"/>`],
+  "Knihomol": ["stit", "bronz", "#5a3a1a", `<path d="M-8 -6 H-1 V7 H-8 Z M8 -6 H1 V7 H8 Z M-1 -6 V7"/>`],
+  "Strážce příběhů": ["kosoctverec", "stribro", "#3b2a5a", `<path d="M-2 8 H2 V-2 H-2 Z M0 -2 C-3 -5 -1 -8 0 -9 C1 -8 3 -5 0 -2"/>`],
+  "Vážený měšťan": ["stit", "stribro", "#7a1f14", `<path d="M0 -8 L2 -3 L7 -3 L3 0 L5 6 L0 3 L-5 6 L-3 0 L-7 -3 L-2 -3 Z"/>`],
+  "Slavný v kraji": ["hvezda", "zlato", "#7a5a12", `<circle r="4"/><path d="M0 -9 V-6 M0 6 V9 M-9 0 H-6 M6 0 H9"/>`],
+  "Spořivá ruka": ["kruh", "zlato", "#4f6a3a", `<path d="M-7 7 H7 M-6 7 V-1 M6 7 V-1 M-2 7 V-1 M2 7 V-1 M-8 -1 H8 L0 -8 Z"/>`],
+  "Štědrý hostitel": ["kruh", "bronz", "#7a5a12", `<path d="M-6 -6 H2 V6 H-6 Z M2 -3 H5 V3 H2"/>`],
+  "Pravá ruka hostinského": ["kruh", "zelezo", "#5a3a1a", `<path d="M-7 7 L5 -5 M2 -8 L8 -2 L5 1 L-1 -5 Z"/>`],
+  "Poutník k oltáři": ["kosoctverec", "stribro", "#3b4f68", `<path d="M0 -9 V9 M-5 -3 H5"/>`],
+  "Neúnavný najatec": ["stit", "zlato", "#4f6a3a", `<path d="M-6 -7 H6 V8 H-6 Z M-3 -3 H3 M-3 1 H3 M-3 5 H1"/>`],
+  "Veterán stezek": ["hvezda", "stribro", "#4f6a3a", `<circle r="7"/><path d="M0 -5 L2 0 L0 5 L-2 0 Z"/>`],
+  "Krvavá čepel": ["stit", "zelezo", "#7a1f14", `<path d="M-6 7 L6 -7 M3 -7 H6 V-4 M-8 4 L-4 8"/>`],
+  "Poctivý plátce": ["kruh", "stribro", "#5a3a1a", `<circle r="6"/><path d="M-3 0 L-1 3 L4 -3"/>`],
+  "Ctěný dlužník": ["kruh", "zlato", "#3b4f68", `<path d="M-8 1 L-3 -3 L0 0 L3 -3 L8 1 L2 6 L-2 6 Z"/>`],
+  "Šampion kolbiště": ["hvezda", "zlato", "#7a1f14", `<path d="M-6 -7 H6 V-2 C6 3 2 5 0 5 C-2 5 -6 3 -6 -2 Z M0 5 V8 M-4 9 H4"/>`],
   "Lovec příšer": ["stit", "stribro", "#7a1f14", `<circle cx="0" cy="-2" r="7"/><path d="M-3 -3 h0.1 M3 -3 h0.1 M-3 4 L-2 7 L0 5 L2 7 L3 4"/>`],
   "Legenda": ["hvezda", "zlato", "#3b4f68", `<path d="M0 -9 L2.4 -2.8 L9 -2.6 L3.8 1.6 L5.6 8 L0 4.4 L-5.6 8 L-3.8 1.6 L-9 -2.6 L-2.4 -2.8 Z"/>`],
   "Postrach pánů míst": ["stit", "zlato", "#7a1f14", `<path d="M-8 6 L-2 -8 L1 -2 L4 -7 L8 6 Z M-4 6 V9 M4 6 V9"/>`],
@@ -1997,9 +2131,9 @@ function odznakSvg(name, got) {
 }
 
 VIEWS.denik = async (view) => {
-  const SEK = [["vypravy", ["Výpravy", "Expeditions"]], ["pocty", ["Počty a bilance", "Tally and ledger"]], ["majetek", ["Majetek", "Property"]],
+  const SEK = [["vypravy", ["Výpravy", "Expeditions"]], ["zakazky", ["Zakázky", "Jobs"]], ["pocty", ["Počty a bilance", "Tally and ledger"]], ["majetek", ["Majetek", "Property"]],
     ["mapy", ["Mapy", "Maps"]], ["zapisky", ["Zápisky", "Notes"]], ["pisemnosti", ["Písemnosti", "Writings"]], ["odznaky", ["Odznaky", "Badges"]]];
-  const RIM = ["I", "II", "III", "IV", "V", "VI", "VII"];
+  const RIM = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
   view.replaceChildren(h(`<div class="denik-kniha">
     <header class="dk-hlava"><span class="pecet" aria-hidden="true">KS</span><div><small>${esc(L(["Královské stezky · Kutnohorsko · Léta Páně 1403", "Royal Trails · Anno Domini 1403"]))}</small>
       <h2>${esc(L(["Deník — ", "Journal — "]) + S.me.name)}</h2></div></header>
@@ -2026,6 +2160,19 @@ VIEWS.denik = async (view) => {
           ${v.hloubka ? `<p class="muted small">${esc(L(["Prošlých míst: ", "Places visited: "]) + v.hloubka)}</p>` : ""}
         </div></details>`).join("")
       : `<div class="empty">${esc(L(["Zatím žádný záznam. Každá další výprava se sem zapíše.", "No records yet."]))}</div>`}`;
+  } else if (DENIK.sekce === "zakazky") {   // r27-35: přijaté zakázky z nástěnky a co se s nimi stalo
+    const Z = D.zakazky || { aktivni: [], log: [] };
+    const STAV = { "přijata": ["Přijata", "Taken"], "splněna": ["Splněna", "Done"], "vzdána": ["Vzdána", "Dropped"], "propadla": ["Propadla", "Expired"] };
+    box.innerHTML = `<h3 class="dk-nadpis">${esc(L(["Zakázky", "Jobs"]))}</h3>
+      <p class="muted">${esc(L([`Splněno celkem: ${Z.hotovo}. Nástěnka se obnoví za ${Math.floor((Z.konci_min || 0) / 60)} h ${String(Math.round((Z.konci_min || 0) % 60)).padStart(2, "0")} min herního času — nesplněné zakázky pak propadnou.`, `Completed: ${Z.hotovo}.`]))}</p>
+      <h4>${esc(L(["Rozpracované", "In progress"]))}</h4>
+      ${Z.aktivni.length ? `<ul class="dk-zakazky">${Z.aktivni.map((q) => `<li class="${q.ready ? "hotova" : ""}"><b>${esc(q.title)}</b>
+        <span>${esc(q.text)}</span>
+        <small>${esc(L(["Odměna ", "Reward "]) + q.coins + " gr. · " + q.xp + " ZK")}${q.mam != null ? esc(L([" · máš ", " · have "]) + q.mam + " / " + q.qty) : ""}${q.ready ? " · <em>" + esc(L(["připravena k odevzdání na nástěnce", "ready to turn in"])) + "</em>" : ""}</small></li>`).join("")}</ul>`
+        : `<p class="empty">${esc(L(["Teď nemáš žádnou zakázku. Vezmi si ji v hostinci na nástěnce.", "No jobs taken."]))}</p>`}
+      <h4>${esc(L(["Záznamy", "Log"]))}</h4>
+      ${Z.log.length ? `<ul class="dk-zaznamy">${Z.log.map((x) => `<li><span class="dz-cas">${esc(datum(x.t))}</span> <b>${esc(L(STAV[x.stav] || [x.stav, x.stav]))}:</b> ${esc(x.title)}${x.stav === "splněna" ? esc(" · +" + x.coins + " gr., +" + x.xp + " ZK") : ""}</li>`).join("")}</ul>`
+        : `<p class="empty">${esc(L(["Zatím žádné záznamy — zapisují se od tohoto vydání.", "No entries yet."]))}</p>`}`;
   } else if (DENIK.sekce === "pocty") {   // r27-6: kniha počtů — co postava dokázala a kam tekly groše
     const K = D.kniha || {}, gr = (n) => n.toLocaleString("cs-CZ") + " gr.";
     const max = Math.max(1, ...(K.bilance || []).map((r) => Math.max(r.in, r.out)));
@@ -2167,6 +2314,10 @@ function plochaNavod() {
 if (plochaMobil() && !plochaMa()) { const b = document.getElementById("plocha-login"); if (b) b.hidden = false; }
 const IMG = (name) => `<picture><source media="(max-width: 760px)" srcset="${IMG_BASE}${name}-m.webp"><img src="${IMG_BASE}${name}.webp" alt="" loading="lazy" decoding="async"></picture>`;
 
+/** r27-31: na PC se neposouvá stránka, ale jen obsah pod lištou (#view) — lišta a záložky zůstanou nahoře. */
+function skrolEl() { const v = document.getElementById("view"); return v && getComputedStyle(v).overflowY === "auto" ? v : null; }
+function skrolY() { const s = skrolEl(); return s ? s.scrollTop : window.scrollY; }
+function skrolNa(y) { const s = skrolEl(); if (s) s.scrollTop = y; else window.scrollTo(0, y); }
 const SPOTS = [   // klikací místa na mapě (% šířky a výšky obrázku mesto-mapa)
   { id: "hostinec", x: 21.8, y: 53.6, n: ["Hostinec", "Inn"] },
   { id: "kovar", x: 20.8, y: 66.5, n: ["Kovárna", "Smithy"] },
@@ -2279,6 +2430,7 @@ const PLACES = {
       { go: "misto/chram-pozehnani", ic: "🙏", n: ["Požehnání", "Blessings"], d: ["Síla, ochrana, moudrost", "Strength, protection, wisdom"] },
       { act: "pray:uzdraveni", ic: "❤️", n: ["Uzdravení", "Healing"], d: ["+25 % životů hned", "+25% health now"] },
       { go: "dar/chram", ic: "🎁", n: ["Dar kostelu", "Gift to the church"], d: ["Pro dobrou pověst", "For your reputation"] },
+      { panel: "svatba", ic: "💍", n: ["Sňatek", "Wedding"], d: ["Muž a žena před oltářem, oba musí souhlasit", "A man and a woman, both must agree"] },   // r27-37
     ] },
   "chram-pozehnani": { img: "mesto-chram", n: ["Požehnání", "Blessings"], say: ["Kněz: „Pomodli se, synu. O jedno požehnání denně smíš prosit.“", "Priest: \"Pray, my child. One blessing a day.\""],
     opts: [
@@ -2481,6 +2633,24 @@ VIEWS.mesto = (view) => {
   });
 };
 
+/** r27-31: cesta pověsti na radnici — kde hráč je mezi stupni Neznámý → Slavný a kolik chybí do dalšího. */
+function povestHtml() {
+  const P = (S.me.profil || {}).povest;
+  if (!P) return "";
+  const st = P.stupne, b = P.body, n = st.length - 1;
+  let i = st.findIndex(([p]) => p > b); if (i < 0) i = n + 1;      // stupně stejně daleko od sebe, výplň uvnitř úseku podle bodů
+  const pct = i > n ? 100 : i === 0 ? 0 : 100 * ((i - 1) + (b - st[i - 1][0]) / (st[i][0] - st[i - 1][0])) / n;
+  const ted = i > 0 ? st[Math.min(i, n + 1) - 1] : null, dalsi = st[i];
+  const rozpis = [L(["Pověst roste zakázkami z nástěnky, výpravami, pány míst, souboji na kolbišti, dary, modlitbami, prací v hostinci, včas zaplaceným desátkem, dražbami, úkoly radnice a pomocí padlým. Zločiny a dluhy ji kazí.", "Renown grows with jobs, expeditions, bosses and donations."])]
+    .concat((P.rozpis || []).map(([d, v]) => `${d}: ${v > 0 ? "+" : ""}${v}`)).join("\n");
+  return `<div class="povest panel" title="${esc(rozpis)}">
+    <div class="spread"><b>${esc(L(["Pověst ve městě", "Renown"]))}: ${esc(ted ? ted[1] : L(["Pochybná", "Dubious"]))} · ${b} ${esc(L(["b.", "pts"]))}</b>
+      <small class="muted">${esc(dalsi ? L([`do stupně ${dalsi[1]} chybí ${dalsi[0] - b} b.`, `${dalsi[0] - b} pts to ${dalsi[1]}`]) : L(["nejvyšší stupeň", "top rank"]))}</small></div>
+    <div class="pv-cesta"><div class="pv-fill" style="width:${pct.toFixed(1)}%"></div>
+      ${st.map(([p, nm], k) => `<span class="pv-stupen${b >= p ? " on" : ""}" style="left:${(100 * k / n).toFixed(1)}%" title="${esc(nm + ": " + ((P.stupne_vyhody || [])[k] || ""))}"><i></i><em>${esc(nm)} <small>${p}</small></em></span>`).join("")}</div>
+    ${P.vyhody ? `<div class="pv-vyhody"><b>${esc(L(["Výhody ve městě:", "Town perks:"]))}</b> ${esc(P.vyhody)}${dalsi && (P.stupne_vyhody || [])[i] ? ` <span class="muted">· ${esc(L([`jako ${dalsi[1]}: `, `as ${dalsi[1]}: `]) + P.stupne_vyhody[i])}</span>` : ""}</div>` : ""}</div>`;
+}
+
 VIEWS.misto = (view) => {
   const p = PLACES[S.arg];
   if (!p || (S.arg === "dum" && S.me.house !== "dum") || (PODNIK_ZAMEK[S.arg] && PODNIK_ZAMEK[S.arg]())) { go("mesto"); return; }
@@ -2502,6 +2672,7 @@ VIEWS.misto = (view) => {
   vylij();
   view.replaceChildren(h(`${sceneHead(p.img, L(p.n), L(p.say))}
     ${S.me.on_raid ? `<div class="panel notice" style="margin:14px 0">🗺️ ${esc(t("on_raid"))}</div>` : ""}
+    ${S.arg === "radnice" ? povestHtml() : ""}
     ${mriz}
     ${S.arg === "hostinec" ? `<div id="hospoda-reci" class="hospoda-reci"></div>` : ""}
     <p><button class="btn" data-go="mesto">← ${esc(t("back_map"))}</button></p>`));
@@ -2521,7 +2692,7 @@ VIEWS.misto = (view) => {
 
 // --- r27-3: všechno jako na Discordu — panel místa nebo osobní věci, ovládaný stejným kódem jako na Discordu
 const PANEL = { back: "", arg: "" };
-const PANEL_IMG = { townhall: "mesto-radnice", inn: "mesto-hostinec", market: "mesto-trziste", menagerie: "mesto-zverinec", pets: "mesto-zverinec",
+const PANEL_IMG = { svatba: "mesto-chram", townhall: "mesto-radnice", inn: "mesto-hostinec", market: "mesto-trziste", menagerie: "mesto-zverinec", pets: "mesto-zverinec",
   arena: "mesto-kolbiste", temple: "mesto-chram", donate_church: "mesto-chram", barber: "mesto-lazebnik", trails: "mesto-brana",
   bank: "mesto-banka", bills: "mesto-radnice", board: "mesto-hostinec", lodging: "mesto-pokoj", innchest: "mesto-hostinec", burgle: "mesto-hostinec",
   learn: "mesto-hostinec", smuggler: "mesto-paserak", carpenter: "mesto-trziste", titles: "mesto-radnice", fine: "mesto-radnice",
@@ -2936,6 +3107,17 @@ function bankaRozvrzeni(box) {
     c.className = "btn small bk-castka " + k;
     c.textContent = t.trim().replace(/^\S+\s*/, "").replace(/\s*gr\.?$/, "") || t;
     radky[k].querySelector(".bk-castky").append(c);
+  });
+  // r27-37: v každém řádku i vlastní částka (políčko + OK) — nejen pevné 10 / 50 / 100 / 500
+  Object.entries(radky).forEach(([k, r]) => {
+    const prvni = r.querySelector("button[data-cid]"); if (!prvni) return;
+    const pref = prvni.dataset.cid.replace(/:[^:]+$/, ":");
+    const box2 = document.createElement("span"); box2.className = "bk-vlastni";
+    box2.innerHTML = `<input type="number" min="1" step="1" inputmode="numeric" placeholder="${esc(L(["částka", "amount"]))}"><button class="btn small bk-castka ${k}" data-cid="${pref}0" disabled>OK</button>`;
+    const inp = box2.querySelector("input"), ok = box2.querySelector("button");
+    inp.oninput = () => { const v = Math.floor(Number(inp.value)); ok.disabled = !(v > 0); ok.dataset.cid = pref + (v > 0 ? v : 0); };
+    inp.onkeydown = (e) => { if (e.key === "Enter" && !ok.disabled) ok.click(); };
+    r.querySelector(".bk-castky").append(box2);
   });
   wrap.querySelectorAll("section").forEach((s) => { if (!s.querySelector(".bk-t").children.length && !s.querySelector(".bk-b").children.length) s.remove(); });
   dtext.append(wrap);
@@ -4368,7 +4550,7 @@ function raidShopHtml(p) {
 }
 
 /** r27-23: vysvětlivky v okénku po klepnutí (rozpis OČ a útoku, potřeby, vlastnosti) — na stránce nezabírají místo. */
-const VL_POPIS = { "Síla": ["útok a zranění zbraní na blízko, nošení těžké výbavy"], "Obratnost": ["útok a zranění střelbou, obrana (ne v těžké zbroji), uhýbání, iniciativa"],
+const VL_POPIS = { "Síla": ["útok a zranění zbraní na blízko, nošení těžké výbavy, výdrž v boji (půl bonusu)"], "Obratnost": ["útok a zranění střelbou, obrana (ne v těžké zbroji), uhýbání, iniciativa"],
   "Odolnost": ["životy, výdrž v boji, pomalejší únava, hlad a žízeň, zima"], "Všímavost": ["všimnout si pastí, stop a skrytých věcí na výpravě"],
   "Učenost": ["čtení, léčení druhů, řemesla a dovednosti"], "Výřečnost": ["vyjednávání, ceny u obchodníků, situace na výpravě"] };
 function vysvetli(k, m, P) {
