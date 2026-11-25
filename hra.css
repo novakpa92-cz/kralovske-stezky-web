@@ -3520,7 +3520,7 @@ html.mobil .vp-lok .vl-obr{height:70px}html.mobil .vp-lok .vl-popis{display:none
 .sz-karta b{font-family:var(--font-title,serif);font-size:1.35rem;padding:0 14px;color:#f3d999}
 .sz-karta small{padding:0 14px;color:#dccaa2;font-size:.92rem;line-height:1.45}
 .sz-obr{position:relative;display:block;aspect-ratio:3/2;background:center/cover no-repeat #120c08}
-.sz-stav{position:absolute;top:10px;right:10px;display:none;padding:3px 9px;border-radius:12px;background:#8c1d18;color:#fff;font-style:normal;font-size:.8rem;box-shadow:0 2px 6px #000a}
+.sz-stav{position:absolute;top:10px;right:10px;display:none;padding:3px 9px;border-radius:12px;background:linear-gradient(#d8b45c,#a9842f);color:#20170b;font-style:normal;font-size:.8rem;box-shadow:0 2px 6px #000a}
 .sz-stav.on{display:block;animation:szblik 1.6s infinite}
 @keyframes szblik{50%{opacity:.6}}
 .pest .pest-fig .skop-postava{height:100%;display:flex;align-items:flex-end;justify-content:center}
@@ -3543,3 +3543,161 @@ html.mobil .vp-lok .vl-obr{height:70px}html.mobil .vp-lok .vl-popis{display:none
 }
 .pest .kh-arena{align-self:center}
 .pest .kh-log{list-style:none;padding-left:0;overflow-y:auto}
+.vyzva-hrace{display:flex;flex-direction:column;gap:6px;margin-top:12px;padding:10px 12px;border:1px dashed #6b5631;border-radius:8px;background:#0006}
+.vyzva-hrace select{min-width:220px}
+.vyzvy-2{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:stretch;margin-top:10px}
+.vyzvy-2 .vyzva-hrace{margin-top:0}
+@media (max-width:900px){.vyzvy-2{grid-template-columns:1fr}}
+@media (min-width:1101px){html:not(.mobil) .skop-npc .skop-portret:not(.velky){max-height:130px;width:auto}html:not(.mobil) .skop-npc{margin-bottom:2px}}
+/* r27-42: veřejná místa — popisek nad žlutým bodem (bod přesně na souřadnici, popisek těsně nad ním) */
+.spot[data-nad]{width:0;height:0}
+.spot[data-nad] span{position:absolute;left:50%;bottom:22px;margin:0;transform:translateX(-50%)}
+.spot[data-nad]:hover span{transform:translateX(-50%) translateY(-2px)}
+.spot[data-nad][data-kraj="l"] span{transform:translateX(-14px)}
+.spot[data-nad][data-kraj="r"] span{transform:translateX(calc(-100% + 14px))}
+@media (max-width:760px){.spot[data-nad] span{bottom:12px}}
+
+/* r27-42: nocleh na záložky (Chudina · Měšťané · Panstvo), karty s náhledem jako u koupě domu */
+.nocleh-zal{display:flex;gap:8px;margin:4px 0 12px}
+.nocleh-zal .chip{flex:1;padding:9px 10px;font-size:.85rem;letter-spacing:.12em}
+.nocleh-zal .chip.on{background:linear-gradient(#d8b45c,#a9842f);color:#20170b;border-color:#e9d29a}
+.nocleh-strana.dve{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.nocleh2 .nabidka-karta .nk-obr{aspect-ratio:auto;height:clamp(140px,calc(100vh - 560px),300px)}
+.nocleh2 .nabidka-jedna .nk-obr{min-height:clamp(220px,calc(100vh - 420px),420px)}
+.nocleh2 .nk-text{padding:14px 16px;display:flex;flex-direction:column;gap:6px;color:#e9dab8}
+.nocleh2 .nk-text b{color:#f3d999;font-size:1.15rem}
+.nocleh2 .nk-text .z-akce{margin-top:auto;padding-top:10px}
+.nocleh2 .nk-text .z-akce .btn{width:100%;padding:10px 14px}
+@media (max-width:760px){.nocleh-strana.dve{grid-template-columns:1fr}}
+.nocleh2 .dtext{display:flex!important;flex-direction:column!important;gap:0!important;grid-template-columns:none!important}
+.nocleh2 .dtext>*{width:100%;max-width:none}
+.nocleh2 .nz-listy{display:block!important}
+.nocleh2 .nabidka-karta .nk-obr{height:clamp(90px,calc(100vh - 680px),300px)!important}
+.nocleh2 .nk-text .z-akce .btn{text-align:center;justify-content:center}
+.nocleh2 .nocleh-pozn{margin:8px 2px 0;font-size:.85rem;opacity:.8}
+.nocleh2 .nocleh-pozn{grid-column:1/-1}
+
+/* r27-42: karta Postava se vejde do okna bez posouvání — kruhy, znaky a vlastnosti se zmenšují podle výšky okna */
+@media (min-width:1101px){
+  html:not(.mobil) .hk-stav{--kz:clamp(58px,calc((100vh - 500px) / 2.6),104px)}
+  html:not(.mobil) .hk-stav .potreby.velke{margin:4px 0 6px;gap:12px}
+  html:not(.mobil) .hk-stav .potreby.velke .potreba .kruh{width:var(--kz);height:var(--kz)}
+  html:not(.mobil) .hk-stav .potreby.velke .potreba .kruh b{font-size:calc(var(--kz) * .3)}
+  html:not(.mobil) .hk-stav .potreby.velke .potreba .kruh small{font-size:calc(var(--kz) * .12)}
+  html:not(.mobil) .hk-stav .znak-obr{width:var(--kz);height:var(--kz)}
+  html:not(.mobil) .hk-stav .znak-obr b{font-size:calc(var(--kz) * .34);padding-top:calc(var(--kz) * .13)}
+  html:not(.mobil) .hk-stav .znak:nth-child(4) .znak-obr b{font-size:calc(var(--kz) * .21)}
+  html:not(.mobil) .hk-stav .vlastnosti.velke{margin-top:4px;gap:10px}
+  html:not(.mobil) .hk-stav .vlastnosti.velke .vlastnost{padding:calc(var(--kz) * .1) 6px calc(var(--kz) * .08)}
+  html:not(.mobil) .hk-stav .vlastnosti.velke .vlastnost b{font-size:calc(var(--kz) * .38)}
+  html:not(.mobil) .hk-stav .sb-sekce{margin:2px 0}
+  html:not(.mobil) .hk-stav .stav-ucinky{margin:2px 0}
+}
+/* r27-42: Vybaveno po záložkách */
+.vyb-zal{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:6px 0 10px}
+.vyb-zal .chip{padding:7px 4px;font-size:.72rem;letter-spacing:.06em;text-align:center;position:relative}
+#view .vyb-zal .chip.on{background:linear-gradient(#d8b45c,#a9842f);color:#20170b;border-color:#e9d29a}
+.vyb-zal .chip.ma::after{content:"";position:absolute;top:4px;right:5px;width:6px;height:6px;border-radius:50%;background:#5b8a2e;box-shadow:0 0 0 1px #f3e3bd}
+.vyb-sect{margin:12px 0 6px;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+.vyb-zal.opz .chip{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
+.vyb-zal.opz .chip small{font-size:.62rem;letter-spacing:0;text-transform:none;opacity:.8;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* r27-42: kompaktní Zdroj světla, filtr v kapsách a batohu */
+html:not(.mobil) .batoh-pc .svetlo-panel{padding:8px 12px!important}
+.svetlo-panel .spread h3{margin:0 0 4px}
+.svetlo-panel .item.svetlo{padding:6px 8px;gap:10px}
+.svetlo-panel .item.svetlo .icon{width:40px;height:40px}
+.svetlo-panel .item.svetlo .palivo{margin:3px 0}
+.svetlo-panel .item.svetlo .acts .btn.small{padding:3px 8px;font-size:.78rem}
+.svetlo-panel .empty{padding:4px 0;font-size:.9rem}
+.bf-filtr{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px;position:sticky;top:0;z-index:2;background:inherit}
+.bf-filtr .chip{padding:4px 8px;font-size:.7rem;letter-spacing:.04em}
+.bf-filtr .chip small{opacity:.7}
+#view .bf-filtr .chip.on{background:linear-gradient(#d8b45c,#a9842f);color:#20170b;border-color:#e9d29a}
+/* r27-42: batoh v mřížce 3 × 2 — Vybaveno a Kapsy nahoře stejně vysoké, Opasek a Zdroj světla dole stejně vysoké, Batoh přes celou výšku */
+@media (min-width:1101px){
+  html:not(.mobil) .batoh.batoh-pc{grid-template-rows:minmax(0,1fr) minmax(0,auto)}
+  html:not(.mobil) .batoh-pc>.grid:first-child{display:contents}
+  html:not(.mobil) .batoh-pc>.grid:first-child>.panel:nth-child(1){grid-column:1;grid-row:1}
+  html:not(.mobil) .batoh-pc>.grid:first-child>.panel:nth-child(2){grid-column:1;grid-row:2}
+  html:not(.mobil) .batoh-pc .opasek-panel,html:not(.mobil) .batoh-pc .svetlo-panel{max-height:34vh}
+}
+/* r27-42: schopnosti — speciální vlastnost na střed, úrovně jako záložky */
+.hk-schop .hk-vlastnost{justify-content:center;text-align:center}
+.hk-schop .hk-vlastnost>div{flex:0 1 auto}
+.sk-zal{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 10px}
+.sk-zal .chip{flex:1 1 0;min-width:84px;padding:7px 6px;font-size:.74rem;letter-spacing:.06em;text-align:center}
+#view .sk-zal .chip.on{background:linear-gradient(#d8b45c,#a9842f);color:#20170b;border-color:#e9d29a}
+.sk-zal .chip.ceka{box-shadow:0 0 0 2px #e9b949;animation:szblik 1.6s infinite}
+.sk-zal .chip.zamek{opacity:.6}
+.hk-schop .sk-uroven{margin-top:0}
+@media (min-width:1101px){
+  html:not(.mobil) .hk-schop .sk-uroven .schopnosti{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  html:not(.mobil) .hk-schop .sk-uroven .schop-karta{margin:0;align-items:flex-start}
+}
+/* r27-42: posuvníky v barvách hry (červené), ne modré z prohlížeče */
+input[type=range]{accent-color:#a3241b}
+/* r27-42: Listiny pro rychtáře */
+.listiny{display:flex;flex-direction:column;gap:12px}
+.li-hlava{display:grid;grid-template-columns:minmax(160px,40%) 1fr;gap:16px;align-items:stretch;border:1px solid #c9a45c55;background:#0e0905cc;box-shadow:0 6px 18px #0009}
+.li-obr{min-height:170px;overflow:hidden}.li-obr img{width:100%;height:100%;object-fit:cover;display:block}
+.li-citat{padding:16px 16px 14px 0;display:flex;flex-direction:column;gap:6px}
+.li-citat p{margin:0;font-style:italic;font-size:1.08rem;line-height:1.5;color:#f1e2bd}
+.li-citat small{color:#c9a45c;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem}
+.li-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.li-chips span{padding:4px 10px;border:1px solid #c9a45c66;border-radius:14px;font-size:.8rem;color:#e9d8ae;background:#1c130b}
+.li-seznam{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.li-karta{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #c9a45c55;background:#140d08}
+.li-karta .li-ik{width:44px;height:44px;object-fit:contain}
+.li-karta>div{flex:1;display:flex;flex-direction:column}.li-karta b{color:#f3d999}.li-karta small{color:#cdb98e}
+.li-prazdno{padding:18px;border:1px dashed #c9a45c66;text-align:center;color:#e9d8ae}
+.li-prazdno p{margin:8px 0 6px;opacity:.8}.li-prazdno .li-chips{justify-content:center}
+/* r27-42: panel se záložkami (Na stezkách) */
+.pz-zal{display:flex;gap:8px;margin:0 0 12px}
+.pz-zal .chip{flex:1;padding:9px 10px;font-size:.82rem;letter-spacing:.1em}
+#view .pz-zal .chip.on{background:linear-gradient(#d8b45c,#a9842f);color:#20170b;border-color:#e9d29a}
+.pz-strana{min-height:120px}
+/* r27-42: příprava výpravy — náhledy u Kdo, Obtížnost a Služby */
+.vp-nahled .vl-obr{height:clamp(110px,calc(100vh - 560px),230px)}
+.vp-nahled .vl-txt{display:flex;flex-direction:column;gap:3px;padding:10px 12px}
+/* r27-42: Vztahy — Lidé ve městě · Milostné vztahy */
+.vz-druh{display:flex;gap:8px;margin:4px 0 10px}
+.vz-druh .chip{flex:1;padding:8px 10px;font-size:.8rem;letter-spacing:.1em}
+#view .vz-druh .chip.on{background:linear-gradient(#d8b45c,#a9842f);color:#20170b;border-color:#e9d29a}
+.lide-mriz{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px;margin:8px 0}
+.li-osoba{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 6px;border:1px solid #b8924a88;border-radius:6px;background:#f6e9c8;color:#3a2410;cursor:var(--k-klik);text-align:center}
+.li-osoba.on{box-shadow:0 0 0 2px #a9842f}
+.li-osoba b{font-size:.86rem;line-height:1.1}.li-osoba em{font-size:.68rem;opacity:.75;line-height:1.15;max-height:2.3em;overflow:hidden}
+.li-tvar{width:58px;height:58px;border-radius:50%;overflow:hidden;border:2px solid #b8924a;flex:none;display:block}
+.li-tvar img{width:100%;height:100%;object-fit:cover}
+.li-st{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.li-body{position:relative;width:90%;height:6px;border-radius:3px;background:#d8c49a;overflow:hidden}
+.li-body i{position:absolute;top:0;bottom:0;background:#7a6545}
+.li-body::after{content:"";position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:#3a2410}
+.spojenec .li-st,.spojenec .li-body i{color:#2f6b1f;background-color:#4b8a2e}.spojenec .li-st{background:none}
+.prizen .li-st{color:#4b7a2a}.prizen .li-body i{background:#7fae4e}
+.neutral .li-st{color:#6b5631}
+.neduvera .li-st{color:#a0581a}.neduvera .li-body i{background:#d08a3a}
+.nepritel .li-st{color:#8c1d18}.nepritel .li-body i{background:#a3241b}
+.li-osoba.spojenec .li-tvar{border-color:#4b8a2e}.li-osoba.prizen .li-tvar{border-color:#7fae4e}.li-osoba.neduvera .li-tvar{border-color:#d08a3a}.li-osoba.nepritel .li-tvar{border-color:#a3241b}
+.li-detail{display:flex;gap:14px;align-items:flex-start;padding:10px 12px;border:1px solid #b8924a;border-radius:6px;background:#fff3d2aa}
+.li-detail .li-tvar{width:74px;height:74px}
+.li-detail h4{margin:0 0 4px}.li-detail h4 small{font-weight:400;opacity:.7}
+.li-detail ul{margin:4px 0;padding-left:16px;font-size:.86rem}.li-detail .plus{color:#2f6b1f;font-weight:700}.li-detail .minus{color:#8c1d18;font-weight:700}
+.lide-mriz{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))!important;gap:6px!important}
+.li-osoba{flex-direction:row!important;align-items:center;text-align:left!important;padding:5px 8px!important;gap:8px!important}
+.li-osoba .li-tvar{width:40px;height:40px}
+.li-txt{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.li-txt .li-body{width:100%}
+.li-detail{margin-top:6px}
+.li-detail .li-body{width:220px;margin:4px 0 6px}
+.vz-odznak{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:12px;font-size:.78rem;letter-spacing:.04em;border:1px solid #c9a45c88;background:#120c08cc;color:#e9d8ae}
+.vz-odznak.spojenec,.vz-odznak.prizen{border-color:#7fae4e;color:#cde8b0}
+.vz-odznak.neduvera{border-color:#d08a3a;color:#f0c890}
+.vz-odznak.nepritel{border-color:#a3241b;color:#f0a8a0}
+.vz-odmita{border-color:#a3241b!important;color:#f0c8c0;margin-bottom:10px}
+#view .vp-volby:has(> .vp-nahled){display:grid!important;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+#view .vp-volba.vp-nahled{display:flex!important;flex-direction:column!important;align-items:stretch;padding:0!important;max-width:none!important;width:auto!important}
+#view .vp-nahled .vl-obr{width:100%!important;height:clamp(110px,calc(100vh - 600px),230px)!important;border-bottom:1px solid #6b5228;border-right:0!important}
+#view .vp-nahled .vl-obr img{width:100%;height:100%;object-fit:cover}
+#view .vp-nahled.prepinac .vl-txt b::before{content:"☐ ";opacity:.8}
+#view .vp-nahled.prepinac.on .vl-txt b::before{content:"☑ "}
