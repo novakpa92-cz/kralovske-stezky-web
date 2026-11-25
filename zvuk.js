@@ -172,6 +172,11 @@ const Zvuk = (() => {
     kosa: ["efekty/kosa"], seti: ["efekty/seti"], kladivo: ["efekty/kladivo-drevo"],                 // r27: statek
     "zvire-slepice": ["efekty/slepice"], "zvire-koza": ["efekty/koza"], "zvire-ovce": ["efekty/ovce"],
     "zvire-prase": ["efekty/prase"], "zvire-krava": ["efekty/krava"],
+    // r27-41: sázky v hostinci (kohoutí jáma, u soudku, na pěsti)
+    kokrhani: ["efekty/kohout-kokrhani"], kdakani: ["efekty/kohout-kdakani"],
+    pest: ["efekty/pest-1", "efekty/pest-2", "efekty/pest-3", "efekty/pest-4"], "pest-tvrda": ["efekty/pest-tvrda-1", "efekty/pest-tvrda-2"],
+    bolest: ["efekty/bolest-1", "efekty/bolest-2"], zaber: ["efekty/zaber-1", "efekty/zaber-2"],
+    rihnuti: ["efekty/rihnuti-1", "efekty/rihnuti-2"], smich: ["efekty/smich-1", "efekty/smich-2"], nalevani: ["efekty/nalevani"],
   };
   const bufs = new Map();                 // název souboru → AudioBuffer | Promise | null (chyba)
   function load(name) {
@@ -261,7 +266,7 @@ const Zvuk = (() => {
     "zvire-prase"() { burst(busSfx, { f: 450, q: 3, a: .01, d: .25, v: .35, fEnd: 300 }); },
     "zvire-krava"() { tone(busSfx, { f: 150, fEnd: 115, type: "sawtooth", a: .1, d: 1.2, v: .08 }); },
   };
-  const SFX_VOL = { hrom: 1, zvon: .6, kovadlina: .35, dvere: .5, kostky: .8, kalisek: .8 };
+  const SFX_VOL = { kokrhani: .55, kdakani: .5, smich: .5, bolest: .55, zaber: .5, rihnuti: .6, nalevani: .5, hrom: 1, zvon: .6, kovadlina: .35, dvere: .5, kostky: .8, kalisek: .8 };
   function sfx(name) {
     if (!V.on || !init()) return;
     const files = FILE_SFX[name];
