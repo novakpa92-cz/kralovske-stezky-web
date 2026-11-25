@@ -3242,3 +3242,139 @@ html.mobil .chat-online li{font-size:13px}
 .vyp .vscene>.vcas.malo{color:#ff9d8a}
 .vyp .vscene>.vcas.kriticky{animation:pulseI 1s ease-in-out infinite}
 @media (max-width:760px){.vyp .vscene>.vcas{top:118px!important;bottom:auto!important;right:12px!important;font-size:1.6rem}}
+/* r27-40: truhlář — karty nábytku s náhledem, místností a účinkem */
+.volby-blok.truhlar .vp-volby{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))!important;gap:6px}
+.volby-blok.truhlar .vp-volba{display:grid;grid-template-columns:60px minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px 10px;min-height:0}
+.volby-blok.truhlar .tr-nah{width:60px;height:60px;background-size:300% 300%;background-repeat:no-repeat;filter:drop-shadow(0 3px 3px #0009)}
+.volby-blok.truhlar .tr-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.volby-blok.truhlar .tr-txt b{font-size:16px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.volby-blok.truhlar .tr-mist{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#c9a55a}
+.volby-blok.truhlar .tr-txt small{color:#d8c6a0;font-size:12.5px;line-height:1.25}
+.volby-blok.truhlar .tr-kup{display:flex;flex-direction:column;align-items:flex-end;gap:4px;white-space:nowrap}
+.volby-blok.truhlar .tr-kup b{color:#f3d58a;font-size:15px}
+/* r27-40: výraznější záložky karty postavy */
+.hk-zalozky{gap:6px!important;padding:8px 10px 0;border-bottom:2px solid #7a1f14!important;background:#cdb383}
+.hk-zalozky button{font:700 14px Cinzel,serif!important;letter-spacing:.08em;color:#4a3420!important;background:linear-gradient(#e8d4a6,#d2b783)!important;border:1px solid #9c7a43!important;border-bottom:0!important;border-radius:6px 6px 0 0;padding:12px 6px!important;box-shadow:inset 0 1px 0 #fff6}
+.hk-zalozky button:hover{background:linear-gradient(#f2e2bb,#dcc396)!important;color:#7a1f14!important}
+.hk-zalozky button.on{background:linear-gradient(#8e2a1b,#6b1a10)!important;color:#f7e6bd!important;border-color:#5a140c!important;box-shadow:0 -2px 6px #0004!important}
+.hk-zalozky button.on .hk-pocet{background:#f3d58a;color:#6b1a10}
+/* r27-40: účinky — mřížka ikon, popis v okénku */
+.uc-mriz{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.uc-dl{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px 6px;border:1px solid #b8924a;border-radius:8px;background:#f3e6c8;cursor:var(--k-klik,pointer);font:inherit;color:#3a2614}
+.uc-dl.bonus{border-color:#6f9a4a;background:linear-gradient(#eef0d2,#dfe3b8)}
+.uc-dl.postih{border-color:#b0503c;background:linear-gradient(#f5ddd0,#e8c4b3)}
+.uc-dl:hover,.uc-dl:focus-visible{outline:2px solid #7a1f14;outline-offset:1px}
+.uc-ik{width:46px;height:46px;display:flex;align-items:center;justify-content:center}
+.uc-ik img.icon{width:46px;height:46px;object-fit:contain}
+.uc-ik.em{font-size:30px;line-height:1}
+.uc-hod{position:absolute;top:4px;right:4px;font:700 11px Cinzel,serif;font-style:normal;padding:1px 5px;border-radius:8px;background:#3d6b2a;color:#f6ecd4}
+.uc-dl.postih .uc-hod{background:#7a1f14}
+.uc-jm{font-size:12px;line-height:1.15;text-align:center;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#uc-tip{position:fixed;z-index:9999;max-width:280px;padding:10px 12px;border-radius:8px;background:#21160c;border:1px solid #c9a55a;color:#f1e3c2;box-shadow:0 8px 24px #000a;pointer-events:none;font-size:14px}
+#uc-tip.postih{border-color:#c04a36}
+#uc-tip b{display:block;color:#f3d58a;font-size:15px}#uc-tip.postih b{color:#ff9d8a}
+#uc-tip p{margin:3px 0 0}#uc-tip small{display:block;margin-top:4px;color:#b8a27a;font-size:12px}
+/* r27-40: batoh na PC — tři sloupce přes celou šířku (Nasazeno + Opasek · Kapsy · Batoh), posouvá se jen uvnitř panelů */
+@media (min-width:1101px){
+  html:not(.mobil) .batoh.batoh-pc{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch!important;max-width:1560px;margin:0 auto}
+  html:not(.mobil) .batoh-pc>.grid:nth-child(2){display:contents}
+  html:not(.mobil) .batoh-pc>.grid:first-child{display:flex;flex-direction:column;gap:14px;min-height:0}
+  html:not(.mobil) .batoh-pc>.grid:first-child>.panel:first-child{flex:1 1 auto}
+  html:not(.mobil) .batoh-pc>.grid:first-child>.panel:last-child{flex:0 1 auto}
+  html:not(.mobil) .batoh-pc .panel{display:flex;flex-direction:column;min-height:0;margin:0;padding:14px 14px}
+  html:not(.mobil) .batoh-pc .panel>.items{flex:1 1 auto;min-height:0;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+  html:not(.mobil) .batoh-pc .item .acts{flex-wrap:wrap;justify-content:flex-end}
+}
+@media (min-width:1101px){html:not(.mobil) main[data-tab="bag"]{max-width:1560px!important}}
+/* r27-40: deník — listování po stranách */
+.dk-strana.listuje{display:flex;flex-direction:column;overflow:hidden}
+.dk-strana.listuje>.dk-list{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:thin}
+.dk-listovani{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding-top:8px;border-top:1px solid #b8924a88;font-family:Cinzel,serif;font-size:13px;color:#6b4a22}
+.dk-listovani .btn:disabled{opacity:.35}
+/* r27-40: Ostatní jako kniha */
+.ostatni-kniha .ost-strana{overflow:auto;scrollbar-width:thin}
+.ostatni-kniha .ost-list{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;color:#2a1a0e;margin:0}
+.ostatni-kniha .ost-list h3{font:400 2rem "EB Garamond",serif;color:#7a1f14;margin:0 0 14px}
+.ostatni-kniha .ost-list .muted,.ostatni-kniha .ost-list .dim{color:#6b5236!important}
+.ostatni-kniha .ost-list a{color:#7a1f14}
+.ostatni-kniha .nast-hl{color:#6b4a22}
+.ostatni-kniha textarea{width:100%;background:#fbf3df;color:#2a1a0e;border:1px solid #b8924a}
+/* r27-40: vztahy v deníku */
+[data-tab="denik"].ma-novinku{position:relative}
+[data-tab="denik"].ma-novinku::after{content:attr(data-pocet);position:absolute;top:2px;right:8px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#b3261e;color:#fff;font:700 11px/18px sans-serif;text-align:center}
+.vz-stav{font-size:1.1rem;margin:0 0 6px}
+.vz-ceka{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:10px;padding:8px 10px;margin:6px 0;border:1px solid #b8924a;border-radius:6px;background:#f6ead0}
+.vz-ceka.zadost{grid-template-columns:1fr auto;border-color:#7a1f14;background:#f3dccb}
+.vz-ceka img.icon,.vz-ikona.velka{width:44px;height:44px;object-fit:contain}
+.vz-karta{border:1px solid #b8924a;border-radius:8px;padding:10px 14px;margin:8px 0;background:#f8edd5}
+.vz-karta.manzel{border-color:#c9a55a;background:linear-gradient(#fbf1d8,#f0deb3)}
+.vz-jm{font-size:1.15rem;color:#7a1f14}
+.vz-bar{position:relative;height:16px;border-radius:8px;background:#e1cfa8;border:1px solid #b8924a;overflow:hidden;margin:6px 0 4px}
+.vz-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#c0504a,#e07a8a)}
+.vz-bar span{position:relative;display:block;text-align:center;font:700 11px/16px Cinzel,serif;color:#3a1610}
+.vz-akce{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.vz-dvbtn{display:inline-flex;align-items:center;gap:6px}
+.vz-ikona{width:26px;height:26px;object-fit:contain}
+.vz-dar{display:flex;gap:8px;align-items:center;margin:4px 0}
+.vz-dar select,.vz-novy select{max-width:340px;background:#fbf3df;color:#2a1a0e;border:1px solid #b8924a;border-radius:4px;padding:5px 8px}
+.vz-log summary{cursor:pointer;color:#6b4a22;font-size:13px}
+.vz-log p{margin:2px 0}
+.uc-ik img.uc-obr{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 2px 2px #0005)}
+@media (min-width:1101px){html:not(.mobil) .denik-kniha:not(.ostatni-kniha) .dk-zalozky{gap:4px;padding-top:8px}html:not(.mobil) .denik-kniha:not(.ostatni-kniha) .dk-zalozky button{padding:8px 12px 8px 10px}}
+/* r27-40: malované odznaky */
+.odz-mal{display:none;width:104px;height:104px;object-fit:contain;filter:drop-shadow(0 4px 4px #0007)}
+.odznak.ma-obr .odz-mal{display:block}
+.odznak.ma-obr .odz-svg{display:none}
+.odz-mal.neni{filter:grayscale(1) opacity(.45)}
+/* r27-40: Škopek — pitná soutěž */
+.skop{padding:16px 18px}
+.skop-npc{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center;margin:6px 0 10px}
+.skop-portret{width:120px;height:170px;object-fit:contain;filter:drop-shadow(0 8px 10px #000a)}
+.skop-portret.velky{width:100%;height:100%;object-fit:contain}
+.skop-npc h3{margin:0 0 4px;font-family:var(--serif)}.skop-npc h3 small{color:#c9a55a;font-size:.8em}
+.skop-pribeh{font-style:italic;color:#d8c6a0;margin:0}
+.skop-vklady{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.skop .row select{background:#1a120a;color:var(--text);border:1px solid #8a6a3c;border-radius:4px;padding:6px 8px}
+.skop-vyzva{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;border:1px solid #c9a55a;border-radius:6px;background:#2a1d10;margin-bottom:8px}
+.skop-stul{display:grid;grid-template-columns:1fr 120px 1fr;gap:12px;align-items:stretch}
+.skop-hrac{display:flex;flex-direction:column;gap:6px;padding:10px;border:1px solid #6b5228;border-radius:8px;background:#1a120ae0;transition:transform .3s,filter .6s}
+.skop-hrac.vitez{border-color:#e8c77a;box-shadow:0 0 18px #e8c77a44}
+.skop-hrac.pod-stolem{filter:grayscale(.7) brightness(.7)}
+.skop-hrac.pod-stolem .skop-fig{transform:rotate(80deg) translateY(30%);transition:transform 1.2s cubic-bezier(.5,-.3,.7,1)}
+.skop-jm{font:700 1.05rem var(--serif);display:flex;align-items:center;gap:6px}
+.skop-fig{height:230px;display:flex;justify-content:center;align-items:flex-end;transform-origin:50% 90%}
+.skop-fig .hero-fig{height:100%;aspect-ratio:2/3;background:none;border:0;box-shadow:none}
+.skop-hrac.pije .skop-fig{animation:skop-kyv 1.6s ease-in-out}
+@keyframes skop-kyv{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}60%{transform:rotate(3deg)}}
+.skop-opil{position:relative;height:18px;border-radius:9px;background:#2a1d10;border:1px solid #6b5228;overflow:hidden}
+.skop-opil i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#d9a441,#c0504a 70%,#8e1f14);transition:width 1.2s ease-out}
+.skop-opil span{position:relative;display:block;text-align:center;font:700 11px/18px Cinzel,serif;color:#f6ecd4;text-shadow:0 1px 2px #000}
+.skop-kostka{min-height:76px;display:flex;justify-content:center}
+.k20{position:relative;width:70px;text-align:center;animation:k20-hod .9s ease-out both;animation-delay:var(--d)}
+.k20 svg{width:56px;height:56px;display:block;margin:0 auto}
+.k20 polygon{fill:#efe1bd;stroke:#7a5a2a;stroke-width:2}.k20 polygon.vnitr{fill:none;stroke:#b8924a;stroke-width:1.2}
+.k20.ne polygon{fill:#e8b6a8;stroke:#8e1f14}
+.k20 b{position:absolute;top:14px;left:0;right:0;font:700 20px Cinzel,serif;color:#2a1a0e}
+.k20 small{display:block;font-size:11px;color:#c9b48a;white-space:nowrap}
+.k20.ne small{color:#ff9d8a}
+@keyframes k20-hod{0%{opacity:0;transform:translateY(-40px) rotate(-200deg) scale(.6)}70%{opacity:1;transform:translateY(4px) rotate(15deg) scale(1.05)}100%{transform:none}}
+.skop-stred{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
+.skop-stred b{font:700 1.2rem var(--serif);color:#f3d58a}.skop-stred small{color:#c9b48a}
+.skop-napoj{width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 6px 6px #000a);animation:skop-nalej 1.2s ease-out}
+@keyframes skop-nalej{0%{transform:translateY(-30px) rotate(-25deg);opacity:0}100%{transform:none;opacity:1}}
+.skop-sazky{display:grid;gap:6px;margin:8px 0}.skop-sazky>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.skop-log{max-height:150px;overflow:auto;font-size:.9rem;color:#d8c6a0;margin:8px 0;padding-left:22px}
+@media (max-width:760px){.skop-stul{grid-template-columns:1fr 70px 1fr;gap:6px}.skop-fig{height:150px}.skop-napoj{width:54px;height:54px}.skop-npc{grid-template-columns:80px 1fr}.skop-portret{width:80px;height:120px}}
+.skop-fig{position:relative;overflow:hidden}
+.skop-postava{position:relative;height:100%;aspect-ratio:2/3}
+.skop-postava .figura{position:relative;height:100%;display:flex;justify-content:center;align-items:flex-end}
+.skop-postava .figura-zbrane{display:none}
+.skop-hlava{position:relative;border:1px solid #6b5228;border-radius:8px;padding:14px 22px;margin-bottom:12px;background:linear-gradient(90deg,#120c08ee 30%,#120c0866),var(--obr) center 40%/cover}
+.skop-hlava h2{margin:0;font:400 2.2rem var(--serif);color:#f6ecd4}.skop-hlava p{margin:2px 0 0;font-style:italic;color:#d8c6a0}
+.skop-hra{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:14px;align-items:start}
+.skop-stul{padding:10px;border-radius:8px;background:linear-gradient(#120c08aa,#120c08dd),var(--obr) center/cover}
+.skop-bok .chat-list{max-height:180px}
+.skop-bok .skop-log{max-height:140px}
+@media (max-width:1100px){.skop-hra{grid-template-columns:1fr}}
+@media (min-width:1101px){html:not(.mobil) .skop-fig{height:clamp(130px,calc(100vh - 650px),280px)}html:not(.mobil) .skop-hlava{padding:8px 20px;margin-bottom:8px}html:not(.mobil) .skop-hlava h2{font-size:1.7rem}html:not(.mobil) .skop{padding:10px 14px}}
+.skop-log{list-style:none;padding-left:4px}
