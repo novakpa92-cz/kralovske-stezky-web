@@ -24,10 +24,10 @@ const T = {
   nav_hero: ["Postava", "Hero"], nav_bag: ["Batoh", "Bag"], nav_pet: ["Mazlíček", "Companion"], nav_admin: ["Admin", "Admin"], nav_denik: ["Deník", "Journal"], nav_market: ["Trh", "Market"],
   nav_inn: ["Hostinec", "Inn"], nav_more: ["Ostatní", "More"],
   coins: ["{0} gr.", "{0} gr."], level: ["Úr. {0}", "Lvl {0}"], level_long: ["Úroveň {0}", "Level {0}"],
-  xp: ["Zkušenosti", "Experience"], health: ["Životy", "Health"], satiety: ["Sytost", "Satiety"],
+  xp: ["Zkušenosti", "Experience"], health: ["Životy", "Health"], satiety: ["Hlad", "Hunger"],
   hydration: ["Žízeň", "Thirst"], rest: ["Odpočatost", "Rest"], needs: ["Stav postavy", "Condition"],
   attributes: ["Vlastnosti", "Attributes"],
-  unspent: ["Volné body k přidělení: {0} — přiděl je na Discordu.", "Unspent points: {0} — assign them on Discord."],
+  unspent: ["Volné body k přidělení: {0} — přiděl je v Postavě u Vlastností (tlačítko +).", "Unspent points: {0} — assign them under Attributes (+)."],
   combat: ["Boj", "Combat"], armor_class: ["Obrana (OČ)", "Armour class"], attack: ["Útok", "Attack"], damage: ["Zranění", "Damage"],
   origin: ["Původ", "Origin"], time: ["Herní čas", "Game time"], refresh: ["Obnovit", "Refresh"],
   no_char: ["Ještě nemáš postavu. Vytvoř si ji na Discordu v kanálu #úvod a pak tady klikni na Obnovit.",
@@ -630,19 +630,19 @@ VIEWS.hero = (view) => {
       const ZNAK = Object.fromEntries(Object.entries(IKO).map(([k, ik]) => [k, `<svg viewBox="0 0 100 100">
         <circle cx="50" cy="50" r="46" fill="url(#zg2)" stroke="#c9a55a" stroke-width="4"/><circle cx="50" cy="50" r="38" fill="none" stroke="#f0d79a" stroke-width="1.2" opacity=".55"/>
         <g transform="translate(50 22) scale(.9)" fill="none" stroke="#f0d79a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">${ik}</g></svg>`]));
-      const znak = (z, val, nazev, pop) => `<div class="znak" title="${esc(pop)}"><div class="znak-obr">${ZNAK[z]}<b>${esc(val)}</b></div><span>${esc(nazev)}</span></div>`;   // r27-6: popis jen v nápovědě (vejde se bez posouvání)
+      const znak = (z, val, nazev, pop) => `<button type="button" class="znak" data-vysv="${z}" title="${esc(pop)}"><div class="znak-obr">${ZNAK[z]}<b>${esc(val)}</b></div><span>${esc(nazev)}</span></button>`;   // r27-23: klepnutí = rozpis v okénku   // r27-6: popis jen v nápovědě (vejde se bez posouvání)
       const hp = Math.round(100 * m.health / Math.max(1, m.max_health));
       return `<svg width="0" height="0" style="position:absolute"><defs>
           <radialGradient id="zg1" cx="40%" cy="30%"><stop offset="0" stop-color="#f0d79a"/><stop offset=".55" stop-color="#c9a55a"/><stop offset="1" stop-color="#8a5a1c"/></radialGradient>
           <radialGradient id="zg2" cx="40%" cy="30%"><stop offset="0" stop-color="#c04a36"/><stop offset=".6" stop-color="#8e1b14"/><stop offset="1" stop-color="#5a0f0a"/></radialGradient></defs></svg>
-        <div class="sb-sekce" title="${esc(L(["Sytost a odpočatost: čím víc, tím líp. Žízeň: čím víc, tím hůř. Pod 25 (žízeň nad 75) postih −1, na nule ztrácíš životy. Od 80 (žízeň do 20) plný sil +1. Přejedení a přepití dá postih, dokud neopadne.", "Body and needs"]))}"><small>${esc(L(["Tělo a potřeby", "Body and needs"]))} ⓘ</small></div>
-        <div class="potreby velke">${potreby.map(([n, v, mx, c]) => `<div class="potreba ${c}" style="--p:${Math.max(0, Math.min(100, 100 * v / mx))}"><div class="kruh"><b>${esc(v)}</b><small>/ ${esc(mx)}</small></div><span>${esc(n)}</span></div>`).join("")}</div>
+        <div class="sb-sekce" data-vysv="potreby" title="${esc(L(["Odpočatost: čím víc, tím líp. Hlad a žízeň: čím víc, tím hůř. Odpočatost pod 25, hlad či žízeň nad 75 = postih −1. Odpočatost od 80, hlad i žízeň do 20 = plný sil +1. Přejedení a přepití dá postih, dokud neopadne.", "Body and needs"]))}"><small>${esc(L(["Tělo a potřeby", "Body and needs"]))} ⓘ</small></div>
+        <div class="potreby velke">${potreby.map(([n, v, mx, c]) => `<div class="potreba ${c}" data-vysv="potreby" role="button" tabindex="0" style="--p:${Math.max(0, Math.min(100, 100 * v / mx))}"><div class="kruh"><b>${esc(v)}</b><small>/ ${esc(mx)}</small></div><span>${esc(n)}</span></div>`).join("")}</div>
         <div class="stav-ucinky">${(m.stav_ucinky || []).map((u) => `<span class="su ${u.kind}">${u.kind === "bonus" ? "+" : "−"} ${esc(u.text)}</span>`).join("") || `<span class="su nic">${esc(L(["Bez bonusů a postihů ze stavu.", "No effects from your condition."]))}</span>`}</div>
-        <p class="muted hk-pozn" hidden>${esc(L(["Sytost a odpočatost: čím víc, tím líp. Žízeň: čím víc, tím hůř. Sytost nebo odpočatost pod 25, nebo žízeň nad 75 = −1 k útoku (odpočatost i k obraně); na nule ztrácíš životy. Sytost a odpočatost od 80 a žízeň do 20 = plný sil, +1 k útoku a zkouškám. Kdo se přejí nebo přepije (přes 100), je těžkopádný — postih, dokud to za pár hodin neopadne.", "Satiety and rest: higher is better. Thirst: higher is worse. Well fed, rested and not thirsty = +1 to attack and checks."]))}</p>
+        <p class="muted hk-pozn" hidden>${esc(L(["Odpočatost: čím víc, tím líp. Hlad a žízeň: čím víc, tím hůř. Odpočatost pod 25, nebo hlad či žízeň nad 75 = −1 k útoku (odpočatost i k obraně); na 100 hladu nebo žízně (a na nule odpočatosti) ztrácíš životy. Odpočatost od 80, hlad i žízeň do 20 = plný sil, +1 k útoku a zkouškám. Kdo se přejí nebo přepije, je těžkopádný — postih, dokud to za pár hodin neopadne.", "Rest: higher is better. Hunger and thirst: higher is worse."]))}</p>
         ${OP.value || OP.nasoska ? `<p class="opilost-txt${OP.other < 0 ? " zle" : ""}">${OP.stage ? `<b>${esc(OP.stage.charAt(0).toUpperCase() + OP.stage.slice(1))}</b> · ${esc(L(["Výřečnost ", "Speech "]) + sg(OP.speech) + (OP.other ? L([" · útok a zkoušky ", " · attack & checks "]) + sg(OP.other) : "") + (OP.def ? L([" · obrana ", " · defence "]) + sg(OP.def) : ""))} · ${esc(L([`vyprchá o ${OP.decay} za hodinu`, `fades ${OP.decay}/hour`]))}` : ""}
           ${OP.nasoska ? `<span class="tag nasoska">${esc(L(["Násoska", "Drunkard"]))}</span> ${esc(L(["snese víc, ale střízlivému se třesou ruce (−1). Zbavíš se toho týdnem bez kapky.", "tolerates more, but shakes when sober (−1). A dry week cures it."]))}` : ""}</p>` : ""}
         ${hp < 35 ? `<p class="upozorneni ne">${esc(L(["Jsi těžce raněný — ošetři se u apatykáře, obvazem nebo noclehem.", "Badly wounded."]))}</p>` : ""}
-        <div class="sb-sekce" title="${esc(L(["Zásah = k20 + útok + zdatnost proti obraně nepřítele; 20 je kritický zásah.", "Hit = d20 + attack + proficiency vs defence."]))}"><small>${esc(L(["Do boje", "In battle"]))} ⓘ</small></div>
+        <div class="sb-sekce" data-vysv="boj" title="${esc(L(["Zásah = k20 + útok + zdatnost proti obraně nepřítele; 20 je kritický zásah.", "Hit = d20 + attack + proficiency vs defence."]))}"><small>${esc(L(["Do boje", "In battle"]))} ⓘ</small></div>
         <div class="znaky">
           ${znak("stit", m.armor_class, t("armor_class"), L(["čím víc, tím hůř tě zasáhnou", "harder to hit"]))}
           ${znak("mec", sg(P.attack_base ?? m.attack), t("attack"), L(["k hodu na zásah", "to hit"]))}
@@ -650,11 +650,12 @@ VIEWS.hero = (view) => {
           ${znak("kostka", m.damage, t("damage"), L(["kostky zbraně + bonus", "weapon dice + bonus"]))}
         </div>
         <p class="muted hk-pozn" hidden>${esc(L(["Zásah = k20 + útok + zdatnost proti obraně nepřítele; 20 je kritický zásah. Hlad a žízeň pod 20 ubírají útok, únava i obranu.", "Hit = d20 + attack + proficiency vs defence."]))}</p>
-        <div class="sb-sekce" title="${esc(L(["Každé 2 body ve vlastnosti = +1 k hodům. Za každou novou úroveň dostaneš 1 bod; strop roste s úrovní.", "Every 2 points = +1 to rolls."]))}"><small>${esc(L(["Vlastnosti", "Attributes"]))} ⓘ</small></div>
+        <div class="sb-sekce" data-vysv="vl" title="${esc(L(["Každé 2 body ve vlastnosti = +1 k hodům. Za každou novou úroveň dostaneš 1 bod; strop roste s úrovní.", "Every 2 points = +1 to rolls."]))}"><small>${esc(L(["Vlastnosti", "Attributes"]))} ⓘ</small></div>
         ${obsah.vlast()}`;
     },
-    vlast: () => `<div class="vlastnosti velke">${m.stats.map((st) => `<div class="vlastnost"><b>${esc(st.value)}</b><span>${esc(st.name)}</span><small>${esc(L(["bonus ", "bonus "]) + sg(Math.floor(st.value / 2)))}</small></div>`).join("")}</div>
-      ${m.unspent ? `<p class="upozorneni">${esc(t("unspent", m.unspent))}</p>` : ""}`,
+    vlast: () => `${m.unspent ? `<p class="upozorneni body-volne">${esc(L([`Volné body: ${m.unspent} — klepni na + u vlastnosti, kterou chceš zvednout (strop teď ${m.stat_cap}).`, `Unspent points: ${m.unspent} — tap + on an attribute (cap ${m.stat_cap}).`]))}</p>` : ""}
+      <div class="vlastnosti velke">${m.stats.map((st) => `<div class="vlastnost${st.muze ? " lze" : ""}" data-vysv="vl:${esc(st.id)}" role="button" tabindex="0"><b>${esc(st.value)}</b><span>${esc(st.name)}</span><small>${esc(L(["bonus ", "bonus "]) + sg(Math.floor(st.value / 2)))}</small>
+        ${st.muze ? `<button class="vl-plus" data-bod="${esc(st.id)}" title="${esc(L(["Přidat bod", "Add a point"]))}">+</button>` : ""}</div>`).join("")}</div>`,   // r27-22: body se přidělují tady
     cesta: () => { const C = m.cesta || [], lv = m.level;
       const dalsi = C.find((c) => c.lvl > lv);
       return `<p class="muted hk-pozn">${esc(L(["Postava roste až do 30. úrovně. Každých pár úrovní se odemkne něco nového — schopnosti, výbava, majetek.", "Your character grows up to level 30."]))}</p>
@@ -666,7 +667,7 @@ VIEWS.hero = (view) => {
   };
   const xpPct = Math.max(0, Math.min(100, m.xp_next ? 100 * m.xp / m.xp_next : 0));
   const OP = m.opilost || { value: 0 };
-  const potreby = [[t("health"), m.health, m.max_health, "hp"], [t("satiety"), m.satiety, 100, "food"], [t("hydration"), Math.max(0, 100 - m.hydration), 100, "water zizen"], [t("rest"), m.rest, 100, "rest"],
+  const potreby = [[t("health"), m.health, m.max_health, "hp"], [t("satiety"), Math.max(0, 100 - m.satiety), 100, "food zizen"], [t("hydration"), Math.max(0, 100 - m.hydration), 100, "water zizen"], [t("rest"), m.rest, 100, "rest"],
     [L(["Opilost", "Drunkenness"]), OP.value || 0, 100, "drunk"]];
   view.replaceChildren(h(`
     ${m.on_raid ? `<div class="panel notice" style="margin-bottom:16px">🗺️ ${esc(t("on_raid"))}</div>` : ""}
@@ -678,7 +679,7 @@ VIEWS.hero = (view) => {
         ${m.na_kutnohorsku ? `<p class="hh-pobyt">${esc(L(["Na Kutnohorsku ", "In the Kutná Hora region for "]) + m.na_kutnohorsku)}</p>` : ""}</div>
       <div class="hh-cas">${esc(m.clock)}</div>
     </header>
-    ${m.unspent ? `<p class="upozorneni">${esc(t("unspent", m.unspent))}</p>` : ""}
+    ${m.unspent ? `<p class="upozorneni">${esc(L([`Volné body k přidělení: ${m.unspent} — přiděl je níž ve Vlastnostech (tlačítko +).`, `Unspent points: ${m.unspent} — assign them below.`]))}</p>` : ""}
     ${P.wanted ? `<p class="upozorneni ne">${esc(L(["Hledaný! Odměna ", "Wanted! Bounty "]) + P.wanted.bounty + L([" gr. · pokuta u rychtáře ", " gr. · fine "]) + P.wanted.fine + " gr.")}</p>` : ""}
     ${P.bills_debt ? `<p class="upozorneni">${esc(L(["Dluh na výdajích: ", "Unpaid bills: "]) + P.bills_debt + L([" gr. (Radnice → Rychtář → Výdaje)", " gr."]))}</p>` : ""}
     ${P.debt ? `<p class="upozorneni">${esc(L(["Dluh u apatykáře: ", "Apothecary debt: "]) + P.debt + " gr.")}</p>` : ""}
@@ -693,6 +694,12 @@ VIEWS.hero = (view) => {
     </div>`));
   mountLive(view, { still: true });
   view.querySelectorAll("[data-karta]").forEach((b) => b.onclick = () => { HERO.karta = b.dataset.karta; render(); });
+  view.querySelectorAll("[data-vysv]").forEach((el) => el.onclick = (e) => { if (e.target.closest("[data-bod]")) return; vysvetli(el.dataset.vysv, m, P); });
+  view.querySelectorAll("[data-bod]").forEach((b) => b.onclick = async () => {   // r27-22: přidělení bodu na webu
+    b.disabled = true;
+    try { await call("pridel_bod", { attr: b.dataset.bod }); Zvuk.sfx("stranka"); toast(L(["+1 ", "+1 "]) + b.dataset.bod); render(); }
+    catch { b.disabled = false; }
+  });
   view.querySelectorAll("[data-vyber-lvl]").forEach((b) => b.onclick = async () => {   // r27-17: volba schopnosti
     if (!confirm(L([`Vybrat „${b.dataset.vyberJm}“ na úrovni ${b.dataset.vyberLvl}? Volba platí napořád.`, `Choose "${b.dataset.vyberJm}"? This is permanent.`]))) return;
     b.disabled = true;
@@ -1852,8 +1859,8 @@ VIEWS.pet = (view) => {
           <p class="muted small">${esc(A.progress)}</p>
         </div>
         <div class="panel pet-potreby"><h3>${esc(L(["Jak se má", "How it's doing"]))}</h3>
-          ${[[L(["Zdraví", "Health"]), A.zdravi ?? 100, "hp"], [L(["Sytost", "Fed"]), A.sytost, "food"], [L(["Spokojenost", "Content"]), A.spokojenost, "mood"]].map(([n, v, c]) => `<div class="bar"><div class="spread"><span>${esc(n)}</span><span class="muted">${v} / 100</span></div>
-            <div class="track"><div class="fill ${c}${v < 20 ? " nizko" : ""}" style="width:${v}%"></div></div></div>`).join("")}
+          ${[[L(["Zdraví", "Health"]), A.zdravi ?? 100, "hp"], [L(["Hlad", "Hunger"]), Math.max(0, 100 - A.sytost), "food", true], [L(["Spokojenost", "Content"]), A.spokojenost, "mood"]].map(([n, v, c, obr]) => `<div class="bar"><div class="spread"><span>${esc(n)}</span><span class="muted">${v} / 100</span></div>
+            <div class="track"><div class="fill ${c}${(obr ? v > 80 : v < 20) ? " nizko" : ""}" style="width:${v}%"></div></div></div>`).join("")}
           ${A.napul ? `<p class="upozorneni ne">${esc(L(["Hladové nebo smutné zvíře nedává žádné bonusy. Nakrm ho a pomazli se s ním.", "A hungry or sad animal gives no bonuses."]))}</p>` : ""}
           ${A.pece < 1 ? `<p class="upozorneni">${esc(A.pece ? L(["Zvíře roste napůl rychle — chce víc jídla a mazlení (obojí aspoň 50).", "Grows at half speed — feed and cuddle it more."]) : L(["Zanedbané zvíře neroste.", "A neglected animal doesn't grow."]))}</p>` : ""}
           ${A.umira != null ? `<p class="upozorneni ne"><b>${esc(L([`Zvíře strádá — bez péče uhyne asi za ${A.umira} h hraní.`, `Neglected — it will die in about ${A.umira} h of play.`]))}</b></p>` : ""}
@@ -1861,7 +1868,7 @@ VIEWS.pet = (view) => {
             ${(A.foods || []).map(([f, n]) => `<button class="btn" data-krmit="${esc(f)}">${esc(L(["Dát: ", "Give: "]) + f)} <small>×${n}</small></button>`).join("")}
             <button class="btn" data-mazlit>${esc(L(["Pomazlit se", "Cuddle"]))}</button>
             <button class="btn danger" data-prodat>${esc(L(["Prodat do zvěřince · ", "Sell · "]) + (A.prodej || 0) + " gr.")}</button></div>
-          <p class="muted small">${esc(L(["Sytost opadá o 1 a spokojenost o půl bodu za hodinu hraní (hladovému rychleji). Když nehraješ, čas pro zvíře stojí. Hladové nebo smutné zvíře (pod 20) nedává bonusy a ubývá mu zdraví; když zdraví dojde, uhyne a pohřbí se na hřbitově zvířátek. Opečovanému se zdraví vrací.", "Needs drop only while you play. A neglected animal gives no bonus and may die."]))}</p>
+          <p class="muted small">${esc(L(["Hlad roste o 1 a spokojenost opadá o půl bodu za hodinu hraní. Když nehraješ, čas pro zvíře stojí. Hladové (hlad nad 80) nebo smutné zvíře (spokojenost pod 20) nedává bonusy a ubývá mu zdraví; když zdraví dojde, uhyne a pohřbí se na hřbitově zvířátek. Opečovanému se zdraví vrací.", "Needs drop only while you play. A neglected animal gives no bonus and may die."]))}</p>
         </div>
         <div class="panel"><h3>${esc(L(["Schopnost", "Ability"]))}</h3>
           <p class="pet-bonus">${esc(A.bonus)}</p>
@@ -2222,6 +2229,7 @@ const PLACES = {
   "radnice-rychtar": { img: "mesto-radnice", n: ["Rychtář", "Reeve"], say: ["Rychtář: „Pokuty se platí, daně taky. A kdo chce být měšťanem, ať se ukáže.“", "Reeve: \"Fines get paid, and so do taxes. Want to be a burgher? Show yourself.\""],
     opts: [
       { panel: "fine", ic: "⚖️", n: ["Pokuty a hledanost", "Fines and bounties"], d: ["Zaplatit pokutu, kdo je hledaný", "Pay fines, who is wanted"] },
+      { panel: "listiny", ic: "📜", n: ["Listiny a důkazy", "Documents"], d: ["Rychtář zaplatí za vzkazy lapků, rozkazy, účty", "The reeve pays for evidence"] },
       { go: "vydaje", ic: "🧾", n: ["Výdaje a dluhy", "Bills and debts"], d: ["Co se strhává každý týden", "What is paid every week"] },
       { panel: "titles", ic: "🏛️", n: ["Měšťanské právo", "Citizenship"], d: ["Staň se měšťanem", "Become a burgher"] },
       { go: "erb", ic: "🛡️", n: ["Erb", "Coat of arms"], d: ["Navrhni si vlastní erb", "Design your own arms"],
@@ -2641,7 +2649,14 @@ function spojVolby(box) {
     const opts = [...sel.options].filter((o) => o.value);
     if (!opts.length) return;
     const ph = noEmoji(sel.options[0].textContent).replace(/[…:.]+$/, "").trim();
-    const sloveso = ph.split(/\s+/)[0] || L(["Vybrat", "Choose"]);
+    const sloveso = (() => {   // r27-22: tlačítko vždy sloveso (ne „Co“ z otázky „Co vydražíš?“)
+      const p = ph.toLowerCase(), w = ph.split(/\s+/)[0] || "";
+      const T = [[/vydraž/, "Vydražit"], [/prod/, "Prodat"], [/použi/, "Použít"], [/kou[pk]/, "Koupit"], [/vyrob/, "Vyrobit"], [/ulož/, "Uložit"],
+        [/vzít|vezm/, "Vzít"], [/odevzd/, "Odevzdat"], [/nauč|lekc/, "Učit se"], [/vypi|nalít/, "Vypít"], [/sněz|najíst/, "Sníst"], [/naslad|nasad/, "Nasadit"]];
+      const hit = T.find(([re]) => re.test(p));
+      if (hit) return L([hit[1], hit[1]]);
+      return /(it|at|et|ět|out|ít)$/i.test(w) && !/^(co|kam|koho|komu|kter|jak)/i.test(w) ? w : L(["Vybrat", "Choose"]);
+    })();
     const vyber = (v) => { sel.value = v; sel.dispatchEvent(new Event("change", { bubbles: true })); };
     const zbyle = [];
     opts.forEach((o) => {
@@ -2665,9 +2680,10 @@ function spojVolby(box) {
     wrap.className = "volby-blok" + (dlouhy ? " dlouhy" : "");
     const ik = (lab) => { const n = noEmoji(lab).replace(/\s*[×x]\s*\d+.*$/, "").replace(/\s*·.*$/, "").trim(); return `<img class="vv-ik" alt="" src="${IMG_BASE}predmety/ikony/${Postava.slug(n)}.webp">`; };
     wrap.innerHTML = `<div class="sect">${esc(ph)}</div>${dlouhy ? `<input class="search vv-hledat" placeholder="${esc(L(["Hledat…", "Search…"]))}">` : ""}<div class="vp-volby">${zbyle.map(([o, lab, desc]) =>
-      `<button type="button" class="vp-volba" data-volba="${esc(o.value)}" data-q="${esc(noEmoji(lab + " " + desc).toLowerCase())}"${o.disabled ? " disabled" : ""}>${dlouhy ? ik(lab) : ""}<span><b>${esc(noEmoji(lab).trim())}</b>${desc ? `<small>${esc(noEmoji(desc).trim())}</small>` : ""}</span></button>`).join("")}</div>`;
+      `<button type="button" class="vp-volba" data-volba="${esc(o.value)}" data-q="${esc(noEmoji(lab + " " + desc).toLowerCase())}"${o.disabled ? " disabled" : ""}>${ik(lab)}<span><b>${esc(noEmoji(lab).trim())}</b>${desc ? `<small>${esc(noEmoji(desc).trim())}</small>` : ""}</span><em class="vv-akce">${esc(sloveso)}</em></button>`).join("")}</div>`;   // r27-22: každá volba s ikonou (když ji věc má) a slovesem vpravo — jako řádky v obchodě
     wrap.querySelectorAll("[data-volba]").forEach((b) => b.onclick = () => { b.disabled = true; vyber(b.dataset.volba); });
-    wrap.querySelectorAll(".vv-ik").forEach((im) => { im.addEventListener("error", () => im.remove()); if (im.complete && !im.naturalWidth) im.remove(); });
+    wrap.querySelectorAll(".vv-ik").forEach((im) => { const pryc = () => { im.remove(); };
+      im.addEventListener("load", () => wrap.classList.add("s-ikonami")); im.addEventListener("error", pryc); if (im.complete && !im.naturalWidth) pryc(); });
     const hl = wrap.querySelector(".vv-hledat");
     if (hl) hl.oninput = () => { const q = hl.value.trim().toLowerCase(); wrap.querySelectorAll("[data-volba]").forEach((b) => { b.hidden = !!q && !b.dataset.q.includes(q); }); };
     (sel.closest(".vrow") || sel).after(wrap);
@@ -2870,7 +2886,19 @@ function bankaRozvrzeni(box) {
     : /úschov|účet|vklad|vlož|výběr|vybrat|deposit|withdraw|account/i.test(t) ? "ucet" : "jine";
   stav.remove();
   [...dtext.children].filter((n) => n.tagName !== "H3").forEach((n) => sek(kam(n.textContent)).querySelector(".bk-t").append(n));
-  ctl.forEach((c) => { c.classList.add("small"); sek(kam(popis(c))).querySelector(".bk-b").append(c); });
+  // r27-23: tlačítka po řádcích podle akce — „Vložit: 10 · 50 · 100 · 500 · vše“, „Vybrat: …“, „Půjčit: …“, „Splatit: …“; každá akce svou barvou
+  const AKCE = [["vlozit", /^\s*(Vložit|Deposit)/i], ["vybrat", /^\s*(Vybrat|Withdraw)/i], ["pujcit", /^\s*(Půjčit|Borrow)/i], ["splatit", /^\s*(Splatit|Repay)/i]];
+  const radky = {};
+  ctl.forEach((c) => {
+    const t = popis(c), ak = AKCE.find(([, re]) => re.test(t));
+    if (!ak || c.tagName === "SELECT") { c.classList.add("small"); sek(kam(t)).querySelector(".bk-b").append(c); return; }
+    const k = ak[0];
+    if (!radky[k]) { const r = document.createElement("div"); r.className = "bk-radek " + k;
+      r.innerHTML = `<span class="bk-co">${esc(t.trim().split(/\s+/)[0])}</span><div class="bk-castky"></div>`; radky[k] = r; sek(kam(t)).querySelector(".bk-b").append(r); }
+    c.className = "btn small bk-castka " + k;
+    c.textContent = t.trim().replace(/^\S+\s*/, "").replace(/\s*gr\.?$/, "") || t;
+    radky[k].querySelector(".bk-castky").append(c);
+  });
   wrap.querySelectorAll("section").forEach((s) => { if (!s.querySelector(".bk-t").children.length && !s.querySelector(".bk-b").children.length) s.remove(); });
   dtext.append(wrap);
   box.querySelectorAll(".vctl .vrow").forEach((r) => { if (!r.children.length) r.remove(); });
@@ -3986,7 +4014,7 @@ function drawRaid(view) {
   const members = (m.members || []).map((p) => `<div class="vmem${combat && m.turn === p.id ? " turn" : ""}"><b>${esc(p.name.split(" ")[0])}</b><div class="vk-rada">
     ${kruh(L(["Životy", "Health"]), p.health, p.max_health, "hp", String(p.health))}
     ${combat ? (p.stamina ? kruh(L(["Energie", "Energy"]), p.stamina[0], p.stamina[1], "st", String(p.stamina[0])) : "")
-      : `${p.satiety != null ? kruh(L(["Sytost", "Food"]), p.satiety, 100, "jidlo", p.satiety + "%") : ""}${p.hydration != null ? kruh(L(["Žízeň", "Thirst"]), 100 - p.hydration, 100, "voda zizen" + (p.hydration <= 25 ? " vysoka" : ""), Math.max(0, 100 - p.hydration) + "%") : ""}`}</div></div>`).join("");
+      : `${p.satiety != null ? kruh(L(["Hlad", "Hunger"]), 100 - p.satiety, 100, "jidlo zizen", Math.max(0, 100 - p.satiety) + "%") : ""}${p.hydration != null ? kruh(L(["Žízeň", "Thirst"]), 100 - p.hydration, 100, "voda zizen" + (p.hydration <= 25 ? " vysoka" : ""), Math.max(0, 100 - p.hydration) + "%") : ""}`}</div></div>`).join("");
   const foe = combat ? `<div class="vfoe${e.boss ? " boss" : ""}">${IMG("bytosti/" + enemyArt(e.name))}</div>
     <div class="vfoehud"><b>${e.boss ? "👑 " : ""}${esc(e.name.split(" — ")[0])}</b>${bar(e.health, e.max_health, "hp big")}<span class="vval">${e.health}/${e.max_health}</span>
       ${e.intent ? `<div class="vintent">${esc(e.intent)}</div>` : ""}
@@ -4297,6 +4325,37 @@ function raidShopHtml(p) {
       <button class="${strana === "koupit" ? "on" : ""}" data-rss="koupit"${buy ? "" : " disabled"}>${esc(L(["Koupit", "Buy"]))}${buy ? " · " + buy.options.length : ""}</button>
       <button class="${strana === "prodat" ? "on" : ""}" data-rss="prodat"${sell ? "" : " disabled"}>${esc(L(["Prodat", "Sell"]))}${sell ? " · " + sell.options.length : ""}</button></div>
     <div class="items rs-list">${strana === "koupit" ? buy.options.map((o) => rada(buy, o, true)).join("") : sell.options.map((o) => rada(sell, o, false)).join("")}</div></div>`;
+}
+
+/** r27-23: vysvětlivky v okénku po klepnutí (rozpis OČ a útoku, potřeby, vlastnosti) — na stránce nezabírají místo. */
+const VL_POPIS = { "Síla": ["útok a zranění zbraní na blízko, nošení těžké výbavy"], "Obratnost": ["útok a zranění střelbou, obrana (ne v těžké zbroji), uhýbání, iniciativa"],
+  "Odolnost": ["životy, výdrž v boji, pomalejší únava, hlad a žízeň, zima"], "Všímavost": ["všimnout si pastí, stop a skrytých věcí na výpravě"],
+  "Učenost": ["čtení, léčení druhů, řemesla a dovednosti"], "Výřečnost": ["vyjednávání, ceny u obchodníků, situace na výpravě"] };
+function vysvetli(k, m, P) {
+  const R = (P && P.rozpis) || m.rozpis || {}, sg2 = (v) => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v);
+  const tab = (rows, soucet, nazev) => `<table class="rozpis">${rows.map(([n, v]) => `<tr><td>${esc(noEmoji(n))}</td><td class="${v < 0 ? "minus" : ""}">${esc(sg2(v))}</td></tr>`).join("")}
+    <tr class="celkem"><td>${esc(nazev)}</td><td>${esc(String(soucet))}</td></tr></table>`;
+  let h1 = "", obsah = "";
+  if (k === "stit") { h1 = L(["Obrana (OČ)", "Defence"]); obsah = `<p>${esc(L(["Nepřítel tě zasáhne, když hodí k20 + svůj útok aspoň tolik.", "Enemies must roll this to hit you."]))}</p>${tab(R.oc || [], m.armor_class, L(["Obrana celkem", "Total"]))}`; }
+  else if (k === "mec") { h1 = L(["Útok", "Attack"]); obsah = `<p>${esc(L(["Zásah = k20 + útok proti obraně nepřítele. Hozená 20 je kritický zásah.", "Hit = d20 + attack vs defence."]))}</p>${tab(R.utok || [], sg2(m.attack ?? 0), L(["Útok celkem", "Total"]))}`; }
+  else if (k === "hvezda") { h1 = L(["Zdatnost", "Proficiency"]); obsah = `<p>${esc(L(["Roste s úrovní (+2 až +6). Přičítá se k útoku i ke zkouškám vlastností na výpravě.", "Grows with level; adds to attack and checks."]))}</p>`; }
+  else if (k === "kostka") { h1 = L(["Zranění", "Damage"]); obsah = `<p>${esc(L(["Kostka podle zbraně + bonus Síly (zblízka) nebo Obratnosti (střelba) + zušlechtění zbraně. Kritický zásah hází kostky dvakrát.", "Weapon dice + Strength/Dexterity bonus + enhancement. Crits roll dice twice."]))}</p><p class="rk-velke">${esc(m.damage || "")}</p>`; }
+  else if (k === "potreby") { h1 = L(["Tělo a potřeby", "Body and needs"]); obsah = `<p>${esc(L(["Odpočatost: čím víc, tím líp. Hlad a žízeň: čím víc, tím hůř.", "Rest: higher is better. Hunger and thirst: higher is worse."]))}</p>
+      <ul><li>${esc(L(["Odpočatost pod 25, hlad či žízeň nad 75 = −1 k útoku (odpočatost i k obraně).", "Below 25 rest / above 75 hunger or thirst = −1."]))}</li>
+      <li>${esc(L(["Hlad či žízeň 100, nebo odpočatost 0 = ztrácíš životy.", "At 100 hunger/thirst or 0 rest you lose health."]))}</li>
+      <li>${esc(L(["Odpočatost od 80, hlad i žízeň do 20 = plný sil, +1 k útoku a zkouškám.", "Well rested and fed = +1."]))}</li>
+      <li>${esc(L(["Přejedení a přepití dá postih, dokud za pár hodin neopadne.", "Overeating gives a penalty for a few hours."]))}</li></ul>`; }
+  else if (k === "boj") { return vysvetli("mec", m, P); }
+  else if (k === "vl" || k.startsWith("vl:")) { const a = k.slice(3); const s = (m.stats || []).find((x) => x.id === a);
+    h1 = a ? a : L(["Vlastnosti", "Attributes"]);
+    obsah = (s ? `<p class="rk-velke">${esc(s.value)} · ${esc(L(["bonus ", "bonus "]) + sg2(Math.floor(s.value / 2)))}</p><p>${esc(L(["K čemu: ", "Used for: "]) + ((VL_POPIS[a] || [""])[0]))}</p>` : "")
+      + `<p class="muted">${esc(L([`Každé 2 body = +1 k hodům. Za každou úroveň 1 bod; strop teď ${m.stat_cap ?? ""} (roste s úrovní).`, "Every 2 points = +1. One point per level."]))}</p>`; }
+  const o = document.createElement("div");
+  o.className = "rekap-obal vysv-obal";
+  o.innerHTML = `<div class="rekap vyp-pergamen vysv"><h2>${esc(h1)}</h2>${obsah}<div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-ok>${esc(L(["Zavřít", "Close"]))}</button></div></div>`;
+  const zavri = () => o.remove();
+  o.onclick = (e) => { if (e.target === o || e.target.closest("[data-ok]")) zavri(); };
+  document.body.appendChild(o);
 }
 
 /** r27-22: po návratu z výpravy pergamen s rekapitulací — kde jste byli, co kdo získal a ztratil. */

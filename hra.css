@@ -2993,7 +2993,7 @@ html.mobil .truhla-sloupce .item .acts{grid-column:3!important;grid-row:1!import
 .sk-vybrat{margin-left:auto}
 .sk-cena{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 /* r27-22: nevyřízené body nebo volba schopnosti — červený kosočtverec Postavy (bez puntíku) */
-.tabs button.ma-volbu>span,.tabs button.ma-volbu>span:empty{background:#c0392b!important;border-color:#ff9a84!important;box-shadow:0 0 8px #e0533f!important}
+.tabs button.ma-volbu:not(.on)>span,.tabs button.ma-volbu:not(.on)>span:empty{background:#c0392b!important;border-color:#ff9a84!important;box-shadow:0 0 8px #e0533f!important}
 .hero-fig>.hero-pet{max-width:46%}.hero-fig>.hero-pet img{object-fit:contain;object-position:left bottom}.hero-fig>.hero-pet.pet-velky img{object-position:right bottom}
 /* r27-18: medvěd a mula v popředí */
 .hero-fig>.hero-pet.pet-velky{z-index:3}.hero-fig>.hero-pet.pet-velky img{filter:drop-shadow(0 8px 10px #000c)}
@@ -3077,3 +3077,48 @@ html.mobil .rs .rs-item,.rs .rs-item{display:grid!important;grid-template-column
 .rekap .rk-r.pozor b{color:#8a4a14}
 .rekap.pad h2{color:#4a1008}
 html.mobil .rekap .rk-r{grid-template-columns:1fr}
+/* r27-22: přidělení bodu do vlastnosti na webu */
+.vlastnost{position:relative}
+.vlastnost.lze{box-shadow:0 0 0 2px #b8913f inset}
+.vl-plus{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:50%;border:1px solid #8a6a3c;background:linear-gradient(#e2c06e,#b8913f);
+  color:#1e140a;font:700 1.3rem/1 var(--serif);display:grid;place-items:center;cursor:var(--k-klik,pointer);box-shadow:0 2px 6px #0006}
+.vl-plus:disabled{opacity:.5}
+/* r27-22: volby ze seznamů (dražba, prodej, použít…) jako řádky s ikonou a slovesem vpravo */
+.volby-blok .vp-volba{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;text-align:left}
+.volby-blok .vp-volba>span{min-width:0}
+.volby-blok .vv-ik{width:40px;height:40px;object-fit:contain;border-radius:6px;background:#0003;border:1px solid #8a6a3c55;padding:2px}
+.volby-blok .vv-akce{font:700 .78rem var(--serif);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#e2c06e;padding:5px 9px;border:1px solid #c9a55a77;border-radius:4px;white-space:nowrap}
+.volby-blok.s-ikonami .vp-volby{grid-template-columns:1fr!important}
+html.mobil .volby-blok .vp-volba{padding:10px 12px}
+/* r27-23: vysvětlivky v okénku */
+button.znak{appearance:none;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:var(--k-klik,pointer)}
+[data-vysv]{cursor:var(--k-klik,pointer)}
+.vysv h2{font-size:1.3rem}
+.vysv p{margin:0 0 8px}
+.vysv ul{margin:0 0 6px 18px;padding:0}
+.vysv li{margin:0 0 4px}
+.rozpis{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:1rem}
+.rozpis td{padding:5px 4px;border-bottom:1px dashed #8a6a3c55}
+.rozpis td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.rozpis td.minus{color:#8e1b14}
+.rozpis tr.celkem td{border-top:2px solid #8a6a3c;border-bottom:0;font-weight:700;color:#6a1a10;font-size:1.1rem}
+.vysv .rk-velke{font:700 1.6rem var(--serif);text-align:center;color:#2e1d0e}
+/* r27-23: banka — částky po řádcích podle akce, každá akce svou barvou */
+.banka .bk-dlazdice{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px}
+.banka .bk-dlazdice>div{padding:8px 6px!important;text-align:center}
+.banka .bk-dlazdice b{font-size:1.25rem!important}
+.banka .bk-dlazdice small{font-size:.62rem!important;letter-spacing:.12em}
+.bk-b{display:flex;flex-direction:column;gap:8px}
+.bk-radek{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:8px}
+.bk-co{font:700 .78rem var(--serif);letter-spacing:.1em;text-transform:uppercase;color:#cbb994}
+.bk-castky{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.btn.bk-castka{padding:8px 2px!important;min-height:40px;font-size:.95rem!important;width:auto!important}
+.btn.bk-castka.vlozit{background:linear-gradient(#5c8a3a,#3f6a26)!important;color:#f2ecd8!important;border-color:#86b25e!important}
+.btn.bk-castka.vybrat{background:linear-gradient(#e2c06e,#b8913f)!important;color:#1e140a!important;border-color:#f0d79a!important}
+.btn.bk-castka.pujcit{background:linear-gradient(#8e2a1c,#651810)!important;color:#f6e7c4!important;border-color:#c0533f!important}
+.btn.bk-castka.splatit{background:linear-gradient(#3a5a7a,#27405a)!important;color:#eef3f8!important;border-color:#6f93b8!important}
+.bk-radek.vlozit .bk-co{color:#9fcf7a}.bk-radek.vybrat .bk-co{color:#e2c06e}.bk-radek.pujcit .bk-co{color:#ff9a84}.bk-radek.splatit .bk-co{color:#9ec3e8}
+.dpanel .banka .bk-b{display:flex!important;flex-direction:column;gap:8px}
+.dpanel .banka .bk-b .bk-castky{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px}
+.dpanel .banka .bk-b .btn.bk-castka{width:100%!important;min-width:0!important;padding:8px 2px!important;display:flex;justify-content:center;align-items:center}
+.dpanel .banka .bk-b .bk-radek{width:100%}
