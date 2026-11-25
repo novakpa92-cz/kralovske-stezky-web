@@ -12,11 +12,13 @@ const Zvuk = (() => {
     set(k, v) { try { localStorage.setItem("stezky_zvuk_" + k, JSON.stringify(v)); } catch { /* nic */ } },
   };
   const V = { on: store.get("on", true), master: store.get("master", .8), amb: store.get("amb", .55), sfx: store.get("sfx", .7), mus: store.get("mus", .35),
-    off_amb: store.get("off_amb", false), off_sfx: store.get("off_sfx", false), off_mus: store.get("off_mus", false) };
+    off_amb: store.get("off_amb", false), off_sfx: store.get("off_sfx", false), off_mus: store.get("off_mus", false),
+    ztlumit_mimo: store.get("ztlumit_mimo", true) };   // r27-25: ztlumit mimo hru (volba v nastavení)
   let ac = null, out, busAmb, busSfx, busMus, noiseBuf, base = "zvuk/";
   const lvl = (k) => (V["off_" + k] ? 0 : V[k]);
   let want = { amb: [], weather: "", night: false };
   const running = new Map();            // název smyčky → {stop()}
+  let pryc = false;                      // r27-25: hráč je mimo hru (jiný program, plocha, jiná karta)
   const R = Math.random;
 
   function init() {
@@ -299,7 +301,7 @@ const Zvuk = (() => {
     d.a.src = base + "hudba/" + ctx + "-" + k + ".mp3";
     d.a.currentTime = 0;
     d.g.gain.cancelScheduledValues(now()); d.g.gain.setValueAtTime(0, now()); d.g.gain.linearRampToValueAtTime(1, now() + fade);
-    if (lvl("mus") > 0 && V.on) d.a.play().catch(() => {});
+    if (lvl("mus") > 0 && V.on) { if (pryc) d.pauzaPryc = true; else d.a.play().catch(() => {}); }   // r27-25: mimo hru nehrát
     if (old) { old.g.gain.cancelScheduledValues(now()); old.g.gain.setValueAtTime(old.g.gain.value, now()); old.g.gain.linearRampToValueAtTime(0, now() + fade);
       const oa = old.a; setTimeout(() => { if (decks[deckIdx].a !== oa) oa.pause(); }, fade * 1000 + 200); }
   }
@@ -328,15 +330,31 @@ const Zvuk = (() => {
     out.gain.linearRampToValueAtTime(V.on ? V.master : 0, now() + .3);
     busAmb.gain.value = lvl("amb"); busSfx.gain.value = lvl("sfx"); busMus.gain.value = lvl("mus");
     const d = decks[deckIdx];
-    if (d) { if (V.on && lvl("mus") > 0) { if (d.a.paused && d.a.src) d.a.play().catch(() => {}); } else d.a.pause(); }
+    if (d) { if (V.on && lvl("mus") > 0) { if (d.a.paused && d.a.src && !pryc) d.a.play().catch(() => {}); } else d.a.pause(); }
   }
   /** Nastavení: on, master, amb, sfx, mus (0–1) a off_amb, off_sfx, off_mus (vypnuto). */
   function set(key, val) {
     V[key] = val; store.set(key, val);
+    if (key === "ztlumit_mimo" && !val && pryc) ztlum(false);
     if (!ac) { if (key === "on" && val) init(); return; }
     apply();
   }
   const setBase = (b) => { base = b.replace(/\/?$/, "/"); };
+  // r27-25: když hráč odejde do jiného programu, na plochu nebo jinou kartu, hudba i zvuky se ztiší a pozastaví;
+  // po návratu do hry se pustí zase tam, kde přestaly.
+  function ztlum(ano) {
+    if (ano && !V.ztlumit_mimo) return;
+    if (ano === pryc) return;
+    pryc = ano;
+    if (!ac) return;
+    const d = decks[deckIdx];
+    if (ano) { if (d && !d.a.paused) { d.pauzaPryc = true; d.a.pause(); } ac.suspend().catch(() => {}); }
+    else { ac.resume().catch(() => {}); if (d && d.pauzaPryc) { d.pauzaPryc = false; if (V.on && lvl("mus") > 0) d.a.play().catch(() => {}); } }
+  }
+  document.addEventListener("visibilitychange", () => ztlum(document.visibilityState !== "visible"));
+  addEventListener("blur", () => ztlum(true));
+  addEventListener("focus", () => ztlum(false));
+  addEventListener("pagehide", () => ztlum(true));
   const state = () => ({ ctx: mctx, deck: decks[deckIdx] && { src: decks[deckIdx].a.src, paused: decks[deckIdx].a.paused, t: decks[deckIdx].a.currentTime }, loops: [...running.keys()], bufs: [...bufs.entries()].filter(([, b]) => b && !(b instanceof Promise)).map(([k]) => k) });
   return { scene, sfx, music, set, setBase, V, state };
 })();

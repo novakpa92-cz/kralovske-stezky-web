@@ -68,7 +68,22 @@ const Scena = (() => {
   }
 
   /** Vytvoří živou scénu v elementu `host`. img = název obrázku bez přípony. */
+  // r27-25: při překreslení stránky (výprava se obnovuje každých pár sekund) se scéna se stejným obrázkem nepostaví znovu —
+  // přesune se i s běžícími částicemi (déšť, mlha, listí), takže efekty plynou dál a „neseknou se“.
+  const recent = new Map();
   function mount(host, img, key, opts = {}) {
+    const rk = img + "|" + (key || "") + "|" + (opts.still ? 1 : 0) + "|" + (opts.contain ? 1 : 0);
+    const old = recent.get(rk);
+    if (old && !old.el.isConnected) {
+      host.prepend(old.el); live.add(old); setTimeout(old.fit, 0); old.apply();
+      return old;
+    }
+    const s0 = mountNew(host, img, key, opts);
+    recent.set(rk, s0);
+    if (recent.size > 6) recent.delete(recent.keys().next().value);
+    return s0;
+  }
+  function mountNew(host, img, key, opts = {}) {
     const cfg = CFG[key || ALIAS[img]] || { emit: [{ t: "dust", rate: .12, area: [0, 0, 100, 100], warm: 1 }] };
     const indoor = !!(cfg.indoor || opts.indoor);
     const el = document.createElement("div");

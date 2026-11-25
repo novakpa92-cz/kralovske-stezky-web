@@ -4114,10 +4114,11 @@ function vypJenPribeh(content, m) {
     if (/počasí:|vzduch\s*[+−-]?\d+\s*°C/i.test(l)) return;                      // počasí je v obraze
     if (/^\S*\s*\*{0,2}(plný sil|hladov|žízniv|unaven|vyčerpan|prochladl|zmrzl|přehřát|opil)/i.test(noEmoji(l))) return;   // stav postavy je v barech
     if (/\d+\s*[+−-]\s*\d+\s*=\s*\d+|\b\d*k\d+\b|proti\s+OČ/.test(l) && !/[a-zá-ž]{4,}.*[a-zá-ž]{4,}.*[a-zá-ž]{4,}/i.test(l.replace(/proti\s+OČ|zásah|vedle|kritick\S*/gi, ""))) return;   // hody kostkou
+    if (/=\s*\d+\s+proti\s+\d+/.test(l)) return;                     // r27-25: zkouška vlastnosti („14 +2 = 16 proti 17 (Učenost) → neúspěch“)
     let x;
     if ((x = /prozkoumáno\s+(\d+\/\d+)(?:.*?nalezeno\s+(\d+))?/.exec(l)) && /^📍/.test(l)) { info.prozkoumano = x[1]; info.nalez = x[2] || ""; return; }
     if (/❤️\s*\d+\/\d+\s*·\s*💤/.test(l)) {                       // řádek potřeb — jen varování, když je zle
-      [["odpočatost", L(["únava", "tired"])], ["nasycení", L(["hlad", "hungry"])], ["žízeň", L(["žízeň", "thirst"])]].forEach(([k, n]) => {
+      [["odpočatost", L(["únava", "tired"])], ["hlad", L(["hlad", "hungry"])], ["žízeň", L(["žízeň", "thirst"])]].forEach(([k, n]) => {
         const r = new RegExp(k + "\\s+\\d+\\s*(🔴|🟠)").exec(l); if (r) info.varovani.push(n); });
       return;
     }
@@ -4125,6 +4126,7 @@ function vypJenPribeh(content, m) {
     if (pryc.some((r) => r.test(l))) return;
     if (/^-#/.test(l) && !/🍖|gr\.|získ|našel|našla|zkušenost|kořist|ztratil|ztratila|zraněn|odměn|\+\d/i.test(l)) return;   // drobné písmo: hody, nápovědy
     if (/^##\s/.test(l) && noEmoji(l.replace(/^##\s*/, "")).trim().toLowerCase() === uzel) return;   // název místa je v obraze
+    if (/^>\s?/.test(l)) { ven.push("*" + noEmoji(l.replace(/^>\s?/, "")).trim().replace(/^\*+|\*+$/g, "") + "*"); return; }   // r27-25: citace (hádanka) kurzívou, bez „>“
     ven.push(noEmoji(l.replace(/^-#\s*/, "")).replace(/^(#{1,3})\s*/, "$1 "));
   });
   const text = ven.join("\n").replace(/\n{3,}/g, "\n\n").trim();
@@ -4654,6 +4656,7 @@ VIEWS.more = (view) => {
       <p class="plocha-zamek"><svg class="zamek-ik" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg> ${esc(L(["Jen zástupce této stránky. Přihlášení zůstává v tomto zařízení.", "Just a shortcut to this page. Your login stays on this device."]))}</p></div>` : ""}
     <div class="panel"><h3>🔊 ${esc(t("sound"))}</h3>
       <label class="row"><input type="checkbox" id="snd-on"${Zvuk.V.on ? " checked" : ""}> ${esc(t("sound_on"))}</label>
+      <label class="row"><input type="checkbox" id="snd-pozadi"${Zvuk.V.ztlumit_mimo ? " checked" : ""}> ${esc(L(["Ztlumit, když hra není vidět (jiný program, plocha, jiná karta)", "Mute when the game is in the background"]))}</label>
       ${[["master", "sound_master"], ["mus", "sound_mus"], ["amb", "sound_amb"], ["sfx", "sound_sfx"]].map(([k, l]) =>
         `<div class="row slider"><span class="muted">${esc(t(l))}</span><input type="range" min="0" max="1" step="0.05" value="${Zvuk.V[k]}" data-vol="${k}" aria-label="${esc(t(l))}">
         ${k === "master" ? "<span></span>" : `<button class="chip${Zvuk.V["off_" + k] ? "" : " on"}" data-mute="${k}">${esc(t(Zvuk.V["off_" + k] ? "sound_off" : "sound_on_short"))}</button>`}</div>`).join("")}
@@ -4686,6 +4689,7 @@ VIEWS.more = (view) => {
     ev.currentTarget.disabled = false;
   };
   $("#snd-on").onchange = (e) => { Zvuk.set("on", e.target.checked); if (e.target.checked) Zvuk.sfx("zvon"); };
+  $("#snd-pozadi").onchange = (e) => Zvuk.set("ztlumit_mimo", e.target.checked);   // r27-25
   view.querySelectorAll("[data-vol]").forEach((r) => r.oninput = () => { Zvuk.set(r.dataset.vol, Number(r.value)); if (r.dataset.vol === "sfx") Zvuk.sfx("mince"); });
   view.querySelectorAll("[data-mute]").forEach((b) => b.onclick = () => {
     const k = b.dataset.mute, off = !Zvuk.V["off_" + k];
