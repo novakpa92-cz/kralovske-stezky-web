@@ -3742,3 +3742,53 @@ input[type=range]{accent-color:#a3241b}
 #view .odznaky .odznak{padding:6px 6px;gap:2px}
 #view .odznaky .odznak img.odz-mal,#view .odznaky .odznak svg{width:58px;height:58px}
 #view .odznaky .odznak b{font-size:.8rem}#view .odznaky .odznak small{font-size:.66rem}
+
+/* 1.0-1: Batoh — „panenka“ (návrh A): postava s výbavou kolem, kapsy a batoh jako mřížky, detail vybrané věci */
+.panenka{display:grid;grid-template-columns:minmax(380px,460px) minmax(0,1fr) minmax(300px,360px);gap:16px;align-items:stretch}
+.panenka>.panel{display:flex;flex-direction:column;gap:12px;min-height:0;overflow:hidden;padding:14px 16px;margin:0}
+.pn-hl{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.pn-hl h3{margin:0}
+.pn-souhrn{font-size:.9rem;color:#6b5434}.pn-souhrn b{color:#5e1a10}
+.pn-panenka{flex:1;min-height:0;display:grid;grid-template-columns:72px minmax(0,1fr) 72px;gap:10px;align-items:stretch}
+.pn-sl{display:flex;flex-direction:column;justify-content:space-around;align-items:center;gap:6px}
+.pn-slot{display:flex;flex-direction:column;align-items:center;gap:3px}
+.pn-jm{font:600 .6rem var(--stitek);letter-spacing:.1em;text-transform:uppercase;color:#7a5f3a}
+.panenka .pn-fig{position:relative;height:auto;min-height:0;max-height:none;aspect-ratio:auto;overflow:hidden;border-radius:8px}
+.pn-dl{position:relative;width:64px;height:64px;flex:none;border:1px solid #8a6a3c;border-radius:6px;background:linear-gradient(#f1e2bd,#d9c08e);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;box-shadow:inset 0 0 8px #7a5a2a44;transition:transform .08s,box-shadow .12s}
+.pn-dl:hover{transform:translateY(-1px);box-shadow:inset 0 0 8px #7a5a2a44,0 3px 8px #0006}
+.pn-dl img.icon{width:80%;height:80%;object-fit:contain;margin:0}
+.pn-dl.vyb{border:2px solid #e9c46a;box-shadow:0 0 0 3px #e9c46a66,0 2px 8px #0008}
+.pn-dl.prazdne,.pn-dl.jen{cursor:default}.pn-dl.prazdne{border-style:dashed;opacity:.7;box-shadow:none}
+.pn-dl.prazdne small{font:600 .55rem/1.1 var(--stitek);letter-spacing:.06em;color:#9c845a;text-transform:uppercase;text-align:center;padding:2px}
+.pn-q{position:absolute;right:3px;bottom:3px;font:600 .8rem var(--serif);color:#2b1d12;background:#f6e7c2dd;border-radius:3px;padding:0 3px;line-height:1.2}
+.pn-enh{position:absolute;left:3px;top:3px;font:700 .65rem var(--stitek);color:#f3e3bd;background:#8c1d18;border-radius:3px;padding:0 3px}
+.pn-stav{position:absolute;left:5px;right:5px;bottom:-5px;height:4px;border-radius:2px;background:#3b2a19}
+.pn-stav b{display:block;height:4px;border-radius:2px;background:#5f8a3a}.pn-stav.stredni b{background:#c08a2a}.pn-stav.zle b{background:#a33a2a}
+.pn-opasek{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid #a78a5a;padding-top:12px}
+.pn-opasek .pn-dl{width:56px;height:56px}
+.pn-lbl{font:600 .68rem var(--stitek);letter-spacing:.14em;text-transform:uppercase;color:#6b4a1c}.pn-lbl small{opacity:.75;letter-spacing:0}
+.pn-mriz{display:grid;grid-template-columns:repeat(auto-fill,64px);gap:10px 9px;padding:2px 2px 8px}
+.pn-kont{display:flex;flex-direction:column;gap:8px;min-height:0}
+.pn-batoh{flex:1;border-top:1px solid #a78a5a;padding-top:12px}.pn-batoh .pn-mriz{overflow:auto;min-height:0;align-content:start}
+.pn-batoh .bf-filtr{margin:0}
+.pn-rada{margin:0;font-style:italic;font-size:.85rem;color:#6b5434}
+.pn-det{overflow:auto}
+.pn-det-hl{display:flex;gap:12px;align-items:flex-start}.pn-det-hl img.icon{width:72px;height:72px;flex:none;border:1px solid #8a6a3c;border-radius:6px;background:linear-gradient(#f1e2bd,#d9c08e);padding:6px;margin:0}
+.pn-det-hl .nm{font-size:1.2rem;font-weight:600;color:#2b1d12}.pn-det-hl .meta{font-size:.9rem;color:#6b5434}
+.pn-tl{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pn-tl .btn{width:100%}
+.pn-por{border-top:1px solid #a78a5a;padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.pn-por-t{font:600 .66rem var(--stitek);letter-spacing:.14em;text-transform:uppercase;color:#6b4a1c}
+.pn-por-r{display:flex;align-items:center;gap:8px}.pn-por-r img.icon{width:36px;height:36px;margin:0}
+.pn-det .svetlo-panel{margin:0;padding:10px;box-shadow:none}
+.pn-nic{margin:auto 0;text-align:center}
+.pn-zavrit{position:absolute;right:10px;top:8px;width:36px;height:36px;border:1px solid #8a6a3c;border-radius:50%;background:#2a1c11;color:#ecdcb8;font-size:16px;cursor:pointer}
+.pn-vyprava{margin-bottom:12px}
+/* mobil */
+.panenka.pn-mob{display:flex;flex-direction:column;gap:10px}
+.pn-mob>.panel{padding:10px 12px;gap:8px}
+.pn-mob .pn-panenka{grid-template-columns:56px minmax(0,1fr) 56px;gap:8px;flex:none;height:262px}
+.pn-mob .pn-dl{width:52px;height:52px}.pn-mob .pn-opasek .pn-dl{width:48px;height:48px}.pn-mob .pn-jm{font-size:.52rem}
+.pn-mob .pn-mriz{grid-template-columns:repeat(5,minmax(0,1fr));gap:9px 7px}.pn-mob .pn-mriz .pn-dl{width:100%;height:auto;aspect-ratio:1}
+.pn-mob .pn-zal{margin:0}.pn-mob .skryt{display:none}.pn-mob .pn-batoh{border-top:0;padding-top:0}
+.pn-mob .pn-det{display:none}
+.pn-mob.s-detailem .pn-det{display:flex;position:fixed;left:0;right:0;bottom:var(--dole,64px);z-index:30;max-height:58vh;border-radius:14px 14px 0 0;border-top:2px solid #e3c27a;box-shadow:0 -8px 24px #000b;padding:16px 14px 14px}
+.pn-mob .pn-kont>.pn-hl{display:none}

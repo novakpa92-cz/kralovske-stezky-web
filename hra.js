@@ -1122,57 +1122,104 @@ function vybavenoZalozky(m, N, row, eqBez, vec) {
     <div class="items">${nosene}
       ${vBatohu.length ? `<div class="sect vyb-sect">${esc(L(["V batohu — můžeš nasadit", "In your pack — can equip"]))}</div>${vBatohu.map((x) => vec(x)).join("")}` : ""}</div></div>`;
 }
+// 1.0-1: Batoh jako „panenka“ — postava s výbavou kolem, opasek, kapsy a batoh jako mřížky, vpravo (v mobilu zespodu) detail vybrané věci. Vše na jedné obrazovce.
+const PAN_L = [["hlava", ["Helma", "Helmet"]], ["plášť", ["Plášť", "Cloak"]], ["zbroj", ["Zbroj", "Armour"]], ["oděv", ["Oděv", "Clothes"]]];
+const PAN_P = [["zbraň", ["Zbraň", "Weapon"]], ["štít", ["Štít", "Shield"]], ["světlo", ["Světlo", "Light"]], ["opasek", ["Opasek", "Belt"]]];
 VIEWS.bag = (view) => {
-  // r27-4: vlevo Nasazeno a Na opasku, vpravo Kapsy a Batoh (jen to, co je v nich — ne co má postava na sobě)
   const m = S.me, N = m.nosim || { pockets: [], backpack: [], belt: [], pockets_max: 5, backpack_max: 0, belt_max: 2 };
+  const mob = jeMobil();
   const row = {}; m.inventory.forEach((i) => { row[i.id] = i; });
-  const vec = ([id, q, barva, hx], naOpasku = false) => {
-    const i = row[id] || { id, name: id, slot_name: "" };
-    const db = barva ? ` data-barva="${esc(barva)}"` : "";
-    return `<div class="item">${icon(id)}
-      <div><div class="nm">${esc(i.name)}${q > 1 ? ` <span class="muted">× ${esc(q)}</span>` : ""}${barvaStitek(barva, hx)}</div>
-      <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.merchant_name ? " · " + esc(t("sell_to", i.merchant_name)) : ""}</div>${statyHtml(i)}${opotrebeni(i)}</div>
-      <div class="acts">
-        ${i.use ? `<button class="btn small" data-use="${esc(id)}">${esc(t("use"))}</button>` : ""}
-        ${i.equip ? `<button class="btn small" data-equip="${esc(id)}"${db}>${esc(t("equip"))}</button>` : ""}
-        ${naOpasku ? `<button class="btn small" data-opasek="${esc(id)}" data-sundat="1">${esc(L(["Sundat do batohu", "Take off the belt"]))}</button>` : ""}
-        ${(N.v_batohu || []).includes(id) ? `<button class="btn small" data-opasek="${esc(id)}" data-sundat="">${esc(L(["Na opasek", "Onto the belt"]))}</button>` : ""}
-      </div></div>`;
-  };   // r27-22: prodej jen na tržišti a u obchodníků (u hostinského), ne v batohu
-  const prazdne = (n) => Array.from({ length: Math.max(0, n) }, () => `<div class="item volno"><span class="icon prazdne"></span><div class="muted">${esc(L(["volné místo", "empty slot"]))}</div></div>`).join("");
-  const blok = (nadpis, pocet, obsah) => `<div class="panel"><div class="spread"><h3>${esc(nadpis)}</h3>${pocet ? `<span class="pill">${esc(pocet)}</span>` : ""}</div><div class="items">${obsah}</div></div>`;
-  const eqBez = m.equipped.filter((e) => e.slot !== "světlo" && !(e.slot === "štít" && e.id === "Louč"));   // r27-41: světlo má vlastní oddíl
-  const BZ = S.batohZal || "kapsy";   // r27-12: na telefonu jen jeden oddíl naráz (bez dlouhého scrollování)
-  const zal = [["nasazeno", L(["Vybaveno", "Equipped"]), m.equipped.length], ["opasek", L(["Opasek", "Belt"]), N.belt.length], ["kapsy", L(["Kapsy", "Pockets"]), N.pockets.length], ["batoh", L(["Batoh", "Backpack"]), N.backpack.length]];
+  const eq = {}; m.equipped.forEach((e) => { eq[e.slot] = e; });
+  const louc = eq["štít"] && eq["štít"].id === "Louč";
+  // výběr: {k: "eq"|"belt"|"pockets"|"backpack", i: index nebo slot}
+  const najdi = (V) => {
+    if (!V) return null;
+    if (V.k === "eq") return eq[V.i] ? { k: "eq", e: eq[V.i] } : null;
+    const x = (N[V.k] || [])[V.i]; return x && x[0] === V.id ? { k: V.k, x, i: row[x[0]] || { id: x[0], name: x[0], slot_name: "" } } : null;
+  };
+  let V = najdi(S.bagSel);
+  if (!V && !mob) V = najdi({ k: "eq", i: "zbraň" }) || (N.pockets[0] && najdi({ k: "pockets", i: 0, id: N.pockets[0][0] })) || null;
+  const jeVyb = (k, i) => V && V.k === k && (k === "eq" ? V.e.slot === i : V.x === (N[k] || [])[i]);
+  const dl = (id, k, i, { q, wear, enh, prazdne, lbl } = {}) => {
+    const w = wear == null ? "" : `<i class="pn-stav ${wear <= 30 ? "zle" : wear <= 60 ? "stredni" : "dobre"}"><b style="width:${Math.max(0, wear)}%"></b></i>`;
+    return id ? `<button type="button" class="pn-dl${jeVyb(k, i) ? " vyb" : ""}" data-pk="${k}" data-pi="${esc(String(i))}" data-pid="${esc(id)}" title="${esc((row[id] || {}).name || id)}">${icon(id)}${q > 1 ? `<span class="pn-q">${q}</span>` : ""}${enh ? `<span class="pn-enh">+${enh}</span>` : ""}${w}</button>`
+      : `<span class="pn-dl prazdne">${lbl ? `<small>${esc(lbl)}</small>` : ""}</span>`;
+  };
+  const eqDl = ([sl, jm]) => {
+    if (sl === "opasek") return `<div class="pn-slot">${N.belt_name ? `<span class="pn-dl jen">${icon(N.belt_name)}</span>` : `<span class="pn-dl prazdne"></span>`}<span class="pn-jm">${esc(L(jm))}</span></div>`;
+    const e = sl === "světlo" ? (eq["světlo"] || (louc ? eq["štít"] : null)) : (sl === "štít" && louc ? null : eq[sl]);
+    return `<div class="pn-slot">${e ? dl(e.id, "eq", e.slot, { wear: e.wear, enh: e.enh }) : `<span class="pn-dl prazdne"></span>`}<span class="pn-jm">${esc(L(jm))}</span></div>`;
+  };
+  const opasek = N.belt_max ? Array.from({ length: Math.max(N.belt_max, N.belt.length) }, (_, i) => { const x = N.belt[i];
+    return x ? dl(x[0], "belt", i, { q: x[1], wear: (row[x[0]] || {}).wear }) : dl(null, "", 0, { lbl: L(["Pouzdro ", "Holster "]) + (i + 1) }); }).join("")
+    : `<span class="muted small">${esc(L(["Nemáš opasek — kup ho u krejčího nebo vetešníka.", "No belt yet."]))}</span>`;
+  const mriz = (k, seznam, max) => {
+    const vidim = k === "backpack" ? seznam.map((x, i) => [x, i]).filter(([x]) => BF.batoh === "vse" || druhVeci(row[x[0]]) === BF.batoh) : seznam.map((x, i) => [x, i]);
+    const volno = (k !== "backpack" || BF.batoh === "vse") ? Math.max(0, max - seznam.length) : 0;
+    return vidim.map(([x, i]) => dl(x[0], k, i, { q: x[1], wear: (row[x[0]] || {}).wear })).join("") + Array.from({ length: volno }, () => dl(null)).join("");
+  };
+  const batohF = N.backpack.length ? filtrVeci("batoh", N.backpack, row) : "";
+  // detail vybrané věci
+  let detail = `<p class="muted pn-nic">${esc(L(["Klepni na věc — tady uvidíš, co umí, a co s ní můžeš dělat.", "Tap an item to see details."]))}</p>`;
+  if (V) {
+    const it = V.k === "eq" ? V.e : V.i, id = it.id;
+    const x = V.x, q = x ? x[1] : 1, barva = x ? x[2] : it.color_name, hx = x ? x[3] : it.color;
+    const tl = [];
+    if (V.k === "eq") tl.push(`<button class="btn primary" data-unequip="${esc(V.e.slot)}">${esc(t("unequip"))}</button>`);
+    else {
+      if (it.use) tl.push(`<button class="btn primary" data-use="${esc(id)}">${esc(t("use"))}</button>`);
+      if (it.equip) tl.push(`<button class="btn${it.use ? "" : " primary"}" data-equip="${esc(id)}"${barva ? ` data-barva="${esc(barva)}"` : ""}>${esc(t("equip"))}</button>`);
+      if (V.k === "belt") tl.push(`<button class="btn" data-opasek="${esc(id)}" data-sundat="1">${esc(L(["Sundat do batohu", "To the backpack"]))}</button>`);
+      if ((N.v_batohu || []).includes(id) && V.k !== "belt") tl.push(`<button class="btn" data-opasek="${esc(id)}" data-sundat="">${esc(L(["Na opasek", "Onto the belt"]))}</button>`);
+    }
+    const nas = V.k !== "eq" && it.equip && eq[it.slot] && eq[it.slot].id !== id ? eq[it.slot] : null;   // porovnání s tím, co máš na sobě
+    const kde = { eq: L(["Máš na sobě", "Equipped"]), belt: L(["Na opasku", "On the belt"]), pockets: L(["V kapsách", "In pockets"]), backpack: L(["V batohu", "In the backpack"]) }[V.k];
+    detail = `<div class="pn-det-hl">${icon(id)}<div><div class="nm">${esc(it.name)}${q > 1 ? ` <span class="muted">× ${q}</span>` : ""}${it.enh ? ` <span class="muted">+${it.enh}</span>` : ""}${barvaStitek(barva, hx)}</div>
+        <div class="meta">${esc([it.slot_name, kde, it.merchant_name ? t("sell_to", it.merchant_name) : ""].filter(Boolean).join(" · "))}</div>${it.fx ? `<div class="meta"><b class="fx">${esc(it.fx)}</b></div>` : ""}</div></div>
+      ${statyHtml(it)}${opotrebeni(it)}
+      ${tl.length ? `<div class="pn-tl">${tl.join("")}</div>` : ""}
+      ${nas ? `<div class="pn-por"><span class="pn-por-t">${esc(L(["Teď máš na sobě", "Currently equipped"]))}</span><div class="pn-por-r">${icon(nas.id)}<b>${esc(nas.name)}</b></div>${statyHtml(nas)}</div>` : ""}
+      ${(V.k === "eq" && (V.e.slot === "světlo" || id === "Louč")) ? svetloPanel(m) : ""}`;
+  }
+  const zal = S.batohZal === "batoh" ? "batoh" : "kapsy";
+  const figura = `<div class="pn-fig hero-fig live" data-img="mesto-pokoj" data-key="pokoj">${Postava.html(m, IMG_BASE)}</div>`;
   view.replaceChildren(h(`
-    ${m.on_raid ? `<div class="panel notice" style="margin-bottom:16px">🗺️ ${esc(t("on_raid"))}</div>` : ""}
-    ${jeMobil() ? `<div class="m-zalozky batoh-zal">${zal.map(([k, n, c]) => `<button class="${BZ === k ? "on" : ""}" data-bz="${k}">${esc(n)}<small>${c}</small></button>`).join("")}</div>` : ""}
-    <div class="grid g2 batoh${jeMobil() ? " m-jen-" + BZ : innerWidth > 1100 ? " batoh-pc" : ""}" style="align-items:start">
-      <div class="grid">
-        ${vybavenoZalozky(m, N, row, eqBez, vec)}
-        ${opasekZalozky(N, vec, prazdne, blok)}
-      </div>
-      <div class="grid">
-        ${blok(L(["Kapsy", "Pockets"]), N.pockets.length + " / " + N.pockets_max, filtrVeci("kapsy", N.pockets, row) + filtruj("kapsy", N.pockets, row).map((x) => vec(x)).join("") + (BF.kapsy === "vse" ? volnaMista(N.pockets_max - N.pockets.length) : ""))}
-        ${N.backpack_max ? blok(N.bag_name || L(["Batoh", "Backpack"]), N.backpack.length + " / " + N.backpack_max, filtrVeci("batoh", N.backpack, row) + filtruj("batoh", N.backpack, row).map((x) => vec(x)).join("") + (BF.batoh === "vse" ? volnaMista(N.backpack_max - N.backpack.length) : ""))
-          : blok(L(["Batoh", "Backpack"]), "", `<div class="empty">${esc(L(["Nemáš batoh — kup ho u krejčího nebo vetešníka.", "No backpack yet."]))}</div>`)}
-        ${svetloPanel(m)}
-      </div>
+    ${m.on_raid ? `<div class="panel notice pn-vyprava">🗺️ ${esc(t("on_raid"))}</div>` : ""}
+    <div class="panenka${mob ? " pn-mob" : ""}${V && mob ? " s-detailem" : ""}">
+      <section class="panel pn-vyb">
+        <div class="pn-hl"><h3>${esc(L(["Vybaveno", "Equipped"]))}</h3><span class="pn-souhrn">${esc(L(["OČ ", "AC "]))}<b>${esc(m.armor_class)}</b> · ${esc(L(["Útok ", "Attack "]))}<b>${esc(m.damage || "")}</b></span></div>
+        <div class="pn-panenka"><div class="pn-sl">${PAN_L.map(eqDl).join("")}</div>${figura}<div class="pn-sl">${PAN_P.map(eqDl).join("")}</div></div>
+        <div class="pn-opasek"><span class="pn-lbl">${esc(L(["Opasek", "Belt"]))}${N.belt_max ? ` <small>${N.belt.length}/${N.belt_max}</small>` : ""}</span>${opasek}</div>
+      </section>
+      <section class="panel pn-nes">
+        ${mob ? `<div class="m-zalozky pn-zal"><button class="${zal === "kapsy" ? "on" : ""}" data-bz="kapsy">${esc(L(["Kapsy", "Pockets"]))}<small>${N.pockets.length}/${N.pockets_max}</small></button><button class="${zal === "batoh" ? "on" : ""}" data-bz="batoh">${esc(N.bag_name || L(["Batoh", "Backpack"]))}<small>${N.backpack.length}/${N.backpack_max}</small></button></div>` : ""}
+        <div class="pn-kont${mob && zal !== "kapsy" ? " skryt" : ""}"><div class="pn-hl"><h3>${esc(L(["Kapsy", "Pockets"]))}</h3><span class="pill">${N.pockets.length} / ${N.pockets_max}</span></div>
+          <div class="pn-mriz">${mriz("pockets", N.pockets, N.pockets_max)}</div></div>
+        <div class="pn-kont pn-batoh${mob && zal !== "batoh" ? " skryt" : ""}"><div class="pn-hl"><h3>${esc(N.bag_name || L(["Batoh", "Backpack"]))}</h3>${N.backpack_max ? `<span class="pill">${N.backpack.length} / ${N.backpack_max}</span>` : ""}</div>
+          ${N.backpack_max ? `${batohF}<div class="pn-mriz">${mriz("backpack", N.backpack, N.backpack_max)}</div>` : `<div class="empty">${esc(L(["Nemáš batoh — kup ho u krejčího nebo vetešníka.", "No backpack yet."]))}</div>`}</div>
+        ${mob ? "" : `<p class="pn-rada">${esc(L(["Klepni na věc · dvojklikem ji nasadíš nebo použiješ", "Click to select · double-click to equip or use"]))}</p>`}
+      </section>
+      <section class="panel pn-det">${mob ? `<button type="button" class="pn-zavrit" data-pzav aria-label="${esc(L(["Zavřít", "Close"]))}">✕</button>` : `<div class="pn-hl"><h3>${esc(L(["Vybraná věc", "Selected item"]))}</h3></div>`}${detail}</section>
     </div>`));
-  vejdiDoOkna(".batoh-pc", 360);   // r27-40: batoh přes celou šířku ve sloupcích, posouvají se jen panely
-  view.querySelectorAll("[data-f]").forEach((b) => b.onclick = () => { S.bagFilter = b.dataset.f; render(); });
+  vejdiDoOkna(".panenka", 420);
+  view.querySelectorAll("[data-pk]").forEach((b) => {
+    b.onclick = () => { const k = b.dataset.pk; S.bagSel = { k, i: k === "eq" ? b.dataset.pi : Number(b.dataset.pi), id: b.dataset.pid }; Zvuk.sfx("klik"); render(); };
+    b.ondblclick = () => { const it = row[b.dataset.pid];
+      if (b.dataset.pk === "eq") act("unequip", { slot: b.dataset.pi });
+      else if (it && it.equip) act("equip", { item: it.id, color: "" });
+      else if (it && it.use) act("use", { item: it.id }); };
+  });
+  view.querySelectorAll("[data-pzav]").forEach((b) => b.onclick = () => { S.bagSel = null; render(); });
   view.querySelectorAll("[data-bz]").forEach((b) => b.onclick = () => { S.batohZal = b.dataset.bz; Zvuk.sfx("klik"); render(); });
   view.querySelectorAll("[data-bf]").forEach((b) => b.onclick = () => { const [k, d] = b.dataset.bf.split(":"); BF[k] = d; Zvuk.sfx("klik"); render(); });
-  view.querySelectorAll("[data-opz]").forEach((b) => b.onclick = () => { S.opasekZal = Number(b.dataset.opz); Zvuk.sfx("klik"); render(); });
-  view.querySelectorAll("[data-vyb]").forEach((b) => b.onclick = () => { S.vybZal = b.dataset.vyb; Zvuk.sfx("klik"); render(); });
   const act = (op, data, msg) => call(op, data).then((r) => { toast(msg ? msg(r) : t("done")); render(); }).catch(() => {});
   view.querySelectorAll("[data-unequip]").forEach((b) => b.onclick = () => act("unequip", { slot: b.dataset.unequip }));
   view.querySelectorAll("[data-equip]").forEach((b) => b.onclick = () => act("equip", { item: b.dataset.equip, color: b.dataset.barva || "" }));
   view.querySelectorAll("[data-use]").forEach((b) => b.onclick = () => act("use", { item: b.dataset.use }));
   view.querySelectorAll("[data-opasek]").forEach((b) => b.onclick = () => act("opasek", { item: b.dataset.opasek, sundat: !!b.dataset.sundat },
     () => b.dataset.sundat ? L(["Sundáno do batohu.", "Moved to the backpack."]) : L(["Zpátky na opasku.", "Back on the belt."])));
-  loadIcons([...m.inventory.map((i) => i.id), ...m.equipped.map((e) => e.id)]);
-  mobilniSeznam(view.querySelector(".batoh"));
+  loadIcons([...m.inventory.map((i) => i.id), ...m.equipped.map((e) => e.id), ...(N.belt_name ? [N.belt_name] : [])]);
+  mountLive(view, { still: true });
 };
 
 // r27-4: kroniky z Discordu na radnici — kniha se záložkami (jako deník)
