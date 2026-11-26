@@ -2337,6 +2337,14 @@ const ODZNAKY = {
   "Dobrodinec": ["kruh", "zlato", "#7a5a12", `<path d="M0 -9 C2 -6 2 -4 0 -3 C-2 -4 -2 -6 0 -9 Z M-2 -3 H2 V8 H-2 Z"/>`],
 };
 const ODZ_KOV = { zlato: ["#fff0b0", "#d9a53a", "#7a5212"], stribro: ["#ffffff", "#b8bcc4", "#5a5e66"], bronz: ["#f6c89a", "#b0703a", "#5a3416"], zelezo: ["#c8c8c8", "#6a6a6a", "#2a2a2a"] };
+// 1.0-1: odznaky v deníku po záložkách podle druhu
+const ODZ_DRUH = [
+  ["boj", ["Boj a kolbiště", "Combat"], ["Lovec příšer", "Krvavá čepel", "Postrach pánů míst", "Pán kraje", "Bez škrábnutí", "Mistr kolbiště", "Vítěz turnaje", "Šampion kolbiště"]],
+  ["vypravy", ["Výpravy", "Expeditions"], ["Matador stezek", "Veterán stezek", "Hledač pokladů", "Sběratel", "Milosrdný samaritán", "Mrchožrout"]],
+  ["mesto", ["Město a víra", "Town and faith"], ["Spolehlivý najatec", "Neúnavný najatec", "Vážený měšťan", "Slavný v kraji", "Zbožná duše", "Poutník k oltáři", "Štědrý hostitel", "Pravá ruka hostinského", "Svazek před oltářem"]],
+  ["majetek", ["Majetek a řemeslo", "Wealth and craft"], ["Zbohatlík", "Spořivá ruka", "Ctěný dlužník", "Poctivý plátce", "Mistr podniku", "Vlastníma rukama", "Mistr řemesla"]],
+  ["zivot", ["Život a příběhy", "Life and lore"], ["Legenda", "Usedlík", "Pamětník", "Stařešina", "Knihomol", "Strážce příběhů", "Přítel zvířat"]],
+];
 // r27-40: malovaný odznak z ComfyUI (img/odznaky/<slug>.webp); dokud malba chybí, zůstane kreslený
 function odznakSvg(name, got) {
   return `<img class="odz-mal${got ? "" : " neni"}" alt="" src="${IMG_BASE}odznaky/${Postava.slug(name)}.webp">` + odznakKresba(name, got);
@@ -2625,10 +2633,23 @@ VIEWS.denik = async (view) => {
     loadIcons(D.pisemnosti.map((w) => w.name));
   } else {
     const mam = D.odznaky.filter((o) => o.got).length;
+    const druh = (o) => (ODZ_DRUH.find(([, , jm]) => jm.includes(o.name)) || [/Daruj/.test(o.desc) ? "mesto" : "zivot"])[0];
+    const zal = ODZ_DRUH.some(([k]) => k === DENIK.odzZal) ? DENIK.odzZal : "boj";
+    const vidim = D.odznaky.filter((o) => druh(o) === zal);
     box.innerHTML = `<p class="kapitola">${esc(L(["Kapitola VII", "Chapter VII"]))}</p><div class="spread"><h3 class="dk-nadpis">${esc(L(["Odznaky a ocenění", "Badges and honours"]))}</h3><span class="pill gold">${mam} / ${D.odznaky.length}</span></div>
-      <div class="odznaky">${D.odznaky.map((o) => `<div class="odznak${o.got ? " ma" : ""}" title="${esc(o.desc)}">${odznakSvg(o.name, o.got)}
+      <div class="vz-druh odz-zal">${ODZ_DRUH.map(([k, n]) => { const v = D.odznaky.filter((o) => druh(o) === k); return `<button type="button" class="chip${zal === k ? " on" : ""}" data-odzz="${k}">${esc(L(n))} <small>${v.filter((o) => o.got).length}/${v.length}</small></button>`; }).join("")}</div>
+      <div class="odznaky">${vidim.map((o) => `<div class="odznak${o.got ? " ma" : ""}" title="${esc(o.desc)}">${odznakSvg(o.name, o.got)}
         <b>${esc(o.name)}</b><small>${esc(o.desc)}</small></div>`).join("")}</div>`;
+    box.querySelectorAll("[data-odzz]").forEach((b) => b.onclick = () => { DENIK.odzZal = b.dataset.odzz; Zvuk.sfx("stranka"); render(); });
     odznakyObr(box);
+    if (!jeMobil() && innerWidth > 1100) {               // 1.0-1: jedna karta — odznaky záložky se posouvají uvnitř, žádné listování
+      vejdiDoOkna(".dk-strana", 360);
+      const g = box.querySelector(".odznaky");
+      const fit = () => { if (!g.isConnected) return; const h = box.getBoundingClientRect().bottom - g.getBoundingClientRect().top - 24;
+        if (h > 120) { g.style.maxHeight = h + "px"; g.style.overflowY = "auto"; } };
+      requestAnimationFrame(fit); setTimeout(fit, 300);
+    }
+    return;
   }
   listujDenik(box);   // r27-40: na PC se v kapitole listuje po stranách, stránka se neposouvá
 };

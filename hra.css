@@ -3733,3 +3733,12 @@ input[type=range]{accent-color:#a3241b}
  .zver-nabidka .zk-dole{margin-top:4px}}
 
 .paserak-den{text-align:center;padding:28px 22px}.paserak-den h3{margin:0 0 10px}.paserak-den p{max-width:520px;margin:0 auto 8px}
+
+/* 1.0-1: odznaky — jedna karta se záložkami */
+.odz-karta{padding:12px 14px}.odz-zal{margin:6px 0 12px;flex-wrap:wrap}.odz-zal small{opacity:.75;margin-left:3px}
+/* 1.0-1: odznaky v deníku — malé dlaždice, celá záložka na jednom listu */
+.odz-zal .chip{padding:6px 8px;font-size:.72rem}
+.denik .odznaky,.dk-list .odznaky,#view .odznaky{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
+#view .odznaky .odznak{padding:6px 6px;gap:2px}
+#view .odznaky .odznak img.odz-mal,#view .odznaky .odznak svg{width:58px;height:58px}
+#view .odznaky .odznak b{font-size:.8rem}#view .odznaky .odznak small{font-size:.66rem}
