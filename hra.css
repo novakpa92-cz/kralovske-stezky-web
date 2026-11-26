@@ -3701,3 +3701,35 @@ input[type=range]{accent-color:#a3241b}
 #view .vp-nahled .vl-obr img{width:100%;height:100%;object-fit:cover}
 #view .vp-nahled.prepinac .vl-txt b::before{content:"☐ ";opacity:.8}
 #view .vp-nahled.prepinac.on .vl-txt b::before{content:"☑ "}
+
+/* 1.0-1: smíření, prostředníci, lichvář */
+.li-smir{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 8px;padding:6px 8px;border:1px dashed #b8924a;border-radius:5px}
+.vz-pres{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.vz-pres-list h4{margin:0 0 8px}
+.vz-pres-mriz{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:52vh;overflow:auto}
+.vz-pres-pol{display:flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid #8a6a3c;border-radius:5px;background:#2a1d12;color:#eadcbc;cursor:pointer;text-align:left}
+.vz-pres-pol span{flex:1;font-size:.86rem}.vz-pres-pol b{color:#e3c27a;font-size:.84rem}
+.vz-pres-pol img{width:28px;height:28px}
+
+/* 1.0-1: zvěřinec po záložkách — jedna řada karet, bez posouvání */
+.zver-zal{margin:0 0 10px}
+@media (min-width:900px){.zver-nabidka .zver-mriz{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-height:none!important;overflow:visible!important}}
+
+.vv-filtr{margin:0 0 8px}
+@media (max-width:899px){.zver-nabidka .zver-mriz{grid-template-columns:1fr 1fr!important;gap:8px!important}
+ .zver-nabidka .zk-obr{height:96px}.zver-nabidka .zk-obr img{max-height:96px;object-fit:contain}
+ .zver-nabidka .zver-karta{padding:8px}.zver-nabidka .zk-pop,.zver-nabidka .zk-zivot,.zver-nabidka .zk-bonus{font-size:.74rem;margin:2px 0}}
+
+/* 1.0-1: vztah obchodníka v hlavičce obchodu */
+.obchod-stav .ob-vztah{display:flex;flex-direction:column;align-items:center;gap:2px;margin:0 auto;min-width:170px;text-align:center}
+.ob-vztah small{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:#a89068}
+.ob-vztah b{font-size:1rem;color:#e9d8ae}.ob-vztah.spojenec b,.ob-vztah.prizen b{color:#b9dc8e}.ob-vztah.neduvera b{color:#f0c890}.ob-vztah.nepritel b{color:#f0a8a0}
+.ob-vztah em{font-style:normal;font-size:.74rem;color:#c9b38a}
+.ob-vztah .li-body{width:140px;margin:2px 0}
+
+@media (min-width:900px){.opts.husta{grid-template-columns:repeat(4,minmax(0,1fr))!important}.opts.husta .obr-karta .ok-txt small{font-size:.74rem}}
+@media (max-width:899px){.zver-nabidka .zk-obr{height:70px!important}.zver-nabidka .zk-obr img{max-height:70px}
+ .zver-nabidka .zk-zivot,.zver-nabidka .zk-bonus{display:none}.zver-nabidka .zver-karta h3{margin:2px 0;font-size:.8rem}
+ .zver-nabidka .zk-dole{margin-top:4px}}
+
+.paserak-den{text-align:center;padding:28px 22px}.paserak-den h3{margin:0 0 10px}.paserak-den p{max-width:520px;margin:0 auto 8px}
