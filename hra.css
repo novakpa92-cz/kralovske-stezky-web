@@ -4159,3 +4159,18 @@ html.mobil .pp-hlavni{grid-auto-flow:row;grid-template-columns:1fr 1fr}
 .mistr-vec{display:flex;align-items:center;gap:8px}.mistr-vec .icon{width:40px;height:40px}.mistr-vec span{display:flex;flex-direction:column;flex:1;min-width:0}.mistr-vec small{font-size:.76rem;color:#cbb994}
 .mistr-vec .pp-stupen{font-style:normal}
 html.mobil .mistr-obr{display:none}
+/* 1.0-1-6: rámečky vzácnosti u ikon předmětů */
+.icon.vz-1,.icon.vz-2,.icon.vz-3,.icon.vz-legenda{border-radius:6px;outline:2px solid var(--vz);outline-offset:-2px;box-shadow:0 0 8px var(--vz),inset 0 0 6px var(--vz)}
+.icon.vz-1{--vz:#5fae4a}
+.icon.vz-2{--vz:#4a8fd9}
+.icon.vz-3{--vz:#a65fd9}
+.icon.vz-legenda{--vz:#f0b43a;outline-width:3px;animation:vz-zar 2.4s ease-in-out infinite}
+@keyframes vz-zar{50%{box-shadow:0 0 14px #f0b43a,inset 0 0 8px #f0b43a}}
+@media (prefers-reduced-motion:reduce){.icon.vz-legenda{animation:none}}
+
+/* 1.0-1-6: pásmo úrovní u obtížnosti výpravy */
+.vp-pasmo { display: block; font-style: normal; font-size: .78rem; margin-top: 3px; font-weight: 600; }
+.vp-pasmo.pod { color: #7fa86a; } .vp-pasmo.pro { color: #d8b45a; } .vp-pasmo.nad { color: #d0685a; }
+
+/* 1.0-1-6: živá ekonomika — šipka ceny */
+.cena-sipka { font-size: .8rem; margin-left: 3px; font-weight: 700; cursor: help; } .cena-sipka.nahoru { color: #d0685a; } .cena-sipka.dolu { color: #7fa86a; }
