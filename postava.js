@@ -121,7 +121,7 @@ const Postava = (() => {
     if (levaZb || st || louc || levaDyka) out.push({ src: P("ruka-dlan-leva-" + sx), cls: "dlan" });
     if (levaDyka) out.push(...vRuce({ src: P("zbran-leva-" + levaDyka + "-" + sx), cls: "zbran" }, pest("leva", "-p20")));
     if (levaZb) out.push(...vRuce({ src: P("zbran-ruka-" + zbSlug + "-" + sx), cls: "zbran" }, pest("leva")));
-    if (louc) out.push(...vRuce({ src: P("svetlo-louc-ruka-" + sx), cls: "svetlo ohen" }, pest("leva")));
+    if (louc && !dlouhyPlast) out.push(...vRuce({ src: P("svetlo-louc-ruka-" + sx), cls: "svetlo ohen" }, pest("leva")));   // 1.0-3-15 (Pavel): louč za pláštěm vůbec není vidět
     zaPlastem.forEach((l) => out.splice(out.indexOf(l), 1));        // přesune se až za plášť
     const helm = HELMA[eq.hlava];
     const hair = L.vlasy === "Bez vlasů" ? null : (VLASY[L.vlasy] || "kratke");   // r27-6: tělo je holé, vlasy nese jen vrstva účesu

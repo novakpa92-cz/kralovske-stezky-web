@@ -4479,3 +4479,8 @@ html.mobil #vyzvy-panel{bottom:76px;right:8px;left:8px;max-width:none}
 .mapa-x{position:absolute;transform:translate(-50%,-50%) rotate(-6deg);font:900 clamp(17px,5cqi,40px)/1 Georgia,serif;font-style:normal;color:#9c140e;
   text-shadow:0 0 2px rgba(244,230,194,.9),0 0 5px rgba(244,230,194,.7);pointer-events:none;container-type:normal}
 .trh-mapa,.skl-deska{container-type:inline-size}
+
+/* 1.0-3-15: ikona zboží s popiskem */
+.ob-ik{display:inline-flex;cursor:help;border-radius:8px;outline:none}
+.ob-ik:hover,.ob-ik:focus-visible{box-shadow:0 0 0 2px var(--gold)}
+#uc-tip p{margin:.35em 0 .2em}

@@ -2454,6 +2454,7 @@ function tipy(root) {
     b.addEventListener("click", (e) => { e.stopPropagation(); ukaz(); });
   });
 }
+document.addEventListener("click", (e) => { const tip = $("#uc-tip"); if (tip && !tip.hidden && !e.target.closest("[data-tip-n]")) tip.hidden = true; });   // 1.0-3-15: klepnutí jinam popisek zavře
 const PETV = { kind: null };
 function petPc(view, Z, A, obr) {
   const Zs = Z.filter((z) => !z.druhy || z === A).concat(Z.filter((z) => z.druhy && z !== A));
@@ -5912,10 +5913,14 @@ VIEWS.obchod = async (view) => {
   const sedi = (i) => !q || i.name.toLowerCase().includes(q.toLowerCase());
   // r27-5: víc kusů posuvníkem (u jídla, střeliva, surovin…), cena se přepočítá
   const mnoz = (max, cena) => max > 1 ? `<label class="mnoz" title="${esc(L(["Kolik kusů", "How many"]))}"><input type="range" min="1" max="${max}" value="1" data-mn data-cena="${cena}"><b>×1</b></label>` : "";
+  // 1.0-3-15: popisek zboží po najetí nebo klepnutí na ikonu (dobový popis, k čemu je, staty)
+  const obTip = (i, inner) => { const st = (i.staty || []).map((x) => x[0]).join(" · ");
+    const s2 = [i.k_cemu, st].filter(Boolean).join(" · ");
+    return i.popis || s2 ? `<span class="ob-ik" tabindex="0" role="button" data-tip-n="${esc(i.name)}" data-tip-t="${esc(i.popis || "")}" data-tip-s="${esc(s2)}">${inner}</span>` : inner; };
   const koupit = (i) => { const mx = i.level <= lvl ? Math.max(1, Math.min(20, Math.floor(S.me.coins / Math.max(1, cena(i))))) : 1;   // r27-6: posuvník u všeho zboží
     const hxv = i.colors ? i.colors[zvol[i.id] || "Přírodní"] : "";   // r27-6: zvolená barva je vidět i na ikoně zboží
     const ik = hxv ? `<span class="ikona-barva${/zbroj|štít|stit/i.test(i.slot_name || "") ? " kov" : ""}" style="--b:${hxv};--m:url('${IMG_BASE}predmety/ikony/${Postava.slug(i.id)}.webp')">${icon(i.id)}<i></i></span>` : icon(i.id);
-    return `<div class="item">${ik}
+    return `<div class="item">${obTip(i, ik)}
       <div><div class="nm">${esc(i.name)}${i.level > lvl ? `<span class="tag lock">${esc(t("from_level", i.level))}</span>` : ""}${i.vyprodano ? `<span class="tag lock">${esc(L(["vyprodáno", "sold out"]))}</span>` : ""}</div>
       <div class="meta">${esc(i.slot_name)}${i.fx ? ` · <b class="fx">${esc(i.fx)}</b>` : ""}${i.count ? " · " + esc(t("have", i.count)) : ""}${i.sklad != null && !i.vyprodano ? " · " + esc(L(["skladem ", "in stock "]) + i.sklad) : ""}</div>${statyHtml(i)}</div>
       <div class="acts">${i.vyprodano ? "" : mnoz(Math.min(mx, i.sklad != null ? i.sklad : mx), cena(i))}<span class="price" data-cena-txt>${esc(t("coins", cena(i)))}</span>${i.sipka ? `<span class="cena-sipka ${i.sipka === "▲" ? "nahoru" : "dolu"}" title="${esc(i.sipka_proc || "")}">${i.sipka}</span>` : ""}
@@ -5924,7 +5929,7 @@ VIEWS.obchod = async (view) => {
         return `<button class="kup-vyber${barvi === i.id ? " on" : ""}" data-barvit="${esc(i.id)}"><i${hx ? ` style="--b:${hx}"` : ` class="prirodni"`}></i>${esc(L(["Barva: ", "Colour: "]) + c)}${hx ? ` <b>+${(i.dye_fees || {})[c] || 0} gr.</b>` : ""} <span>${barvi === i.id ? "▴" : "▾ " + esc(L(["vybrat barvu", "choose"]))}</span></button>
         ${barvi === i.id ? `<div class="kup-barva">${Object.entries(i.colors).sort(([a], [b]) => ((i.dye_fees || {})[a] || 0) - ((i.dye_fees || {})[b] || 0)).map(([cc, h2]) =>
           `<button class="kb${cc === c ? " on" : ""}" data-zvol="${esc(i.id)}" data-barva="${esc(cc)}" title="${esc(cc)}"><i${h2 ? ` style="--b:${h2}"` : ` class="prirodni"`}></i><small>${esc(cc)}</small><em>${(i.dye_fees || {})[cc] ? "+" + i.dye_fees[cc] + " gr." : L(["zdarma", "free"])}</em></button>`).join("")}</div>` : ""}`; })() : ""}</div>`; };
-  const prodat = (i) => `<div class="item${i.sell ? "" : " nechce"}"${kusAttr(i)}>${icon(i.id)}
+  const prodat = (i) => `<div class="item${i.sell ? "" : " nechce"}"${kusAttr(i)}>${obTip(i, icon(i.id))}
       <div><div class="nm">${esc(i.name)}${kusTag(i)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}${i.kus == null ? barvaStitek(i.color, i.hex) : ""}${i.sell && i.best ? `<span class="tag ok">${esc(L(["nejlepší výkup", "best price"]))}</span>` : ""}</div>
       <div class="meta">${esc(i.sell ? (i.best_shop ? L(["víc dá ", "more at "]) + i.best_shop + " (" + t("coins", i.best_price) + ")" : i.slot_name) : L(["tohle nevykupuje", "won't buy this"]))}</div>${opotrebeni(i)}</div>
       <div class="acts">${i.sell ? `${mnoz(i.count, i.sell)}<span class="price" data-cena-txt>${esc(t("coins", i.sell))}</span>
@@ -5940,7 +5945,7 @@ VIEWS.obchod = async (view) => {
       if (!fk._kolo) { fk._kolo = true; fk.addEventListener("wheel", (e) => { if (fk.scrollWidth > fk.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { fk.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false }); }
     }
     const skup = kat || kats.length < 2 ? [[kat, rows]] : kats.map((k) => [k, rows.filter((i) => katOf(i) === k)]).filter(([, r]) => r.length);
-    const mistr = (data.mistrovske || []).filter((x) => (!q || x.name.toLowerCase().includes(q.toLowerCase())) && (!kat || !x.slot_name || katOf(x) === kat)).map((x) => `<div class="item mistr-radek">${icon(x.id)}
+    const mistr = (data.mistrovske || []).filter((x) => (!q || x.name.toLowerCase().includes(q.toLowerCase())) && (!kat || !x.slot_name || katOf(x) === kat)).map((x) => `<div class="item mistr-radek">${obTip(x, icon(x.id))}
       <div><div class="nm">${esc(x.name)} <i class="pp-stupen">+1</i><span class="tag ok">${esc(L(["mistrovský kus · jen dnes", "masterwork · today only"]))}</span>${x.level > lvl ? `<span class="tag lock">${esc(t("from_level", x.level))}</span>` : ""}</div>
       <div class="meta">${esc(L(["Už zušlechtěný na +1, jediný kus", "Already improved to +1, one piece only"]))}</div></div>
       <div class="acts"><span class="price">${esc(t("coins", x.price))}</span><button class="btn small primary" data-mistr="${esc(x.id)}"${S.me.coins < x.price || lvl < x.level ? " disabled" : ""}>${esc(t("buy"))}</button></div></div>`).join("");   // 1.0-1-9 (Pavel): žádná přehlídka, běžný řádek nahoře v seznamu
@@ -5965,6 +5970,7 @@ VIEWS.obchod = async (view) => {
       call("sell", { item: b.dataset.sell, shop: shopId, count: n, color: b.dataset.barva || "" }).then((r) => { Zvuk.sfx("mince"); toast(t("sold", r.price)); render(); }).catch(() => { b.disabled = false; });
     });
     loadIcons([...rows, ...mine].map((i) => i.id));
+    tipy(box);                                            // 1.0-3-15: popisky zboží
     mobilniSeznam(box);
   };
   const mins = data.restock_min || 0;
