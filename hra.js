@@ -5641,8 +5641,15 @@ function vejdiObchod(sel = ".obchod-sloupce .items") {
     }
     view.scrollTop = 0;
   };
-  requestAnimationFrame(run); setTimeout(run, 300); setTimeout(run, 900);
+  requestAnimationFrame(run); setTimeout(run, 300); setTimeout(run, 900); setTimeout(run, 2000);
   document.fonts?.ready.then(run);
+  if (pevne && typeof ResizeObserver !== "undefined") {    // 1.0-1-12: když se hlavička obchodu nebo obrázek dodatečně přeskládá, dorovnat znovu
+    vejdiObchod._ro?.disconnect();
+    let cek = 0;
+    const ro = new ResizeObserver(() => { cancelAnimationFrame(cek); cek = requestAnimationFrame(run); });
+    [view.querySelector(".scene"), view.querySelector(".obchod-stav"), view.querySelector(".obchod-prepinac")].forEach((el) => el && ro.observe(el));
+    vejdiObchod._ro = ro;
+  }
 }
 addEventListener("hashchange", () => { const tip = $("#uc-tip"); if (tip) tip.hidden = true; });
 addEventListener("resize", () => { if (S.tab === "obchod") vejdiObchod(); else if (S.tab === "misto") vejdiObchod(".misto-volby"); else if (S.tab === "panel") vejdiObchod(".volby-blok .vp-volby"); else if (S.tab === "aukce") vejdiObchod("#auclist"); });
@@ -5719,6 +5726,7 @@ VIEWS.obchod = async (view) => {
       fk.innerHTML = kats.length > 1 ? [["", L(["Vše", "All"]) + " · " + vse.length], ...kats.map((k) => [k, k + " · " + vse.filter((i) => katOf(i) === k).length])]
         .map(([k, n]) => `<button class="chip${kat === k ? " on" : ""}" data-kat="${esc(k)}">${esc(n.charAt(0).toUpperCase() + n.slice(1))}</button>`).join("") : "";
       fk.querySelectorAll("[data-kat]").forEach((b) => b.onclick = () => { kat = b.dataset.kat; drawShop(); });
+      if (!fk._kolo) { fk._kolo = true; fk.addEventListener("wheel", (e) => { if (fk.scrollWidth > fk.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { fk.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false }); }
     }
     const skup = kat || kats.length < 2 ? [[kat, rows]] : kats.map((k) => [k, rows.filter((i) => katOf(i) === k)]).filter(([, r]) => r.length);
     const mistr = (data.mistrovske || []).filter((x) => (!q || x.name.toLowerCase().includes(q.toLowerCase())) && (!kat || !x.slot_name || katOf(x) === kat)).map((x) => `<div class="item mistr-radek">${icon(x.id)}

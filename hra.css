@@ -4207,3 +4207,6 @@ html.mobil .mistr-obr{display:none}
 .tb-zvuk.ztlumeno{opacity:.75}
 .login-card{position:relative}
 .login-zvuk{position:absolute;top:14px;right:14px;margin:0}
+/* 1.0-1-12: filtry obchodu v jednom řádku (víc místa pro seznam zboží); co se nevejde, posune se kolečkem do strany */
+html:not(.mobil) .shop-kat{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+html:not(.mobil) .shop-kat .chip{flex:0 0 auto}
