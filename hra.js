@@ -1532,8 +1532,34 @@ function chatRebuild(box, html, rooms) {
     });
     return false;
   }
-  box.innerHTML = html;
+  // 1.0-2: obnova (každé 2–3 s) přepíše jen to, co se opravdu změnilo — obrázky a postavy zůstanou (na telefonu blikaly)
+  const tpl = document.createElement("template"); tpl.innerHTML = html;
+  if (box._ksSrc && box.childNodes.length === box._ksSrc.childNodes.length) morphDom(box, box._ksSrc, tpl.content);
+  else box.replaceChildren(tpl.content.cloneNode(true));
+  box._ksSrc = tpl.content;
   return true;
+}
+/** Zarovná živé DOM (postavené ze staré předlohy) na novou předlohu; nezměněné uzly nechá být (i s tím, co do nich dokreslil skript). */
+function morphDom(live, stary, novy) {
+  const L = [...live.childNodes], O = [...stary.childNodes], N = [...novy.childNodes];
+  if (L.length !== O.length || O.length !== N.length) { live.replaceChildren(...N.map((n) => n.cloneNode(true))); return; }
+  for (let i = 0; i < N.length; i++) {
+    const o = O[i], n = N[i], l = L[i];
+    if (o.isEqualNode(n)) continue;
+    // plátno postavy má při každém vykreslení nové id — když se vrstvy (sourozenec .pas) nezměnily, nakreslená postava zůstane
+    if (o.nodeName === "CANVAS" && n.nodeName === "CANVAS" && n.classList.contains("figura-platno") && l.nodeName === "CANVAS"
+        && o.previousElementSibling && n.previousElementSibling && o.previousElementSibling.isEqualNode(n.previousElementSibling)) continue;
+    if (o.nodeType === 3 && n.nodeType === 3) { l.nodeValue = n.nodeValue; continue; }
+    if (o.nodeType === 1 && n.nodeType === 1 && o.tagName === n.tagName && l.nodeType === 1 && l.tagName === o.tagName
+        && !["INPUT", "SELECT", "TEXTAREA", "CANVAS", "IMG"].includes(n.tagName)) {
+      for (const at of [...o.attributes]) if (!n.hasAttribute(at.name)) l.removeAttribute(at.name);
+      for (const at of [...n.attributes]) if (o.getAttribute(at.name) !== at.value) l.setAttribute(at.name, at.value);
+      morphDom(l, o, n);
+      continue;
+    }
+    if (n.nodeName === "CANVAS" && n.classList.contains("figura-platno") && l.previousElementSibling) l.previousElementSibling.style.visibility = "";   // vrstvy znovu vidět, než se plátno překreslí
+    l.replaceWith(n.cloneNode(true));
+  }
 }
 /** r27-28: seznam hráčů ve hře v pravé části hospodských řečí — stejná výška jako zprávy, posouvá se svisle. */
 function onlineHtml(lidi) {
