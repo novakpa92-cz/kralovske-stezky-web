@@ -155,17 +155,19 @@ async function call(op, data = {}, quiet = false) {
     pending++; if (!quiet) busyUkaz(true);
     try {
       let res;
+      let poslany = S.token;                       // 1.0-1-10: odpověď na starší přihlášení nesmí odhlásit nové
       for (let pokus = 0; ; pokus++) {
-        try { res = await fetchApi(op, data); break; }
+        try { poslany = S.token; res = await fetchApi(op, data); break; }
         catch (e) {
           if (pokus === 0 && CTENI.has(op) && !(e instanceof SyntaxError)) { await new Promise((r) => setTimeout(r, 600)); continue; }
           throw new Error(t(e instanceof SyntaxError ? "bad_reply" : "net_error"));
         }
       }
       if (!res.ok) {
-        if (res.auth === "login" && op !== "link") { logout(true, res.error); }
+        if (res.auth === "login" && op !== "link" && poslany === S.token) { logout(true, res.error); }
         throw new Error(res.error || t("bad_reply"));
       }
+      if (res.token && (op === "link" || op === "login_pw")) { S.token = res.token; store.set("token", res.token); }   // 1.0-1-10: nový klíč dřív, než setMe pošle další požadavky (vzkazy)
       if (res.me) setMe(res.me);
       else if (op === "me") setMe(res);              // „me“ vrací postavu přímo, ne pod klíčem me
       return res;
