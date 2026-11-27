@@ -4378,3 +4378,104 @@ html.mobil .hk-schop .hk-vlastnost p{font-size:.95rem}
 .kp-hp{height:8px;border-radius:4px;background:#3a2c1a;overflow:hidden}.kp-hp i{display:block;height:100%;background:linear-gradient(90deg,#c25a45,#e07a5a);transition:width .5s}
 .kp-hp.ja i{background:linear-gradient(90deg,#5a8a3a,#7fa35a)}
 .kp-odmena{font-size:1.05rem}
+
+/* 1.0-3-1: panel výzev (škopek, pěsti, hry, kolbiště) */
+#vyzvy-panel{position:fixed;right:14px;bottom:14px;z-index:60;display:flex;flex-direction:column;gap:6px;max-width:min(440px,calc(100vw - 28px))}
+.vyz{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;border:1px solid var(--line2);background:#231b11f2;box-shadow:0 6px 18px #000a;font-size:.92rem}
+.vyz-pri{border-color:var(--gold);animation:vyzPrijezd .4s ease-out}.vyz-cas{color:var(--muted);margin-left:4px;white-space:nowrap}.vyz-cas.malo{color:var(--red);font-weight:700}
+@keyframes vyzPrijezd{from{transform:translateX(30px);opacity:0}}
+html.mobil #vyzvy-panel{bottom:76px;right:8px;left:8px;max-width:none}
+
+/* 1.0-3-3: admin — náhled postavy hráče */
+.adm-hrac.klik{cursor:var(--k-klik)}.adm-hrac.klik:hover{border-color:var(--gold);filter:brightness(1.1)}
+.adm-post{position:relative;display:grid;grid-template-columns:minmax(200px,300px) minmax(0,1fr);gap:18px;align-items:start;max-width:760px;width:calc(100vw - 32px)}
+.adm-post-fig{position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:radial-gradient(#4a3a26,#1c140a)}
+.adm-post-fig .figura{position:absolute;inset:0}
+.adm-post-eq{margin:.3em 0;padding-left:1.1em;font-size:.92rem}.adm-post-eq small{color:var(--dim);display:inline-block;min-width:4.5em}
+.adm-post-x{position:absolute;right:8px;top:6px;border:0;background:none;font-size:1.2rem;cursor:var(--k-klik);color:inherit}
+@media (max-width:640px){.adm-post{grid-template-columns:1fr}.adm-post-fig{max-height:52vh}}
+.adm-post .muted{color:#6b5233}.adm-post-t h2{text-align:left;margin:0 0 .2em}.adm-post-t p{margin:.45em 0}
+
+/* 1.0-3-6: útržky map po oblastech v deníku */
+.dk-utrzky{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px;margin:6px 0 12px}
+.dk-utrzek{display:flex;gap:8px;align-items:center;padding:5px 8px;border:1px solid rgba(120,90,50,.35);border-radius:8px;background:rgba(255,255,255,.12)}
+.dk-utrzek img{width:34px;height:34px;object-fit:contain}.dk-utrzek span{display:flex;flex-direction:column;line-height:1.2}
+.dk-utrzek small{color:#6b5233}.dk-utrzek.plno{border-color:var(--gold)}.dk-utrzek.poklad small{color:#4d6b2a;font-weight:600}
+
+/* 1.0-3-7: malovaná mapa oblasti s popisky */
+.mmapa{position:relative;width:100%;max-width:1100px;margin:0 auto;container-type:inline-size;border-radius:6px;overflow:hidden}
+.mmapa>img{display:block;width:100%;height:100%;object-fit:fill}
+.mmapa.cela{width:min(96vw,calc(92vh * 1.41));max-width:none}
+.mm-titul{position:absolute;left:50%;top:1.6%;transform:translateX(-50%);font:700 clamp(12px,2.6cqi,30px)/1.1 var(--serif,Georgia),serif;color:#4a2c12;
+  letter-spacing:.06em;text-transform:uppercase;text-shadow:0 0 3px #f3e3bb,0 0 6px #f3e3bb,0 0 10px #efdcae;white-space:nowrap;pointer-events:none}
+.mm-misto{position:absolute;width:0;height:0;pointer-events:none}
+.mm-misto b{position:absolute;white-space:nowrap;font:600 clamp(8px,1.45cqi,17px)/1.05 var(--serif,Georgia),serif;color:#3b230e;font-style:italic;
+  text-shadow:0 0 2px #f4e6c2,0 0 4px #f4e6c2,0 0 7px #f0dfb4,0 0 11px #ecd9a8}
+.mm-misto.mm-d b{left:0;top:1.6cqi;transform:translateX(-50%)}.mm-misto.mm-u b{left:0;bottom:1.6cqi;transform:translateX(-50%)}
+.mm-misto.mm-l b{right:1.6cqi;top:0;transform:translateY(-50%)}.mm-misto.mm-r b{left:1.6cqi;top:0;transform:translateY(-50%)}
+.mm-misto.tu b{color:#7a1010}
+.mm-tu{position:absolute;left:0;top:0;width:clamp(9px,1.6cqi,20px);height:clamp(9px,1.6cqi,20px);transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#e05a4a,#8c1a12 70%);border:2px solid #f6e7c4;box-shadow:0 0 0 2px rgba(122,16,16,.5),0 0 10px rgba(122,16,16,.7);animation:mm-pulz 1.6s ease-in-out infinite}
+@keyframes mm-pulz{50%{box-shadow:0 0 0 5px rgba(122,16,16,.25),0 0 14px rgba(122,16,16,.8)}}
+.mm-x{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font:900 clamp(16px,3.4cqi,40px)/1 Georgia,serif;font-style:normal;color:#a3140e;
+  text-shadow:0 0 3px #f4e6c2,0 0 6px #f4e6c2}
+.mm-misto.poklad b{color:#a3140e}
+.mm-nahled{cursor:var(--k-klik)}
+.vmapa-cela .mmapa{box-shadow:0 10px 40px rgba(0,0,0,.6)}
+
+/* 1.0-3-8: cinknuté kostky */
+.kostka.cinknuta img{filter:sepia(.55) saturate(1.6) hue-rotate(-12deg) brightness(.97);}
+.kostka.cinknuta::after{content:"";position:absolute;inset:8%;border-radius:18%;box-shadow:0 0 0 2px rgba(201,150,40,.85),0 0 12px rgba(201,150,40,.6);pointer-events:none}
+.cink-volba{display:flex;flex-direction:column;gap:5px;margin:6px 0 12px;padding:8px 10px;border:1px solid #8a6a3c66;border-radius:8px;background:#0003}
+.cink-k{display:flex;align-items:center;gap:8px;cursor:var(--k-klik)}.cink-k img{width:30px;height:30px;object-fit:contain}
+.cink-k span{display:flex;flex-direction:column;line-height:1.15}.cink-k small{color:var(--dim);font-size:.8em}
+
+/* 1.0-3-8: náhled stěn u čalouníka — obrázek přes zástupný text */
+.cal-nah{position:relative}.cal-nah .cal-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.cal-nah.ukazka::after{content:"ukázka z domu";position:absolute;right:6px;bottom:5px;font-size:.72rem;padding:1px 6px;border-radius:6px;background:#000a;color:#e9d9b4}
+
+/* 1.0-3-10: roztrhaná mapa z útržků */
+.trh-mapy{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin:8px 0 14px}
+.trh-karta{margin:0;display:flex;flex-direction:column;gap:6px}
+.trh-karta figcaption{display:flex;flex-direction:column;line-height:1.2}.trh-karta figcaption small{color:#6b5233}
+.trh-mapa{position:relative;width:100%}
+.trh-kus{position:absolute;inset:0;transition:transform .5s ease}
+.trh-kus .trh-vnitr{position:absolute;inset:0}
+.trh-kus img{display:block;width:100%;height:100%;object-fit:fill}
+.trh-kus:not(.ma) .trh-vnitr{opacity:.16;filter:grayscale(1) sepia(.6) blur(1.5px)}
+.trh-kus:not(.ma){filter:drop-shadow(0 0 0 transparent)}
+.trh-kus.ma{filter:drop-shadow(1px 2px 2px rgba(40,20,0,.55)) drop-shadow(0 0 1px rgba(80,50,20,.5))}
+.trh-mapa.cela .trh-kus.ma{filter:drop-shadow(1px 2px 3px rgba(40,20,0,.5))}
+.trh-karta figcaption b{color:#3b230e}
+
+/* 1.0-3-11: skládačka mapy */
+.skl{max-width:980px;width:calc(100vw - 24px)}
+.skl-plocha{align-self:center;width:100%;box-sizing:border-box;padding:7% 9%;max-width:calc((100vh - 230px) * 1.3);margin-left:auto;margin-right:auto;margin:6px 0;border-radius:10px;background:radial-gradient(#4a3a26,#1c140a);overflow:hidden;touch-action:none}
+.skl-deska{position:relative;width:100%;outline:2px dashed rgba(233,217,180,.35);outline-offset:2px;border-radius:4px}
+.skl-kus{position:absolute;inset:0;cursor:grab;transition:filter .2s;will-change:transform;filter:drop-shadow(2px 3px 3px rgba(0,0,0,.6))}
+.skl-kus:active{cursor:grabbing}
+.skl-kus img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none}
+.skl-kus.fix{cursor:default;filter:none;transition:transform .25s ease}
+.skl-deska.hotovo .skl-kus{filter:brightness(1.08)}
+
+/* 1.0-3-12: stupnice vztahu s pásmy */
+.vz-stup{display:flex;flex-direction:column;gap:2px;width:100%;position:relative}
+.vz-pasma{position:relative;display:block;height:8px;border-radius:4px;overflow:visible;background:#d8c49a}
+.vz-pasma i{position:absolute;top:0;bottom:0;opacity:.38}
+.vz-pasma i:first-child{border-radius:4px 0 0 4px}.vz-pasma i:nth-child(5){border-radius:0 4px 4px 0}
+.vz-pasma i.on{opacity:.95}
+.vz-pasma i.nepritel{background:#a3241b}.vz-pasma i.neduvera{background:#d08a3a}.vz-pasma i.neutral{background:#a99470}
+.vz-pasma i.prizen{background:#7fae4e}.vz-pasma i.spojenec{background:#3f7d25}
+.vz-znacka{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#fff4dc;border:2px solid #3a2410;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.vz-cislo{font-size:.74rem;color:#6b5233;letter-spacing:0;white-space:nowrap}
+.vz-stup.velka{width:min(100%,420px);margin:6px 0 4px}
+.vz-stup.velka .vz-pasma{height:12px}.vz-stup.velka .vz-znacka{width:16px;height:16px}
+.vz-legenda{position:relative;display:block;height:1.1em;font-size:.68rem}
+.vz-legenda em{position:absolute;text-align:center;font-style:normal;color:#6b5233;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-osoba{cursor:var(--k-klik)}
+.vz-stup.velka .vz-legenda{order:2}.vz-stup.velka .vz-cislo{order:3;font-size:.82rem}.vz-stup.velka{margin-bottom:8px}
+
+/* 1.0-3-12: křížek pokladu na útržcích */
+.mapa-x{position:absolute;transform:translate(-50%,-50%) rotate(-6deg);font:900 clamp(17px,5cqi,40px)/1 Georgia,serif;font-style:normal;color:#9c140e;
+  text-shadow:0 0 2px rgba(244,230,194,.9),0 0 5px rgba(244,230,194,.7);pointer-events:none;container-type:normal}
+.trh-mapa,.skl-deska{container-type:inline-size}

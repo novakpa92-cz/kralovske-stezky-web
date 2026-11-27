@@ -153,7 +153,7 @@ let pending = 0;
 // už neblokuje hru), stejné souběžné dotazy (obnovy na pozadí) se slučují, čtení se při výpadku jednou zopakuje
 // a točící se ukazatel se ukáže jen u akcí hráče, které trvají déle než chvilku.
 const SPOJ = { letici: new Map(), ovladace: new Set(), busyT: 0 };
-const CTENI = new Set(["me", "raid", "mini", "chat", "cas", "place", "shop", "icons", "card", "mapa_obr", "vyhlasky", "denik", "zverinec", "napoje", "hraci", "cock",
+const CTENI = new Set(["me", "vyzvy", "raid", "mini", "chat", "cas", "place", "shop", "icons", "card", "mapa_obr", "vyhlasky", "denik", "zverinec", "napoje", "hraci", "cock",
   "kampan", "auctions", "duels", "people", "poradi", "kroniky", "farm", "truhla", "domov", "uloziste", "tapety", "dum_predat_info", "domy", "vareni", "podnik", "zakazky_hracu", "admin_check", "status"]);
 const LIMIT = (op) => (["card", "mapa_obr", "icons"].includes(op) ? 45000 : op === "raid_click" ? 30000 : 15000);
 function busyUkaz(zap) {
@@ -253,7 +253,10 @@ const icon = (id, lvl) => `<img class="icon malovana${vzacnost(id, lvl)}" alt=""
 function ikonaZaloha(img) {
   img.onerror = null; img.classList.remove("malovana"); img.dataset.zaloha = "1";
   const s = S.icons[img.dataset.item];
-  if (s) img.src = "data:image/png;base64," + s; else img.removeAttribute("src");
+  if (s) { img.src = "data:image/png;base64," + s; return; }
+  img.style.visibility = "hidden";                                // 1.0-3-14: žádná rozbitá ikona — schovat a dotáhnout ikonu ze serveru
+  if (img.dataset.item && !(img.dataset.item in S.icons)) loadIcons([img.dataset.item]).then(() => {
+    const t = S.icons[img.dataset.item]; if (t) { img.src = "data:image/png;base64," + t; img.style.visibility = ""; } });
 }
 
 // ------------------------------------------------------------------ přihlášení
@@ -463,6 +466,50 @@ setInterval(async () => {
     if (zmena && typeof Scena !== "undefined") Scena.setWorld(S.me);   // noc / den, déšť v obrázcích
   } catch { /* nic */ }
 }, 60000);
+
+/** 1.0-3-1: výzvy (škopek, pěsti, hry, kolbiště) — stálý panel s tlačítky a odpočtem; obnova každých 10 s.
+ *  Dřív výzva přišla jen jako krátké upozornění se zprávami (jednou za minutu) a hned zmizela. */
+const VYZ = { st: { prichozi: [], odchozi: [] }, t: 0, busy: false, tik: null };
+async function vyzvyNacti() {
+  if (!S.token || !S.me || !S.me.has_character || document.visibilityState !== "visible" || VYZ.busy) return;
+  try { const r = await call("vyzvy", {}, true); VYZ.st = { prichozi: r.prichozi || [], odchozi: r.odchozi || [] }; VYZ.t = Date.now();
+    if (r.zmena && r.zmena !== VYZ.zmena) {   // 1.0-3-14: správce změnil postavu (groše, předmět…) → načíst profil bez obnovení stránky
+      const prvni = VYZ.zmena == null; VYZ.zmena = r.zmena;
+      if (!prvni) { await call("me", {}, true).catch(() => {}); if (!document.querySelector(".rekap-obal, .vmodal input:focus, input:focus, textarea:focus")) render(); }
+    } else if (VYZ.zmena == null) VYZ.zmena = r.zmena || 0;
+  } catch { return; }
+  vyzvyKresli();
+}
+function vyzvyKresli() {
+  let el = document.getElementById("vyzvy-panel");
+  const { prichozi, odchozi } = VYZ.st;
+  if (!prichozi.length && !odchozi.length) { if (el) el.remove(); clearInterval(VYZ.tik); VYZ.tik = null; return; }
+  if (!el) { el = document.createElement("div"); el.id = "vyzvy-panel"; document.body.appendChild(el); }
+  const ub = Math.floor((Date.now() - VYZ.t) / 1000);
+  const cas = (z) => { const s = Math.max(0, z - ub); return `<small class="vyz-cas${s < 40 ? " malo" : ""}">⏳ ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}</small>`; };
+  const nove = prichozi.some((v) => !VYZ.videno || !VYZ.videno.has(v.druh + v.id));
+  el.innerHTML = prichozi.map((v) => `<div class="vyz vyz-pri"><span>⚔️ <b>${esc(v.od)}</b> ${esc(L(["tě vyzývá:", "challenges you:"]))} <b>${esc(v.co)}</b>${v.vklad ? ` ${esc(L(["o", "for"]))} <b>${v.vklad} gr.</b>` : ""} ${cas(v.zbyva)}</span>
+      <span class="row"><button class="btn small primary" data-vyz="ano" data-d="${esc(v.druh)}" data-id="${esc(v.id)}">${esc(L(["Přijmout", "Accept"]))}</button><button class="btn small" data-vyz="ne" data-d="${esc(v.druh)}" data-id="${esc(v.id)}">${esc(L(["Odmítnout", "Decline"]))}</button></span></div>`).join("")
+    + odchozi.map((v) => `<div class="vyz vyz-odch"><span>⏳ ${esc(L(["Tvoje výzva", "Your challenge"]))} → <b>${esc(v.k)}</b>: ${esc(v.co)}${v.vklad ? ` ${v.vklad} gr.` : ""} ${cas(v.zbyva)}</span>
+      <button class="btn small" data-vyz="zrus" data-d="${esc(v.druh)}" data-id="${esc(v.id)}">${esc(L(["Zrušit výzvu", "Cancel"]))}</button></div>`).join("");
+  if (nove && prichozi.length) { VYZ.videno = new Set(prichozi.map((v) => v.druh + v.id)); if (typeof Zvuk !== "undefined") Zvuk.sfx("zvon"); }
+  el.querySelectorAll("[data-vyz]").forEach((b) => b.onclick = () => vyzvaAkce(b.dataset.vyz, b.dataset.d, b.dataset.id));
+  if (!VYZ.tik) VYZ.tik = setInterval(vyzvyKresli, 1000);
+}
+async function vyzvaAkce(co, druh, id) {
+  if (VYZ.busy) return;
+  VYZ.busy = true;
+  try {
+    let r;
+    if (druh === "hra") r = await call("raid_click", { id: `ks:pvp:${co === "ano" ? "accept" : "decline"}:${id}` });
+    else r = await call(`${druh}_${co === "zrus" ? "zrusit" : "odpoved"}`, co === "zrus" ? { id } : { id, ano: co === "ano" });
+    if (r && r.text) toast(r.text);
+    if (co === "ano") go(druh === "hra" ? "hra" : druh);
+  } catch { /* toast ukázal chybu */ } finally { VYZ.busy = false; }
+  VYZ.t = 0; await vyzvyNacti();
+}
+setInterval(vyzvyNacti, 10000);
+setTimeout(vyzvyNacti, 2500);
 
 /** v1.0 + 1.0-2-3: zprávy hráči. Běžné jako krátké upozornění, důležité (s nadpisem — třeba někdo našel tvé tělo) jako okno k potvrzení. */
 const VZK = { videno: new Set(), fronta: [] };
@@ -829,7 +876,7 @@ VIEWS.hero = (view) => {
     const [, em, sl] = f ? [0, ...f] : (UC_EMO.find(([re]) => re.test(x.name + " " + x.src + " " + x.text)) || [0, x.kind === "bonus" ? "✦" : "✕", ""]);
     return sl ? `<span class="uc-ik em" data-em="${em}"><img class="uc-obr" alt="" src="${IMG_BASE}ucinky/${sl}.webp"></span>` : `<span class="uc-ik em">${em}</span>`;
   };
-  const ucHod = (x) => (/[+−-]\s?\d+\s?%?/.exec(x.text) || [""])[0].replace(/\s/g, "");
+  const ucHod = (x) => x.name === "Boj dvěma zbraněmi" ? "×2" : (/[+−-]\s?\d+\s?%?/.exec(x.text) || [""])[0].replace(/\s/g, "");   // 1.0-3-2
   const ucinky = U.length ? ["bonus", "postih"].map((kind) => {
       const z = U.filter((x) => x.kind === kind);
       if (!z.length) return `<div class="uc-sk ${kind}"><small>${esc(kind === "bonus" ? L(["Bonusy", "Bonuses"]) : L(["Postihy", "Penalties"]))}</small><p class="muted small">${esc(kind === "bonus" ? L(["Teď žádné.", "None now."]) : L(["Nic tě netrápí.", "Nothing troubles you."]))}</p></div>`;
@@ -837,7 +884,8 @@ VIEWS.hero = (view) => {
         `<button type="button" class="uc-dl ${kind}" data-uc-n="${esc(x.name)}" data-uc-t="${esc(noEmoji(x.text))}" data-uc-s="${esc(x.src || "")}">${ucIk(x)}${ucHod(x) ? `<i class="uc-hod">${esc(ucHod(x))}</i>` : ""}<span class="uc-jm">${esc(x.name)}</span></button>`).join("")}</div></div>`;
     }).join("") : `<div class="empty">${esc(L(["Na postavu teď nic zvláštního nepůsobí. Požehnání v chrámu, odvary nebo mazlíček přidají bonusy; hlad, únava a zima ubírají.", "Nothing special affects you now."]))}</div>`;
   const HK = [["stav", L(["Postava", "Character"])],   // r27-5: záložka „Postava“ (dřív Stav a boj) — tělo, boj a pod Do boje i vlastnosti
-    ["schop", L(["Schopnosti", "Abilities"]) + ((P.ceka || []).length ? ` <i class="hk-pocet">${P.ceka.length}</i>` : "")],   // r27-17: čeká volba ["dov", L(["Dovednosti", "Skills"])], ["cesta", L(["Cesta", "Path"])],
+    ["schop", L(["Schopnosti", "Abilities"]) + ((P.ceka || []).length ? ` <i class="hk-pocet">${P.ceka.length}</i>` : "")],   // r27-17: čeká volba
+    ["dov", L(["Dovednosti", "Skills"])], ["cesta", L(["Cesta", "Path"])],   // 1.0-3-8: záložky Dovednosti a Cesta byly omylem v komentáři
     ["uc", L(["Účinky", "Effects"]) + (U.length ? ` <i class="hk-pocet${U.some((x) => x.kind === "postih") ? " zle" : ""}">${U.length}</i>` : "")]];
   if (!HK.some(([k]) => k === HERO.karta) && !(HERO.karta === "vzhled" && jeMobil())) HERO.karta = "stav";   // (záložka „boj“ je teď součástí „stav“)
   const obsah = {
@@ -863,7 +911,7 @@ VIEWS.hero = (view) => {
         <div class="sb-sekce" data-vysv="boj" title="${esc(L(["Zásah = k20 + útok + zdatnost proti obraně nepřítele; 20 je kritický zásah.", "Hit = d20 + attack + proficiency vs defence."]))}"><small>${esc(L(["Do boje", "In battle"]))} ⓘ</small></div>
         <div class="znaky">
           ${znak("stit", m.armor_class, t("armor_class"), m.tlumeni ? L([`zbroj tlumí ${m.tlumeni} z každé rány`, `armour soaks ${m.tlumeni} per hit`]) : L(["čím víc, tím hůř tě zasáhnou", "harder to hit"]))}
-          ${znak("mec", sg(m.attack), t("attack"), L(["k hodu na zásah", "to hit"]))}
+          ${znak("mec", sg(m.attack), t("attack") + (m.attack_leva != null ? " · " + L(["levou ", "left "]) + sg(m.attack_leva) : ""), L(["k hodu na zásah", "to hit"]) + (m.attack_leva != null ? L([" · druhá rána levou rukou má postih", " · off-hand strike has a penalty"]) : ""))}
           ${znak("hvezda", sg(P.proficiency || 0), L(["Zdatnost", "Proficiency"]), L(["k útoku i zkouškám", "attack and checks"]))}
           ${znak("kostka", m.damage, t("damage"), L(["kostky zbraně + bonus", "weapon dice + bonus"]))}
         </div>
@@ -956,6 +1004,28 @@ VIEWS.hero = (view) => {
 // r27-4: admin panel — vidí ho jen správce (ověřuje server podle Discord účtu)
 // r27-6: admin — vlastní rozhraní (velín): přehled, hráči, čas a datum, počasí, události, zkušební režim, verze, hospodářství
 const ADM = { sekce: "prehled" };
+/** 1.0-3-3: admin — náhled vzhledu postavy hráče (klik v seznamu hráčů). */
+async function admPostava(uid) {
+  let r; try { r = await call("admin", { action: "postava", data: { uid } }); } catch { return; }
+  const p = r.postava; if (!p) return;
+  document.querySelector(".adm-post-obal")?.remove();
+  const eq = (p.equipped || []).map((e) => `<li><small>${esc(e.slot)}</small> ${esc(e.name || e.id)}</li>`).join("") || `<li class="muted">nic nenasazeno</li>`;
+  const st = Object.entries(p.stats || {}).map(([k, v]) => `${esc(k.slice(0, 3))} ${v}`).join(" · ");
+  const o = document.createElement("div");
+  o.className = "rekap-obal vysv-obal adm-post-obal";
+  o.innerHTML = `<div class="rekap vyp-pergamen adm-post"><button class="adm-post-x" data-x aria-label="Zavřít">✕</button>
+    <div class="adm-post-fig">${Postava.html(p, IMG_BASE)}</div>
+    <div class="adm-post-t"><h2>${esc(p.name)}</h2><p class="muted">${esc((p.origin_name || "") + " · úr. " + p.level + " · " + p.coins + " gr.")}<br>Discord: ${esc(p.discord || "—")}</p>
+      <p>Životy ${p.health}/${p.max_health}<br><small>${st}</small></p>
+      <p><small>Vzhled: ${esc(Object.entries(p.looks || {}).map(([k, v]) => k + " " + v).join(", "))}</small></p>
+      <ul class="adm-post-eq">${eq}</ul>
+      <p class="row"><button class="btn primary" data-sprav>Spravovat hráče</button><button class="btn" data-x>Zavřít</button></p></div></div>`;
+  o.querySelectorAll("[data-x]").forEach((b) => b.onclick = () => o.remove());
+  o.onclick = (ev) => { if (ev.target === o) o.remove(); };
+  o.querySelector("[data-sprav]").onclick = () => { o.remove(); ADM.hrac = uid; ADM.sekce = "sprava"; render(); };
+  document.body.appendChild(o);
+  if (typeof Postava.paint === "function") Postava.paint(o);
+}
 VIEWS.admin = async (view) => {
   view.innerHTML = `<div class="velin"><div class="panel empty">…</div></div>`;
   let r; try { r = await call("admin", { action: "stav" }); } catch { go("mesto"); return; }
@@ -977,7 +1047,7 @@ VIEWS.admin = async (view) => {
       </div>`; },
     hraci: () => `<div class="adm-hraci">${(r.hraci || []).map((x) => {   // 1.0-1: postava · hráč na Discordu · původ, úroveň, groše · online/offline
       const pred = x.ago == null ? "nikdy" : x.ago < 60 ? "teď" : x.ago < 3600 ? Math.floor(x.ago / 60) + " min" : x.ago < 86400 ? Math.floor(x.ago / 3600) + " h" : Math.floor(x.ago / 86400) + " dní";
-      return `<div class="adm-hrac ${x.stav}"><i class="tecka"></i><div class="adm-hrac-t"><b>${esc(x.name)}</b><span class="adm-dc">Discord: ${esc(x.discord || "—")}</span>
+      return `<div class="adm-hrac ${x.stav}${x.uid ? " klik" : ""}"${x.uid ? ` data-adm-post="${esc(x.uid)}" role="button" tabindex="0" title="Náhled postavy"` : ""}><i class="tecka"></i><div class="adm-hrac-t"><b>${esc(x.name)}</b><span class="adm-dc">Discord: ${esc(x.discord || "—")}</span>
           <small>${esc(x.origin + " · úr. " + x.level + " · " + x.coins + " gr.")}${x.vyprava ? " · na výpravě" : ""}</small></div>
         <span class="adm-kde"><b>${esc(x.stav === "online" ? "online" : "offline")}</b>${x.stav !== "online" ? `<small>${esc(x.ago == null ? "nikdy" : "před " + pred)}</small>` : ""}</span></div>`; }).join("")}</div>`,
     cas: () => `<p class="vl-ted">Teď: <b>${esc(noEmoji(r.cas ? r.cas.text : ""))}</b> · ${esc(r.cas ? r.cas.obdobi : "")}</p>
@@ -1022,7 +1092,7 @@ VIEWS.admin = async (view) => {
       const pruhy = (rows, cls) => { const mx = Math.max(1, ...rows.map((x) => x[1])); return rows.length ? `<ul class="hs-pruhy ${cls}">${rows.map(([k, v]) =>
         `<li><span class="hs-k">${esc(String(k).replace(/^banka\b/, "směnárna"))}</span><span class="hs-p"><i style="width:${Math.max(2, 100 * v / mx)}%"></i></span><b>${f(v)}</b></li>`).join("")}</ul>` : `<p class="muted">—</p>`; };
       const sp = E.prijmy.reduce((s, x) => s + x[1], 0), sv = E.vydaje.reduce((s, x) => s + x[1], 0);
-      const HZ = [["souhrn", "Souhrn"], ["toky", "Příjmy a výdaje"], ["tyden", "Týden a úrovně"], ["bohati", "Nejbohatší"]];   // 1.0-1: po kartách, bez posouvání
+      const HZ = [["souhrn", "Souhrn"], ["toky", "Příjmy a výdaje"], ["obchod", "Obchod"], ["tyden", "Týden a úrovně"], ["bohati", "Nejbohatší"]];   // 1.0-1: po kartách, bez posouvání
       const z = HZ.some(([k]) => k === ADM.hosZal) ? ADM.hosZal : "souhrn";
       const obsah = {
         souhrn: () => `<div class="vl-radek hs-dl">
@@ -1039,6 +1109,14 @@ VIEWS.admin = async (view) => {
           <section class="vl-box"><h4>Za tento týden odteklo</h4>${pruhy(E.tyden_odteklo, "minus")}</section>
           <section class="vl-box"><h4>Podle úrovní</h4><table class="hs-tab"><tr><th>Úrovně</th><th>Hráčů</th><th>Medián grošů</th></tr>
             ${E.urovne.map((u) => `<tr><td>${esc(u.pasmo)}</td><td>${u.hracu}</td><td>${f(u.median)}</td></tr>`).join("")}</table></section></div>`,
+        obchod: () => { const ob = (E.obchod || {})[ADM.obObd || "7"] || {}, OBD = [["7", "7 dní"], ["30", "30 dní"], ["vse", "Celkem"]];   // 1.0-3-9
+          const tab = (rows) => rows && rows.length ? `<table class="hs-tab"><tr><th>#</th><th>Předmět</th><th>Kusů</th><th>Grošů</th><th>Nejvíc u</th></tr>
+            ${rows.map((x, i) => `<tr><td>${i + 1}.</td><td>${esc(x.name)}</td><td>${f(x.ks)}</td><td>${f(x.gr)}</td><td>${esc(x.kde || "—")}</td></tr>`).join("")}</table>` : `<p class="muted">Zatím nic.</p>`;
+          return `<div class="vz-druh hs-zal">${OBD.map(([k, n]) => `<button type="button" class="chip${(ADM.obObd || "7") === k ? " on" : ""}" data-obobd="${k}">${esc(n)}</button>`).join("")}</div>
+          <div class="hs-sloupce">
+          <section class="vl-box"><h4>Hráči nejčastěji kupují <span>${f(ob.nakup_ks)} ks · ${f(ob.nakup_gr)} gr.</span></h4>${tab(ob.nakup)}</section>
+          <section class="vl-box"><h4>Hráči nejčastěji prodávají <span>${f(ob.prodej_ks)} ks · ${f(ob.prodej_gr)} gr.</span></h4>${tab(ob.prodej)}</section></div>
+          <p class="muted small">Nákupy u obchodníků, pašeráka a přes posla; prodeje obchodníkům a pašerákovi. Počítá se od ${ob.od ? new Date(ob.od * 1000).toLocaleDateString("cs-CZ") : "teď"} (zkušební postavy ne).</p>`; },
         bohati: () => `<section class="vl-box"><h4>Nejbohatší (kapsa + směnárna)</h4><table class="hs-tab"><tr><th>#</th><th>Hrdina</th><th>Úr.</th><th>Groše</th><th>Domy a podniky</th></tr>
           ${E.nejbohatsi.map((x, i) => `<tr><td>${i + 1}.</td><td>${esc(x.name)}</td><td>${x.level}</td><td>${f(x.penize)}</td><td>${x.majetek ? f(x.majetek) : "—"}</td></tr>`).join("")}</table></section>`,
       };
@@ -1078,6 +1156,7 @@ VIEWS.admin = async (view) => {
     <section class="vl-obsah"><h2>${esc(S_.find(([k]) => k === ADM.sekce)[1])}</h2>${sek[ADM.sekce]()}</section></div>`;
   view.querySelectorAll("[data-sek]").forEach((b) => b.onclick = () => { ADM.sekce = b.dataset.sek; render(); });
   view.querySelectorAll("[data-hz]").forEach((b) => b.onclick = () => { ADM.hosZal = b.dataset.hz; render(); });
+  view.querySelectorAll("[data-obobd]").forEach((b) => b.onclick = () => { ADM.obObd = b.dataset.obobd; render(); });   // 1.0-3-9
   const zk = async (on, znovu) => { try { msg(await call("admin", { action: "zkusebni", data: { on, znovu } })); await obnov(); } catch {} };
   document.querySelectorAll("[data-zkpodnik]").forEach((b) => b.onclick = async () => { b.disabled = true;   // 1.0-1-5: testování podniků
     try { const x = await call("admin", { action: "zk_podnik", data: { typ: b.dataset.zkpodnik } }); toast(noEmoji(x.text || "")); const me = await call("me", {}, true); if (me && me.name) S.me = me; go("podnik"); } catch { b.disabled = false; } });
@@ -1093,6 +1172,7 @@ VIEWS.admin = async (view) => {
     try { msg(await call("admin", { action: "datum", data })); await obnov(); } catch {}
   };
   const ah = $("#a-hrac"); if (ah) ah.onchange = () => { ADM.hrac = ah.value; render(); };
+  view.querySelectorAll("[data-adm-post]").forEach((b) => b.onclick = () => admPostava(b.dataset.admPost));   // 1.0-3-3
   view.querySelectorAll("[data-hr]").forEach((b) => b.onclick = async () => {
     const co = b.dataset.hr, data = { uid: $("#a-hrac").value, co };
     if (co === "penize") data.pocet = $("#a-gr").value;
@@ -1101,7 +1181,7 @@ VIEWS.admin = async (view) => {
     if (co === "uroven") data.uroven = $("#a-lv").value;
     if (co === "xp") data.pocet = $("#a-xp").value;
     if (!confirm(`Opravdu upravit hráče ${$("#a-hrac").selectedOptions[0].text.split(" · ")[0]}?`)) return;
-    try { msg(await call("admin", { action: "hrac", data })); render(); } catch {}
+    try { msg(await call("admin", { action: "hrac", data })); await call("me", {}, true).catch(() => {}); render(); } catch {}   // 1.0-3-14: i vlastní groše hned
   });
   // 1.0-1: schopnosti, vyhození, BAN, rychlost času, náhledy předmětů
   const so = $("#a-schop-ok"); if (so) so.onclick = async () => {
@@ -2631,13 +2711,35 @@ const LIDE_OBR = { "Vetešník": "mesto-vetesnik", "Směnárník": "mesto-banka"
   "Krejčí": "mesto-krejci", "Písař": "mesto-pisar", "Truhlář": "mesto-trziste", "Mlynář": "mesto-mlyn", "Apatykář": "mesto-apatykar", "Lazebník": "mesto-lazebnik", "Zvěřinec": "mesto-zverinec",
   "Rychtář": "mesto-radnice", "Farář": "mesto-chram", "Pašerák": "mesto-paserak", "Lichvář": "mesto-lichvar" };
 const LIDE = { vyb: "" };
+/** 1.0-3-12: stupnice vztahu −100…+100 s pásmy (Nepřítel … Spojenec), značkou, kde jsi, a kolik chybí do dalšího stupně. */
+const VZ_PASMA = [[-100, -60, "nepritel", ["Nepřítel", "Enemy"], ["neprodá, nevykoupí, nepomůže", "won't trade or help"]],
+  [-60, -25, "neduvera", ["Nedůvěra", "Distrust"], ["ceny +20 %, výkup −10 %, odmítá služby", "prices +20 %, refuses services"]],
+  [-25, 25, "neutral", ["Neutrál", "Neutral"], ["běžné jednání", "normal dealings"]],
+  [25, 60, "prizen", ["Přízeň", "Favour"], ["ceny −10 %, výkup +5 %", "prices −10 %, sells +5 %"]],
+  [60, 101, "spojenec", ["Spojenec", "Ally"], ["ceny −20 %, výkup +10 %, přimluví se", "prices −20 %, sells +10 %, vouches"]]];
+function vztahInfo(x) {
+  const b = Math.max(-100, Math.min(100, x.b || 0)), i = VZ_PASMA.findIndex(([od, do_]) => b >= od && b < do_);
+  const dal = VZ_PASMA[i + 1], hor = VZ_PASMA[i - 1];
+  return { b, dal: x.zap ? null : dal ? { jm: L(dal[3]), co: L(dal[4]), chybi: dal[0] - b } : null,
+    hor: hor ? { jm: L(hor[3]), rezerva: b - VZ_PASMA[i][0] + 1 } : null };
+}
+function vztahStupnice(x, velka) {
+  const I = vztahInfo(x), pos = (I.b + 100) / 2;
+  const tip = `${L(["Vztah ", "Relation "])}${I.b > 0 ? "+" : ""}${I.b} ${L(["z ±100", "of ±100"])} · ${x.st_jm}${x.popis ? ": " + x.popis : ""}`
+    + (x.zap ? L([" · zapečetěno, už se nespraví", " · sealed"]) : I.dal ? ` · ${L(["do stupně ", "to "])}${I.dal.jm} (${I.dal.co}) ${L(["chybí ", "need "])}${I.dal.chybi} ${L(["bodů", "pts"])}` : L([" · nejlepší možný vztah", " · best possible"]))
+    + (I.hor ? ` · ${L(["pád na ", "drop to "])}${I.hor.jm} ${L(["za ", "after "])}−${I.hor.rezerva}` : "");
+  return `<span class="vz-stup${velka ? " velka" : ""}" title="${esc(tip)}">
+    <span class="vz-pasma">${VZ_PASMA.map(([od, do_, k]) => `<i class="${k}${k === x.st ? " on" : ""}" style="left:${(od + 100) / 2}%;width:${(Math.min(100, do_) - od) / 2}%"></i>`).join("")}<b class="vz-znacka" style="left:${pos}%"></b></span>
+    <small class="vz-cislo">${I.b > 0 ? "+" : ""}${I.b}${x.zap ? " 🔒" : I.dal ? ` · ${esc(I.dal.jm)} ${L(["za", "in"])} +${I.dal.chybi}` : ""}</small>
+    ${velka ? `<span class="vz-legenda">${VZ_PASMA.map(([od, do_, k, jm]) => `<em class="${k}" style="left:${(od + 100) / 2}%;width:${(Math.min(100, do_) - od) / 2}%">${esc(L(jm))}</em>`).join("")}</span>` : ""}</span>`;
+}
 function lideKresli(box, P) {
   const vyb = P.find((x) => x.id === LIDE.vyb);
   const tvar = (x) => `<span class="li-tvar"><img alt="" src="${IMG_BASE}${LIDE_OBR[x.id] || "mesto-hostinec"}-m.webp"></span>`;
-  const body = (x) => `<span class="li-body ${x.st}"><i style="left:50%;width:${Math.abs(x.b) / 2}%;${x.b < 0 ? "transform:translateX(-100%)" : ""}"></i></span>`;
+  const body = (x, velka) => vztahStupnice(x, velka);   // 1.0-3-12: stupnice s pásmy, značkou a popiskem
   const hlava = `<p class="kapitola">${esc(L(["Kapitola IX", "Chapter IX"]))}</p>${vzDruhHtml()}`;
   box.innerHTML = vyb ? `${hlava}<div class="li-detail ${vyb.st}">${tvar(vyb)}<div><h4>${esc(vyb.jm)}${vyb.zap ? " 🔒" : ""} <small>${esc(vyb.misto)}</small></h4>
-      <p><b class="li-st">${esc(vyb.st_jm)}</b> · ${esc(vyb.popis)}</p>${body(vyb)}
+      <p><b class="li-st">${esc(vyb.st_jm)}</b> · ${esc(vyb.popis)}</p>${body(vyb, true)}
       ${vyb.proc.length ? `<ul>${vyb.proc.map((p) => `<li><span class="${p.z >= 0 ? "plus" : "minus"}">${p.z >= 0 ? "+" : ""}${p.z}</span> ${esc(p.t)}</li>`).join("")}</ul>` : `<p class="muted small">${esc(L(["Zatím mezi vámi nic zvláštního.", "Nothing between you yet."]))}</p>`}
       <p class="muted small">${esc(vyb.naprava)}</p>${smirHtml(vyb)}<button type="button" class="btn small" data-lid="">← ${esc(L(["Všichni lidé", "All people"]))}</button></div></div>`
     : `${hlava}<p class="muted small li-uvod">${esc(L(["Pověst = jak tě vidí celé město. Vztah = co si o tobě myslí jeden člověk. Ztratit ho jde hned, získat zpátky jen pomalu (nejvýš +3 za den). Klepni na člověka a uvidíš proč.", "What individual townsfolk think of you."]))}</p>
@@ -2880,8 +2982,9 @@ VIEWS.denik = async (view) => {
   } else if (DENIK.sekce === "mapy") {
     const M = D.mapy || [];
     box.innerHTML = `<p class="kapitola">${esc(L(["Kapitola IV", "Chapter IV"]))}</p><h3 class="dk-nadpis">${esc(L(["Mapy", "Maps"]))}</h3>
-      <p class="muted small">${esc(L(["Mapy oblastí koupíš u písaře. Tři útržky mapy k pokladu se zcelí v mapu pokladu — po vykopání pokladu zmizí.", "Buy area maps from the scribe; three fragments make a treasure map."]))}
-        ${esc(L([" Útržky u sebe: ", " Fragments: "]) + D.utrzky + " / " + D.utrzku_treba)}</p>
+      <p class="muted small">${esc(L(["Mapy oblastí koupíš u písaře. Každá oblast má svoje útržky mapy (4–6 kusů). Až je máš všechny, slož si je tady do mapy pokladu. Po vykopání pokladu mapa zmizí.", "Buy area maps from the scribe. Each area has its own map scraps; three scraps of an area make its treasure map."]))}</p>
+      ${roztrhaneMapy(D)}
+      ${(D.utrzky_oblasti || []).length ? `<div class="dk-utrzky">${D.utrzky_oblasti.map((u) => `<div class="dk-utrzek${u.n >= (u.treba || 6) ? " plno" : ""}${u.poklad ? " poklad" : ""}"><img alt="" src="${IMG_BASE}predmety/ikony/${Postava.slug(u.item)}.webp" data-nahrada="${IMG_BASE}predmety/ikony/utrzek-mapy-k-pokladu.webp"><span><b>${esc(u.name)}</b><small>${esc(u.poklad ? L(["mapa pokladu hotová", "treasure map ready"]) : L(["útržky ", "scraps "]) + Math.min(u.n, (u.treba || 6)) + " / " + (u.treba || 6))}${u.n > (u.treba || 6) && !u.poklad ? esc(L([" (+" + (u.n - (u.treba || 6)) + " navíc)", ""])) : ""}</small></span></div>`).join("")}</div>` : ""}
       ${M.length ? [...new Set(M.map((m) => m.name))].map((loc) => `<section class="dk-kat dk-mapa-kat"><h4>${esc(loc)}</h4><div class="mapy">${M.filter((m) => m.name === loc).map((m) => `<button class="mapa-karta${m.kind === "poklad" ? " poklad" : ""}" data-mapa="${esc(m.key)}" data-poklad="${m.kind === "poklad" ? 1 : ""}">
           <b>${esc(m.kind === "poklad" ? L(["Mapa pokladu", "Treasure map"]) : L(["Mapa oblasti", "Area map"]))}</b>
           <small>${esc(m.kind === "poklad" ? L(["poklad leží u: ", "buried at: "]) + m.spot + L([" · vezmi lopatu", " · bring a shovel"]) : m.name)}</small></button>`).join("")}</div>
@@ -2891,11 +2994,25 @@ VIEWS.denik = async (view) => {
       const sec = b.closest(".dk-kat") || box;
       sec.querySelectorAll(".mapa-karta").forEach((x) => x.classList.toggle("on", x === b));
       const o = sec.querySelector(".mapa-obr"); o.innerHTML = `<div class="empty">${esc(L(["Rozkládám mapu…", "Unfolding the map…"]))}</div>`;
-      try { const r = await call("mapa_obr", { key: b.dataset.mapa, poklad: !!b.dataset.poklad }, true); o.innerHTML = `<img alt="" src="data:image/png;base64,${r.image}">`; }
+      try { const r = await call("mapa_obr", { key: b.dataset.mapa, poklad: !!b.dataset.poklad }, true); o.innerHTML = r.mapa ? malovanaMapa(r.mapa) : `<img alt="" src="data:image/png;base64,${r.image}">`; }
       catch (e) { o.innerHTML = `<div class="empty">${esc(e.message || "")}</div>`; }
     };
     box.querySelectorAll(".dk-mapa-kat").forEach((sec) => { const k = sec.querySelector(".mapa-karta"); if (k) ukaz(k); });
     box.querySelectorAll(".mapa-karta").forEach((b) => b.onclick = () => ukaz(b));
+    box.querySelectorAll("[data-sloz]").forEach((b) => b.onclick = () => {   // 1.0-3-11: skládačka z útržků
+      const u = (D.utrzky_oblasti || []).find((x) => x.key === b.dataset.sloz); if (!u) return;
+      const hotovo = async (o) => {
+        try {
+          const r = await call("mapa_slozit", { key: u.key });
+          o.querySelector(".skl").innerHTML = `<h2>${esc(L(["Mapa pokladu je celá!", "The treasure map is complete!"]))}</h2>
+            <p>${esc(L(["Poklad je zakopaný u místa ", "The treasure lies at "]))}<b>${esc(r.misto)}</b> (${esc(r.oblast)}). ${esc(L(["Vezmi lopatu.", "Bring a shovel."]))}</p>
+            ${r.mapa ? malovanaMapa(r.mapa) : ""}<p class="row" style="justify-content:center"><button class="btn primary" data-ok>${esc(L(["Rozumím", "Got it"]))}</button></p>`;
+          Zvuk.sfx("vyhra");
+          o.querySelector("[data-ok]").onclick = () => { o.remove(); render(); };
+        } catch { o.remove(); }
+      };
+      skladacka(u, hotovo);
+    });
 
   } else if (DENIK.sekce === "zapisky") {
     box.innerHTML = `<p class="kapitola">${esc(L(["Kapitola V", "Chapter V"]))}</p><h3 class="dk-nadpis">${esc(L(["Osobní zápisky", "Personal notes"]))}</h3>
@@ -2956,7 +3073,11 @@ document.addEventListener("error", (e) => {
   const im = e.target;
   if (!im || im.tagName !== "IMG") return;
   if (im.classList.contains("malovana") && typeof ikonaZaloha === "function") ikonaZaloha(im);
+  else if (im.dataset.nahrada && !im.dataset.nahradaUzita) {   // 1.0-3-14: náhradní obrázek (inline onerror CSP blokuje)
+    im.dataset.nahradaUzita = "1"; if (im.dataset.nahradaTrida) im.parentNode?.classList.add(im.dataset.nahradaTrida); im.src = im.dataset.nahrada;
+  }
   else if (im.hasAttribute("data-pryc-pri-chybe")) im.remove();
+  else if (im.hasAttribute("data-skryt-pri-chybe")) im.style.visibility = "hidden";
 }, true);
 // r27-5: ikona hry na ploše telefonu (zástupce webu, PWA). Nic se neinstaluje odjinud — ikona jen otevře tuto stránku.
 const PLOCHA = { e: null };
@@ -3129,7 +3250,7 @@ const PLACES = {
   "radnice-rychtar": { img: "mesto-radnice", n: ["Rychtář", "Reeve"], say: ["Rychtář: „Pokuty se platí, daně taky. A kdo chce být měšťanem, ať se ukáže.“", "Reeve: \"Fines get paid, and so do taxes. Want to be a burgher? Show yourself.\""],
     opts: [
       { panel: "fine", ic: "⚖️", obr: "domov/nahled-rychtar-pokuty", n: ["Pokuty a hledanost", "Fines and bounties"], d: ["Zaplatit pokutu, kdo je hledaný", "Pay fines, who is wanted"] },
-      { panel: "listiny", ic: "📜", obr: "domov/nahled-rychtar-listiny", n: ["Listiny a důkazy", "Documents"], d: ["Rychtář zaplatí za vzkazy lapků, rozkazy, účty", "The reeve pays for evidence"] },
+      { panel: "listiny", ic: "📜", obr: "domov/nahled-rychtar-listiny", n: ["Listiny a důkazy", "Documents"], d: ["Rychtář zaplatí za vzkazy lapků, rozkazy, účty i odznaky", "The reeve pays for evidence and badges"] },
       { go: "vydaje", ic: "🧾", obr: "domov/nahled-rychtar-vydaje", n: ["Výdaje a dluhy", "Bills and debts"], d: ["Co se strhává každý týden", "What is paid every week"] },
       { panel: "titles", ic: "🏛️", obr: "domov/nahled-rychtar-pravo", n: ["Měšťanské právo", "Citizenship"], d: ["Staň se měšťanem", "Become a burgher"] },
       { go: "erb", ic: "🛡️", obr: "domov/nahled-rychtar-erb", n: ["Erb", "Coat of arms"], d: ["Navrhni si vlastní erb", "Design your own arms"],
@@ -3185,7 +3306,7 @@ const PLACES = {
       { go: "prodejdomu", ic: "📜", obr: "domov/nahled-dum-prodej", n: ["Prodat či darovat chalupu", "Sell or give away"], d: ["Radnici, městu nebo jinému hráči", "To the town hall, the town or a player"], when: (m) => m.house === "chalupa" },
       { go: "podnik", ic: "🗡️", obr: "domov/podnik-doupe", n: ["Doupě", "The den"], d: ["Lapkovská skrýš: kořist, šperháky a výroba.", "Hideout outside the walls"],
         lock: (m) => !(m.origin === "lapka" && m.business), why: (m) => m.origin === "lapka" ? ["Doupě si koupíš na radnici (Nemovitosti → Koupit podnik).", "Buy the den at the town hall."] : ["Doupě patří lapkům.", "The den belongs to bandits."] },
-      { cid: "ks:porter:menu", ic: "📦", n: ["Kořist u brány", "Loot at the gate"], d: ["Co se po výpravě nevešlo — prodat nebo nechat odnést", "What didn't fit after the expedition"], when: (m) => m.nosic > 0 },
+      { cid: "ks:porter:menu", ic: "📦", n: ["Kořist u brány", "Loot at the gate"], d: ["Co se po výpravě nevešlo — vzít, prodat nebo nechat odnést", "What didn't fit after the expedition"], when: (m) => m.nosic > 0 },
       { cid: "ks:gate:steal", ic: "🕵️", n: ["Věci u brány", "Things at the gate"], d: ["Lapka se prohrabe zapomenutým", "A bandit rummages through left goods"], when: (m) => m.origin === "lapka" },
     ] },
   dum: { img: "mesto-dum", n: ["Měšťanský dům", "Burgher house"], say: ["Tvůj vlastní kout v Kutné Hoře.", "Your own corner of Kutná Hora."],
@@ -3601,7 +3722,7 @@ function listinyVzhled(box) {
   const tl = [...box.querySelectorAll("button.vbtn")].filter((b) => /odevzdat za/i.test(b.textContent));
   const karty = tl.map((b) => { const m = /^\s*(?:📜\s*)?(.+?)(?:\s*×(\d+))?\s*·\s*odevzdat za\s*(\d+)\s*gr/i.exec(noEmoji(b.textContent)) || [];
     const jm = (m[1] || b.textContent).trim();
-    return `<div class="li-karta"><img class="li-ik" alt="" src="${IMG_BASE}predmety/ikony/${Postava.slug(jm)}.webp" onerror="this.style.visibility='hidden'">
+    return `<div class="li-karta"><img class="li-ik" alt="" src="${IMG_BASE}predmety/ikony/${Postava.slug(jm)}.webp" data-skryt-pri-chybe>
       <div><b>${esc(jm)}</b>${m[2] ? ` <span class="muted">× ${m[2]}</span>` : ""}<small>${esc(L(["rychtář dá ", "the reeve pays "]) + (m[3] || "?") + " gr. · +1 pověst")}</small></div><span class="li-tl"></span></div>`; });
   const pozn = [...dt.querySelectorAll("p, .radek")].find((x) => /^(✅|Odevzdáno|Rychtář si)/.test(x.textContent.trim()));
   const w = document.createElement("div"); w.className = "listiny";
@@ -4223,7 +4344,7 @@ function pestKresli() {
       <div class="skop-vklady">${esc(L(["Vklad: ", "Stake: "]))}${s.vklady.map((v) => `<button class="chip${PEST.vklad === v ? " on" : ""}" data-pe-vklad="${v}">${v} gr.</button>`).join("")}</div>
       <div class="vyzvy-2"><div class="vyzva-hrace"><b>${esc(L(["Místní", "Local"]))}</b><div class="row"><button class="btn primary" id="pe-npc">👊 ${esc(L([`Vyzvat Medvěda o ${PEST.vklad} gr.`, `Challenge Medvěd for ${PEST.vklad} gr.`]))}</button>
 </div></div>${vyzvaHraceHtml("pe", PEST.hoste, PEST.vklad, L(["pěsti", "fists"]))}</div>
-      ${s.moje_vyzvy.length ? `<p class="muted small">⏳ ${esc(L(["Čekáš na: ", "Waiting for: "]) + s.moje_vyzvy.map((x) => x.k + " (" + x.vklad + " gr.)").join(", "))}</p>` : ""}
+      ${s.moje_vyzvy.length ? `<p class="muted small">⏳ ${esc(L(["Čekáš na: ", "Waiting for: "]))}${s.moje_vyzvy.map((x) => `${esc(x.k + " (" + x.vklad + " gr.)")} <button class="btn small" data-pe-zrus="${esc(x.id)}">${esc(L(["Zrušit", "Cancel"]))}</button>`).join(" ")}</p>` : ""}
       ${s.free_in ? `<p class="muted small">${esc(L([`Dvůr se uklízí, další souboj asi za ${Math.ceil(s.free_in / 60)} min.`, "Next fight soon."]))}</p>` : ""}`;
     if (!chatRebuild(box, html, {})) return;
   } else {
@@ -4261,6 +4382,7 @@ function pestKresli() {
   const npc = $("#pe-npc"); if (npc) npc.onclick = () => pestAkce("pesti_vyzvat", { cil: N.id, vklad: PEST.vklad });
   const vy = $("#pe-vyzvi"); if (vy) vy.onclick = () => { const v = $("#pe-hrac").value; if (!v) { toast(L(["Vyber soupeře.", "Pick an opponent."]), true); return; } pestAkce("pesti_vyzvat", { cil: v, vklad: PEST.vklad }); };
   box.querySelectorAll("[data-pe-odp]").forEach((b) => b.onclick = () => { const [id, a] = b.dataset.peOdp.split(":"); pestAkce("pesti_odpoved", { id, ano: a === "1" }); });
+  box.querySelectorAll("[data-pe-zrus]").forEach((b) => b.onclick = () => pestAkce("pesti_zrusit", { id: b.dataset.peZrus }));   // 1.0-3-1
   box.querySelectorAll("[data-pe-bet]").forEach((b) => b.onclick = () => { const [side, amount] = b.dataset.peBet.split(":").map(Number); pestAkce("pesti_vsadit", { side, amount }); });
 }
 async function pestAkce(op, data) {
@@ -4307,7 +4429,7 @@ function skopKresli() {
       <div class="skop-vklady">${esc(L(["Vklad: ", "Stake: "]))}${s.vklady.map((v) => `<button class="chip${SKOP.vklad === v ? " on" : ""}" data-sk-vklad="${v}">${v} gr.</button>`).join("")}</div>
       <div class="vyzvy-2"><div class="vyzva-hrace"><b>${esc(L(["Místní", "Local"]))}</b><div class="row"><button class="btn primary" id="sk-npc">🍺 ${esc(L([`Vyzvat Sudka o ${SKOP.vklad} gr.`, `Challenge Sudek for ${SKOP.vklad} gr.`]))}</button>
 </div></div>${vyzvaHraceHtml("sk", hoste, SKOP.vklad, L(["škopek", "a drink-off"]))}</div>
-      ${s.moje_vyzvy.length ? `<p class="muted small">⏳ ${esc(L(["Čekáš na: ", "Waiting for: "]) + s.moje_vyzvy.map((x) => x.k + " (" + x.vklad + " gr.)").join(", "))}</p>` : ""}
+      ${s.moje_vyzvy.length ? `<p class="muted small">⏳ ${esc(L(["Čekáš na: ", "Waiting for: "]))}${s.moje_vyzvy.map((x) => `${esc(x.k + " (" + x.vklad + " gr.)")} <button class="btn small" data-sk-zrus="${esc(x.id)}">${esc(L(["Zrušit", "Cancel"]))}</button>`).join(" ")}</p>` : ""}
       ${s.free_in ? `<p class="muted small">${esc(L([`Hostinský utírá stůl, další škopek asi za ${Math.ceil(s.free_in / 60)} min.`, "Next contest soon."]))}</p>` : ""}`;
     if (!chatRebuild(box, html, {})) return;
   } else {
@@ -4343,6 +4465,7 @@ function skopKresli() {
   const npc = $("#sk-npc"); if (npc) npc.onclick = () => skopAkce("skopek_vyzvat", { cil: N.id, vklad: SKOP.vklad });
   const vy = $("#sk-vyzvi"); if (vy) vy.onclick = () => { const v = $("#sk-hrac").value; if (!v) { toast(L(["Vyber soupeře.", "Pick an opponent."]), true); return; } skopAkce("skopek_vyzvat", { cil: v, vklad: SKOP.vklad }); };
   box.querySelectorAll("[data-sk-odp]").forEach((b) => b.onclick = () => { const [id, a] = b.dataset.skOdp.split(":"); skopAkce("skopek_odpoved", { id, ano: a === "1" }); });
+  box.querySelectorAll("[data-sk-zrus]").forEach((b) => b.onclick = () => skopAkce("skopek_zrusit", { id: b.dataset.skZrus }));   // 1.0-3-1
   box.querySelectorAll("[data-sk-bet]").forEach((b) => b.onclick = () => { const [side, amount] = b.dataset.skBet.split(":").map(Number); skopAkce("skopek_vsadit", { side, amount }); });
 }
 async function skopAkce(op, data) {
@@ -4533,7 +4656,7 @@ function hDice(T_, mine) {
       ${T_.turn_points ? `<button class="btn" data-a="bankonly">${esc(t("bankonly"))}</button>` : ""}</div>`;
   return {
     table: `<div class="kostky-plocha${fresh ? " hod" : ""}">
-      ${pick ? T_.dice.map((f, i) => dieImg(f, i, lay[i], (HRACI.sel.has(i) ? "sel" : "") + (fresh ? " pada" : "") + (mine ? "" : " cizi"))).join("") : ""}
+      ${pick ? T_.dice.map((f, i) => dieImg(f, i, lay[i], (HRACI.sel.has(i) ? "sel" : "") + (fresh ? " pada" : "") + (mine ? "" : " cizi"), (T_.typy || [])[i])).join("") : ""}
       ${fresh ? lay.map((p, i) => `<img class="letici" src="${DOM("hra-kostka-let-" + (1 + i % 3))}" style="--x:${p.x}%;--y:${p.y}%;--i:${i}" alt="">`).join("") : ""}
       <img class="kalisek ${fresh ? "vysypat" : pick ? "odlozeny" : "stoji"}" src="${DOM("hra-kalisek-m")}" alt=""></div>`,
     info: `<p class="muted small">${esc(t("target", T_.target))} · ${esc(T_.diff)}</p>
@@ -4745,11 +4868,11 @@ VIEWS.domov = async (view) => {
   const tip = !kusyMist.length ? L(["Místnost je prázdná. Nábytek ti udělá truhlář — Úprava místnosti.", "The room is empty. Buy furniture in Arrange the room."])
     : sekce !== "uprava" || DOMOV_ED.vyber ? "" : L(["Klikni na kus nábytku — vpravo ho otočíš, přeneseš nebo vyneseš. Tažením ho posuneš.", "Click a piece to rotate, carry or remove it. Drag to move it."]);
   const dlazdice = (k) => { const X = DOMOV_SEKCE[k], o = chal && k === "prehled" ? "domov/chalupa-svetnice" : X.obr;
-    return `<button class="opt obr-karta dm-dl" data-sekce="${k}"><span class="ok-obr"><img src="${ART_SRC(o)}" alt="" onerror="this.onerror=null;this.src='${ART_SRC("domov/dum-svetnice")}'"></span>
+    return `<button class="opt obr-karta dm-dl" data-sekce="${k}"><span class="ok-obr"><img src="${ART_SRC(o)}" alt="" data-nahrada="${ART_SRC("domov/dum-svetnice")}"></span>
       <span class="ok-txt"><b>${esc(L(X.n))}</b><small>${esc(L(X.d))}</small></span></button>`; };
   view.replaceChildren(h(`<div class="scene dm-scena${tah ? " zarizuje" : ""}" style="--dm-bg:url('${IMG_BASE}${bgImg}-m.webp')"><div class="dm-pokoj" style="background-image:url('${IMG_BASE}${bgImg}.webp')">
         ${kusyMist.map((k, i) => `<div class="dm-kus${(NAB_ROZ[k.name] || [])[3] ? " plochy" : ""}${tah ? "" : " zamceno"}${k.klic === DOMOV_ED.vyber && sekce === "uprava" ? " vybrany" : ""}${ohenKus(k) ? ((D.ohen[k.kind] || {}).hori ? " hori" : " studena") : ""}" data-klic="${esc(k.klic)}" data-i="${i}" title="${esc(k.name + " — " + k.popis)}">
-          <img src="${ohenKus(k) && !(D.ohen[k.kind] || {}).hori ? IMG_BASE + "domov/nab/" + (k.kind === "oven" ? "pec-studena" : "krb-studeny") + ".webp" : nabSrc(k.name)}" alt="${esc(k.name)}" draggable="false"${ohenKus(k) ? ` data-zaloha="${nabSrc(k.name)}"` : ""}>${vys(k.klic, k.name)}</div>`).join("")}
+          <img src="${ohenKus(k) && !(D.ohen[k.kind] || {}).hori ? IMG_BASE + "domov/nab/" + (k.kind === "oven" ? "pec-studena" : "krb-studeny") + ".webp" : nabSrc(k.name)}" alt="${esc(k.name)}" draggable="false"${ohenKus(k) ? ` data-nahrada="${nabSrc(k.name)}"` : ""}>${vys(k.klic, k.name)}</div>`).join("")}
         ${tip ? `<div class="dm-tip">${esc(tip)}</div>` : ""}
         <h2 class="dm-nazev">${esc(L(ROOM_NAZ[room] || ["Domov", "Home"]))}</h2>
         <span class="dm-teplo" title="${esc(L(["Teplota a útulnost domu", "Warmth and cosiness"]))}">${esc(D.teplota + " °C · " + D.teplota_slovem + " · " + L(["útulnost ", "cosy "]) + D.utulnost + " %")}</span></div></div>
@@ -4838,7 +4961,7 @@ function domovPrehledHtml(D, room, R) {
   R.kusy.forEach((k) => { (sk[k.name] = sk[k.name] || { ...k, pocet: 0 }).pocet++; });
   const v = Object.values(sk);
   return `<div class="sect">${esc(L(ROOM_NAZ[room] || [room, room]) + " · " + R.used + " / " + R.slots + L([" míst", " slots"]))}</div>
-    <div class="dm-vybaveni">${v.map((k) => `<div class="dm-vb"><img src="${nabSrc(k.name)}" alt="" onerror="this.style.visibility='hidden'">
+    <div class="dm-vybaveni">${v.map((k) => `<div class="dm-vb"><img src="${nabSrc(k.name)}" alt="" data-skryt-pri-chybe>
         <span><b>${esc(k.name + (k.pocet > 1 ? " ×" + k.pocet : ""))}</b><small>${esc(k.popis)}</small>
         ${k.domov !== room ? `<em>${esc(L(["patří do místnosti ", "belongs to "]) + L(ROOM_NAZ[k.domov] || [k.domov, k.domov]))}</em>` : ""}</span></div>`).join("")
       || `<div class="empty">${esc(L(["V místnosti zatím nic nestojí. Nábytek koupíš v Úpravě místnosti.", "Nothing here yet."]))}</div>`}</div>`;
@@ -4993,7 +5116,7 @@ VIEWS.uloziste = async (view) => {
   const K = U.kusy[ULOZ.kus];
   view.replaceChildren(h(`${sceneHead(artReady("domov/nahled-dum-uloziste") ? "domov/nahled-dum-uloziste" : "domov/dum-svetnice", L(["Úložný prostor", "Storage"]), L(["Truhly: ", "Chests: "]) + U.chest[0] + " / " + U.chest[1] + L([" druhů · Spíž: ", " kinds · Pantry: "]) + U.pantry[0] + " / " + U.pantry[1], true)}
     ${nic ? `<div class="panel notice">${esc(L(["Nemáš žádnou truhlu, skříň ani spíž. Nábytek na ukládání prodává truhlář (Domov → Úprava místnosti).", "You have no chest, wardrobe or pantry."]))}</div>` : `<div class="ul-obal">
-    <div class="ul-truhly">${U.kusy.map((k, i) => `<button class="ul-truhla${i === ULOZ.kus ? " on" : ""}" data-ultruhla="${i}"><img src="${nabSrc(k.name)}" alt="" onerror="this.style.visibility='hidden'">
+    <div class="ul-truhly">${U.kusy.map((k, i) => `<button class="ul-truhla${i === ULOZ.kus ? " on" : ""}" data-ultruhla="${i}"><img src="${nabSrc(k.name)}" alt="" data-skryt-pri-chybe>
         <b>${esc(k.name)}</b><small>${esc(L(ROOM_NAZ[k.room] || [k.room, k.room]) + " · " + k.items.length + " / " + k.slots)}</small></button>`).join("")}</div>
     <div class="m-zalozky truhla-zal"><button class="${ULOZ.strana === "ulozit" ? "on" : ""}" data-us="ulozit">${esc(L(["Uložit", "Store"]))}<small>${esc(L(["u sebe ", "carried "]) + U.carried.length)}</small></button>
       <button class="${ULOZ.strana !== "ulozit" ? "on" : ""}" data-us="vzit">${esc(L(["Vzít", "Take"]))}<small>${esc(L(["v truhle ", "inside "]) + K.items.length)}</small></button></div>
@@ -5045,7 +5168,7 @@ VIEWS.stavdomu = async (view) => {
         : st.teplota < 14 ? L(["V domě je chladno: po spánku odpočatost −8.", "Chilly: rest −8."]) : L(["V domě je teplo — vyspíš se dobře a zahřeješ se.", "Warm house — good sleep."]))}</p>
       <div class="sect">${esc(L(["Zásoby pro chod domu", "Household supplies"]))}</div>
       ${Object.entries(st.zasoby).map(([n, q]) => { const u = st.u_sebe[n] || 0, volno = st.zasoby_max - q;
-        return `<div class="sd-zasoba"><img class="sd-zas-obr" src="${ART_SRC("domov/nahled-chalupa-zasoby")}" alt="" onerror="this.src='${IMG_BASE}predmety/ikony/${Postava.slug(n)}.webp'"><div><b>${esc(n)}</b>
+        return `<div class="sd-zasoba"><img class="sd-zas-obr" src="${ART_SRC("domov/nahled-chalupa-zasoby")}" alt="" data-nahrada="${IMG_BASE}predmety/ikony/${Postava.slug(n)}.webp"><div><b>${esc(n)}</b>
           <small>${esc(L(["V zásobě ", "Stored "]) + q + " / " + st.zasoby_max + L([" · u sebe ", " · carried "]) + u)}</small>
           <small class="muted">${esc(L(["Když venku není léto, pec a krb se ze zásob zatopí samy (otep na herní den).", "Outside summer the stove and hearth light themselves from the woodpile."]))}</small></div>
           <div class="sd-zas-tl">${[1, 5].filter((k) => k <= Math.min(u, volno)).map((k) => `<button class="btn small" data-zas="ulozit" data-q="${k}">${esc(L(["Uložit ", "Store "]) + k)}</button>`).join("")}
@@ -5082,12 +5205,15 @@ VIEWS.calounik = async (view) => {
   const room = T.rooms.find((r) => r.key === CAL.room) ? CAL.room : T.rooms[0].key;
   const R = T.rooms.find((r) => r.key === room);
   const zaklad = "domov/" + (chal ? "chalupa" : "dum") + "-" + R.img;
-  const nah = (st) => st === "puvodni" ? zaklad : (artReady("domov/steny/" + zaklad.split("/").pop() + "-" + st) ? "domov/steny/" + zaklad.split("/").pop() + "-" + st : "");
+  // 1.0-3-8: náhled se načte rovnou (dřív čekal na artReady a bez překreslení se nikdy neukázal); chybí-li malba chalupy, ukáže se stejný styl z domu
+  const nah = (st) => st === "puvodni" ? zaklad : "domov/steny/" + zaklad.split("/").pop() + "-" + st;
+  const nahZaloha = (st) => st === "puvodni" || !chal ? "" : "domov/steny/dum-" + R.img + "-" + st;
   view.replaceChildren(h(`${sceneHead(obr, L(["Čalouník", "Tapestry maker"]), L(["Čalouník: „Čalouny z Flander, malby jako v kostele. Vyber si.“", "\"Flemish tapestries, church-style paintings. Choose.\""]), true)}
     <div class="panel cal-panel">
       <div class="bf-filtr">${T.rooms.map((r) => `<button type="button" class="chip${r.key === room ? " on" : ""}" data-cr="${esc(r.key)}">${esc(L(ROOM_NAZ[r.key] || [r.key, r.key]))}</button>`).join("")}</div>
       <div class="cal-styly">${T.styly.map((st) => { const ma = R.styl === st.key, n = nah(st.key), cena = R.ceny[st.key];
-        return `<div class="cal-styl${ma ? " on" : ""}"><span class="cal-nah"${n ? ` style="background-image:url('${ART_SRC(n)}')"` : ""}>${n ? "" : `<i>${esc(L(["náhled se maluje", "preview pending"]))}</i>`}</span>
+        const z = nahZaloha(st.key);
+        return `<div class="cal-styl${ma ? " on" : ""}"><span class="cal-nah"><i>${esc(L(["náhled se maluje", "preview pending"]))}</i><img class="cal-img" alt="" src="${ART_SRC(n)}"${z ? ` data-nahrada="${ART_SRC(z)}" data-nahrada-trida="ukazka"` : " data-pryc-pri-chybe"}></span>
           <b>${esc(st.name)}</b><small>${esc(st.popis)}</small>
           ${ma ? `<em class="cal-ma">${esc(L(["Máš", "Current"]))}</em>` : `<button class="btn small primary" data-cs="${esc(st.key)}"${T.coins < cena ? " disabled" : ""}>${esc((st.key === "puvodni" ? L(["Vrátit · ", "Restore · "]) : L(["Koupit · ", "Buy · "])) + cena + " gr.")}</button>`}</div>`; }).join("")}</div>
     </div>
@@ -5385,7 +5511,7 @@ VIEWS.podnik = (view) => {
   if (!S.me.business) { go("mesto"); return; }
   const src = (o) => { const n = typeof o.obr === "function" ? o.obr() : o.obr; return IMG_BASE + n + (n.startsWith("domov/") ? "-m.webp" : ".webp"); };
   view.replaceChildren(h(`${sceneHead(BIZ_IMG[S.me.origin] || "mesto-trziste", L(["Tvůj podnik", "Your business"]), "", true)}
-    <div class="opts">${PODNIK_KARTY.map((o) => `<button class="opt obr-karta" data-go="${o.go}"><span class="ok-obr"><img src="${src(o)}" alt="" onerror="this.src='${IMG_BASE}${BIZ_IMG[S.me.origin] || "mesto-trziste"}-m.webp'"></span><b>${esc(L(o.n))}</b><small>${esc(L(o.d))}</small></button>`).join("")}</div>
+    <div class="opts">${PODNIK_KARTY.map((o) => `<button class="opt obr-karta" data-go="${o.go}"><span class="ok-obr"><img src="${src(o)}" alt="" data-nahrada="${IMG_BASE}${BIZ_IMG[S.me.origin] || "mesto-trziste"}-m.webp"></span><b>${esc(L(o.n))}</b><small>${esc(L(o.d))}</small></button>`).join("")}</div>
     <p><button class="btn" id="pback">← ${esc(t("back"))}</button></p>`));
   mountLive(view);
   view.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => { Zvuk.sfx("klik"); go(b.dataset.go); });
@@ -5957,7 +6083,7 @@ function diceLayout(n, seed) {
   }
   return out;
 }
-const dieImg = (face, i, p, cls = "") => `<button class="kostka ${cls}" data-i="${i}" style="left:${p.x}%;top:${p.y}%;--rot:${p.rot}deg;--i:${i}" aria-label="${face}">
+const dieImg = (face, i, p, cls = "", typ = "") => `<button class="kostka ${cls}${typ ? " cinknuta" : ""}" data-i="${i}" style="left:${p.x}%;top:${p.y}%;--rot:${p.rot}deg;--i:${i}" aria-label="${face}"${typ ? ` title="${esc(typ)}"` : ""}>
   <img src="${DOM("hra-kostka-" + face)}" alt="${face}" draggable="false"></button>`;
 
 // Karty: české (německé) barvy — srdce, kule, listy, žaludy; ♥ srdce, ♦ kule, ♠ listy, ♣ žaludy.
@@ -6085,6 +6211,10 @@ VIEWS.hra = async (view) => {
         ${kind === "dice" ? `<label for="diff" class="muted">${esc(t("difficulty"))}</label>
         <select id="diff">${(st.difficulty || []).map((d) => `<option value="${esc(d.id)}"${d.id === diff ? " selected" : ""}>${esc(d.name)} · ${esc(t("target", d.target))}</option>`).join("")}</select>` : ""}
         <span class="dim small">🪙 ${esc(t("coins", S.me.coins))}</span></div>
+      ${kind === "dice" && (st.kostky || []).length ? `<div class="cink-volba"><b>${esc(L(["Cinknuté kostky", "Loaded dice"]))}</b>
+        <span class="dim small">${esc(L(["Každá vybraná nahradí jednu obyčejnou kostku.", "Each replaces one normal die."]))}</span>
+        ${st.kostky.map((k) => `<label class="cink-k" title="${esc(k.popis)}"><input type="checkbox" data-kostka="${esc(k.name)}"${k.on ? " checked" : ""}>
+          <img alt="" src="${IMG_BASE}predmety/ikony/${Postava.slug(k.name)}.webp" data-skryt-pri-chybe><span>${esc(k.name)}<small>${esc(k.popis)}</small></span></label>`).join("")}</div>` : ""}
       <div class="row"><button class="btn primary big" style="max-width:240px" data-start="${kind}">${esc(t("play"))}</button>
       <button class="btn" data-go="misto/hostinec">← ${esc(t("back"))}</button></div></div>`)));
     mountLive(view, { still: true });
@@ -6093,6 +6223,7 @@ VIEWS.hra = async (view) => {
       const data = { kind: b.dataset.start, stake: Number($("#stake").value) };
       store.set("stake", data.stake);
       if (data.kind === "dice" && $("#diff")) { data.diff = $("#diff").value; store.set("diff", data.diff); }
+      if (data.kind === "dice" && view.querySelector("[data-kostka]")) data.kostky = [...view.querySelectorAll("[data-kostka]:checked")].map((x) => x.dataset.kostka);   // 1.0-3-8
       Zvuk.sfx(data.kind === "dice" ? "kalisek" : "michani");
       S.anim = { new: true };
       send("inn_start", data);
@@ -6107,7 +6238,7 @@ VIEWS.hra = async (view) => {
     S.diceKey = key;
     const lay = diceLayout(g.dice.length, key);
     table = `<div class="kostky-plocha${fresh ? " hod" : ""}">
-      ${g.phase === "pick" ? g.dice.map((f, i) => dieImg(f, i, lay[i], (S.sel.has(i) ? "sel" : "") + (fresh ? " pada" : ""))).join("") : ""}
+      ${g.phase === "pick" ? g.dice.map((f, i) => dieImg(f, i, lay[i], (S.sel.has(i) ? "sel" : "") + (fresh ? " pada" : ""), (g.typy || [])[i])).join("") : ""}
       ${fresh ? lay.map((p, i) => `<img class="letici" src="${DOM("hra-kostka-let-" + (1 + i % 3))}" style="--x:${p.x}%;--y:${p.y}%;--i:${i}" alt="">`).join("") : ""}
       <img class="kalisek ${fresh ? "vysypat" : g.phase === "pick" ? "odlozeny" : "stoji"}" src="${DOM("hra-kalisek-m")}" alt="">
     </div>`;
@@ -6640,7 +6771,10 @@ function drawRaidSetup(view, st) {
       if (VYP.porter) await call("raid_click", { id: "ks:setup:porter", values: [] }, true);
       const r = await call("raid_click", { id: "ks:setup:launch", values: [] });
       RAID.st = { mission: r.mission, locations: r.locations, difficulties: r.difficulties, ...r };
-      if (!r.mission && r.panel) toast(noEmoji(r.panel.content || "").replace(/\*\*/g, "").split("\n").filter((x) => /⚠️|Nemáš|nemáš|gr\./.test(x))[0] || L(["Výpravu se nepodařilo spustit.", "Could not start."]));
+      if (!r.mission && r.panel) {   // 1.0-3-5: skutečný důvod (řádek ⚠️), ne informační řádek „Glejt: ne · 15 gr.“
+        const rad = String(r.panel.content || "").split("\n"), varov = rad.find((x) => x.includes("⚠️")) || rad.find((x) => /Nemáš|nemáš|Nemá na/.test(x));
+        toast(varov ? noEmoji(varov).replace(/\*\*/g, "").trim() : L(["Výpravu se nepodařilo spustit.", "Could not start."]));
+      }
       else Zvuk.sfx("dvere");
     } catch { RAID.st = await raidLoad(); }
     finally { RAID.busy = false; drawRaid($("#view")); }
@@ -6808,6 +6942,95 @@ function vysvetli(k, m, P) {
   document.body.appendChild(o);
 }
 
+/** 1.0-3-12: dílky roztrhané mapy — mřížka sloupce × řádky s roztřepenými trhlinami (stejné v deníku i ve skládačce). */
+function dilkyMapy(key, cols, rows) {
+  const seed = [...key].reduce((a, c) => a + c.charCodeAt(0), 7);
+  const rnd = (() => { let s = seed * 7 + 3; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; })();
+  const cara = (x0, n) => { const b = []; let vlna = 0;   // roztřepená hrana: velké zuby + drobná vlákna papíru
+    for (let i = 0; i <= n; i++) { if (i % 6 === 0) vlna = (rnd() - 0.5) * 8; b.push(x0 + vlna + (rnd() - 0.5) * 2.6 + (i % 2 ? 0.9 : -0.9) * rnd()); } return b; };
+  const V = [null], H = [null];
+  for (let c = 1; c < cols; c++) V.push(cara(100 * c / cols, 60)); V.push(null);
+  for (let r = 1; r < rows; r++) H.push(cara(100 * r / rows, 60)); H.push(null);
+  const interp = (arr, t) => { const f = t / 100 * (arr.length - 1), i = Math.min(arr.length - 2, Math.max(0, Math.floor(f))); return arr[i] + (arr[i + 1] - arr[i]) * (f - i); };
+  const Vx = (c, y) => c === 0 ? 0 : c === cols ? 100 : interp(V[c], y), Hy = (r, x) => r === 0 ? 0 : r === rows ? 100 : interp(H[r], x);
+  const roh = (c, r) => { let y = Hy(r, Vx(c, 50)), x = 0; for (let k = 0; k < 6; k++) { x = Vx(c, y); y = Hy(r, x); } return [x, y]; };
+  const kus = (c, r) => {
+    const pts = [], N = 40, [ax, ay] = roh(c, r), [bx, by] = roh(c + 1, r), [cx, cy] = roh(c + 1, r + 1), [dx, dy] = roh(c, r + 1);
+    for (let i = 0; i <= N; i++) { const x = ax + (bx - ax) * i / N; pts.push([x, Hy(r, x)]); }
+    for (let i = 1; i <= N; i++) { const y = by + (cy - by) * i / N; pts.push([Vx(c + 1, y), y]); }
+    for (let i = 1; i <= N; i++) { const x = cx + (dx - cx) * i / N; pts.push([x, Hy(r + 1, x)]); }
+    for (let i = 1; i < N; i++) { const y = dy + (ay - dy) * i / N; pts.push([Vx(c, y), y]); }
+    const sx = pts.reduce((a, p) => a + p[0], 0) / pts.length, sy = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+    return { cp: `polygon(${pts.map(([x, y]) => x.toFixed(2) + "% " + y.toFixed(2) + "%").join(",")})`, sx, sy };
+  };
+  const out = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) out.push(kus(c, r));
+  return { dilky: out, rnd };
+}
+// 1.0-3-12: inkoustový křížek pokladu — je na tom útržku, kam padne (clip-path ho ořízne s dílkem)
+const krizek = (u) => u.x ? `<i class="mapa-x" style="left:${u.x[0]}%;top:${u.x[1]}%">✕</i>` : "";
+/** 1.0-3-10: útržky mapy jako skutečně roztrhaná malovaná mapa — co máš, je vidět, co chybí, je jen obrys. */
+function roztrhanaMapa(u) {
+  const treba = u.treba || 6, cols = u.sloupce || 3, rows = Math.ceil(treba / cols);
+  const { dilky } = dilkyMapy(u.key, cols, rows);
+  const ma = u.poklad ? treba : Math.min(u.n, treba);
+  return `<div class="trh-mapa${u.poklad ? " cela" : ""}" style="aspect-ratio:${u.pomer}" title="${esc(u.name)}">${dilky.map((d, i) => {
+    const je = i < ma, dx = ((i * 37) % 5 - 2) * 0.5, dy = ((i * 53) % 5 - 2) * 0.4, rot = ((i * 29) % 7 - 3) * 0.5;
+    return `<div class="trh-kus${je ? " ma" : ""}" style="${je && !u.poklad && ma < treba ? `transform:translate(${dx}%,${dy}%) rotate(${rot}deg);transform-origin:${d.sx}% ${d.sy}%` : ""}"><div class="trh-vnitr" style="clip-path:${d.cp}"><img alt="" loading="lazy" src="${IMG_BASE}${u.obr}-m.webp">${krizek(u)}</div></div>`; }).join("")}</div>`;
+}
+function roztrhaneMapy(D) {
+  const U = (D.utrzky_oblasti || []).filter((u) => u.obr && (u.n > 0 || u.poklad));
+  if (!U.length) return "";
+  return `<div class="trh-mapy">${U.map((u) => { const treba = u.treba || 6; return `<figure class="trh-karta">${roztrhanaMapa(u)}<figcaption><b>${esc(u.name)}</b><small>${esc(u.poklad
+    ? L(["mapa pokladu je celá — místo je vyznačené na mapě oblasti", "treasure map complete"])
+    : u.n >= treba ? L(["máš všechny útržky — slož si je dohromady", "all scraps — put them together"])
+    : L(["útržky ", "scraps "]) + u.n + " / " + treba)}</small>${!u.poklad && u.n >= treba ? `<button class="btn primary small" data-sloz="${esc(u.key)}">${esc(L(["Složit mapu", "Assemble the map"]))}</button>` : ""}</figcaption></figure>`; }).join("")}</div>`;
+}
+/** 1.0-3-11: skládačka — útržky mapy se přetahují a otáčejí (klepnutím o 90°), dokud do sebe nezapadnou. */
+function skladacka(u, hotovo) {
+  const treba = u.treba || 6, cols = u.sloupce || 3, rows = Math.ceil(treba / cols);
+  const { dilky, rnd } = dilkyMapy(u.key, cols, rows);
+  const K = dilky.map((k) => {
+    let dx = 0, dy = 0;
+    for (let t = 0; t < 20 && Math.hypot(dx, dy) < 22; t++) { dx = 8 + 84 * rnd() - k.sx; dy = 12 + 76 * rnd() - k.sy; }   // rozházené po stole, ne na svém místě
+    return { ...k, dx, dy, rot: [90, 180, 270, 0][Math.floor(rnd() * 4)], fix: false };
+  });
+  const o = document.createElement("div");
+  o.className = "rekap-obal skl-obal";
+  o.innerHTML = `<div class="rekap vyp-pergamen skl"><h2>${esc(L(["Slož mapu: ", "Assemble: "]) + u.name)}</h2>
+    <p class="muted small">${esc(L(["Přetáhni útržky na místo, klepnutím je otočíš. Až do sebe všechny zapadnou, ukáže se poklad.", "Drag the scraps into place, tap to rotate."]))}</p>
+    <div class="skl-plocha"><div class="skl-deska" style="aspect-ratio:${u.pomer}">${K.map((k, i) => `<div class="skl-kus" data-k="${i}" style="clip-path:${k.cp};transform-origin:${k.sx}% ${k.sy}%"><img alt="" draggable="false" src="${IMG_BASE}${u.obr}-m.webp">${krizek(u)}</div>`).join("")}</div></div>
+    <p class="row" style="justify-content:center"><button class="btn" data-x>${esc(L(["Zavřít", "Close"]))}</button></p></div>`;
+  document.body.appendChild(o);
+  o.querySelector("[data-x]").onclick = () => o.remove();
+  const deska = o.querySelector(".skl-deska"), els = [...o.querySelectorAll(".skl-kus")];
+  o._K = K;
+  let z = 10;
+  const kresli = (i) => { const k = K[i], el = els[i]; el.style.transform = `translate(${k.dx}%,${k.dy}%) rotate(${k.rot}deg)`; el.classList.toggle("fix", k.fix); };
+  K.forEach((_, i) => kresli(i));
+  const zkus = (i) => { const k = K[i]; if (k.rot % 360 === 0 && Math.abs(k.dx) < 3.5 && Math.abs(k.dy) < 4.5) { k.dx = k.dy = 0; k.fix = true; Zvuk.sfx("klik"); } kresli(i);
+    if (K.every((x) => x.fix)) { deska.classList.add("hotovo"); setTimeout(() => hotovo(o), 650); } };
+  els.forEach((el, i) => {
+    el.addEventListener("pointerdown", (ev) => {
+      const k = K[i]; if (k.fix) return;
+      ev.preventDefault(); el.setPointerCapture(ev.pointerId); el.style.zIndex = ++z;
+      const r = deska.getBoundingClientRect(), x0 = ev.clientX, y0 = ev.clientY, dx0 = k.dx, dy0 = k.dy; let posun = false;
+      const mv = (e) => { const ddx = e.clientX - x0, ddy = e.clientY - y0; if (Math.abs(ddx) + Math.abs(ddy) > 5) posun = true;
+        k.dx = dx0 + 100 * ddx / r.width; k.dy = dy0 + 100 * ddy / r.height; kresli(i); };
+      const up = () => { el.removeEventListener("pointermove", mv); el.removeEventListener("pointerup", up); el.removeEventListener("pointercancel", up);
+        if (!posun) k.rot = (k.rot + 90) % 360; zkus(i); };
+      el.addEventListener("pointermove", mv); el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+    });
+  });
+}
+/** 1.0-3-7: malovaná mapa oblasti s popisky míst, polohou družiny (●) a pokladem (✕). */
+function malovanaMapa(mm, cela) {
+  const mala = !cela && window.innerWidth < 760;
+  const misto = (x) => `<span class="mm-misto mm-${x.kde}${x.tu ? " tu" : ""}${x.poklad ? " poklad" : ""}" style="left:${x.x}%;top:${x.y}%">`
+    + `${x.tu ? `<i class="mm-tu" aria-label="${esc(L(["Jsi tady", "You are here"]))}"></i>` : ""}${x.poklad ? `<i class="mm-x">✕</i>` : ""}<b>${esc(x.name)}</b></span>`;
+  return `<div class="mmapa${cela ? " cela" : ""}" style="aspect-ratio:${mm.pomer}"><img alt="${esc(mm.titul)}" src="${IMG_BASE}${mm.obr}${mala ? "-m" : ""}.webp">`
+    + `<span class="mm-titul">${esc(mm.titul)}</span>${(mm.mista || []).map(misto).join("")}</div>`;
+}
 /** r27-22: po návratu z výpravy pergamen s rekapitulací — kde jste byli, co kdo získal a ztratil. */
 function ukazRekap(r) {
   if (!r || document.querySelector(".rekap-obal") || S._rekapId === r.id + ":" + r.t) return;
@@ -6859,11 +7082,11 @@ function showRaidPanel(p) {
     return;
   }
   // r27-22: Rozhlédnout se (a jiné panely s obrázkem) — náhled mapy přímo v okně, klepnutím na celou obrazovku
-  box.innerHTML = `<div class="vmodal"><div class="panel${p.image ? " s-mapou" : ""}">${dmd(p.content)}${p.image ? `<img class="vmapa-nahled" src="${p.image}" alt="${esc(L(["Mapa oblasti", "Area map"]))}" title="${esc(L(["Klepni pro celou obrazovku", "Tap for full screen"]))}">` : ""}${controlsHtml(p.controls)}
+  box.innerHTML = `<div class="vmodal"><div class="panel${p.image || p.mapa ? " s-mapou" : ""}">${dmd(p.content)}${p.mapa ? `<div class="vmapa-nahled mm-nahled" title="${esc(L(["Klepni pro celou obrazovku", "Tap for full screen"]))}">${malovanaMapa(p.mapa)}</div>` : p.image ? `<img class="vmapa-nahled" src="${p.image}" alt="${esc(L(["Mapa oblasti", "Area map"]))}" title="${esc(L(["Klepni pro celou obrazovku", "Tap for full screen"]))}">` : ""}${controlsHtml(p.controls)}
     <div class="row" style="margin-top:10px"><button class="btn small" id="vclose">${esc(L(["Zavřít", "Close"]))}</button></div></div></div>`;
   $("#vclose").onclick = () => { RAID.panel = null; box.innerHTML = ""; };
   const mp = box.querySelector(".vmapa-nahled");
-  if (mp) mp.onclick = () => { const o = document.createElement("div"); o.className = "vmapa-cela"; o.innerHTML = `<img src="${p.image}" alt="">`; o.onclick = () => o.remove(); document.body.appendChild(o); };
+  if (mp) mp.onclick = () => { const o = document.createElement("div"); o.className = "vmapa-cela"; o.innerHTML = p.mapa ? malovanaMapa(p.mapa, true) : `<img src="${p.image}" alt="">`; o.onclick = () => o.remove(); document.body.appendChild(o); };
   wireRaid(box);
 }
 

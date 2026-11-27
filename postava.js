@@ -28,7 +28,8 @@ const Postava = (() => {
     "Plátěná čepice": "platena-cepice", "Vyšívaná čepice": "vysivana-cepice", "Sametový baret": "sametovy-baret", "Měkká čepice s pérem": "mekka-cepice-s-perem",
     "Černý baret s pérem": "cerny-baret-s-perem", "Brokátová čepice": "brokatova-cepice", "Baret s chocholem": "baret-s-chocholem", "Věneček": "venecek",
     "Perlový čepec": "perlovy-cepec" };
-  const HELMA_JEN_MUZ = new Set(["batvat", "havirska"]);           // ženská verze zatím není — použije se mužská
+  const HELMA_JEN_MUZ = new Set(["batvat", "havirska"]);
+  const NOSNIK = new Set(["nosova"]);                               // 1.0-3-12: helmy s nosníkem (vrstva helma-<x>-nos přes vousy)           // ženská verze zatím není — použije se mužská
   const HELMA_JEN_ZENA = new Set(["venecek", "perlovy-cepec"]);   // 1.0-1-15: mužská verze není — použije se ženská
   // 1.0-1-15 (Pavel): holá hlava + vlasy podle postavy + čepice navrch. Vlasy se nekreslí jen pod helmou, která zakryje celou hlavu;
   // jinak je kryje maska helma-<x>-skryva.webp (vlasy pod čepicí a nad jejím okrajem), věneček sedí na vlasech bez masky.
@@ -103,7 +104,7 @@ const Postava = (() => {
     // r27-4: zbraň, štít a louč v rukou — sevřená pěst přes rukojeť; otevřenou dlaň těla (a kovovou rukavici zbroje) schová maska „ruka-dlan“
     const zbSlug = ZBRAN_ALIAS[slug(eq["zbraň"] || "")] || slug(eq["zbraň"] || "");
     const zb = PLAST[eq["plášť"]] && SKRYT_V_PLASTI.has(zbSlug) ? null : ZBRAN_RUKA[zbSlug], st = STIT[eq["štít"]];
-    const pravaZb = zb && zb !== "luk", levaZb = zb === "luk", louc = eq["světlo"] === "Louč" && !st && !levaZb && !LEVA[eq["štít"]];
+    const pravaZb = zb && zb !== "luk", levaZb = zb === "luk", louc = (eq["světlo"] === "Louč" || eq["štít"] === "Louč") && !st && !levaZb && !LEVA[eq["štít"]];   // 1.0-3-14: louč i v ruce místo štítu
     const kov = !fem && ["platova", "goticky-plat", "cerny-plat", "milanska-zbroj"].includes(ZBROJ[eq.zbroj]);   // 1.0-1-15: milánská má plátové rukavice
     const levaDyka = LEVA[eq["štít"]] && !st ? LEVA[eq["štít"]] : null;      // 1.0-1-15: druhá dýka v levé pěsti
     const pest = (strana, uhel = "") => ({ src: P((kov ? "rukavice" : "ruka") + "-pest-" + strana + (kov ? "-muz" : "-" + sx) + uhel), cls: "pest",
@@ -146,6 +147,7 @@ const Postava = (() => {
     if (!kape) helma();
     const beard = !fem && VOUSY[L.vousy];
     if (beard && !SKRYJE_VOUSY.has(helm)) out.push({ src: P("vousy-" + beard), filter: BARVA[L["barva vousů"]] || "none", cls: "vousy" });
+    if (beard && NOSNIK.has(helm)) out.push({ src: P(helmaSrc + "-nos"), cls: "helma-nos" });   // 1.0-3-12: nosník helmy jde přes knír a vousy
     if (st) out.push({ src: P("stit-ruka-" + st.replace(/^stit-/, "") + "-" + sx), cls: "stit", erb: me.erbStit || "" });   // r27-6: vlastní erb na štítu   // r27-4: štít vždy navrch přes všechny vrstvy (i plášť, brašnu a vousy)
     out.push(...zaPlastem);                                        // 1.0-2-2 (Pavel): zbraň v pravé ruce jde přes štít (v plášti jen to, co z pláště kouká)
     // 1.0-1-15 (Pavel: vrstvy plynule navazují): za oděvem, zbrojí, pláštěm a pokrývkou hlavy jemný kontaktní stín <díl>-stin.webp
@@ -360,7 +362,7 @@ const Postava = (() => {
     const eq = {};
     (me.equipped || []).forEach((e) => { eq[e.slot] = e; });
     const inHand = eq["zbraň"] && ZBRAN_RUKA[slug(eq["zbraň"].id)];
-    const weapon = inHand ? null : eq["zbraň"], shield = eq["štít"] && (STIT[eq["štít"].id] || LEVA[eq["štít"].id]) ? null : eq["štít"];
+    const weapon = inHand ? null : eq["zbraň"], shield = eq["štít"] && (STIT[eq["štít"].id] || LEVA[eq["štít"].id] || eq["štít"].id === "Louč") ? null : eq["štít"];   // 1.0-3-14: louč v ruce není štít (dřív rozbitý obrázek vedle postavy)
     const torch = eq["světlo"]?.id === "Louč" && (eq["štít"] || inHand === "luk") ? eq["světlo"] : null;   // r27-4: v ruce, jinak vedle postavy
     const imgs = layers(me, base).filter((l) => l.cls !== "stin").map((l) => { const st = (l.filter && l.filter !== "none" ? `filter:${l.filter};` : "") + (l.clip ? `clip-path:${l.clip};` : "")
       + (l.maskIn ? `-webkit-mask-image:url('${l.maskIn}');mask-image:url('${l.maskIn}');-webkit-mask-size:100% 100%;mask-size:100% 100%;` : "");
