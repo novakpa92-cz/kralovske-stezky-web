@@ -770,7 +770,7 @@ VIEWS.hero = (view) => {
   const cekaU = stromU.find((u) => u.dosazeno && !u.pevna && !u.potvrzeno);
   if (HERO.skUr == null || !stromU.some((u) => u.lvl === HERO.skUr)) HERO.skUr = cekaU ? cekaU.lvl : (stromU[0] || {}).lvl;
   const skZal = stromU.length ? `<div class="sk-zal">${stromU.map((u) => { const ceka = u.dosazeno && !u.pevna && !u.potvrzeno;
-    return `<button type="button" class="chip${u.lvl === HERO.skUr ? " on" : ""}${ceka ? " ceka" : ""}${u.dosazeno ? "" : " zamek"}" data-skur="${u.lvl}">${esc(L(["Úroveň ", "Level "]) + u.lvl)}${ceka ? " !" : u.dosazeno ? "" : " 🔒"}</button>`; }).join("")}</div>` : "";
+    return `<button type="button" class="chip${u.lvl === HERO.skUr ? " on" : ""}${ceka ? " ceka" : ""}${u.dosazeno ? "" : " zamek"}" data-skur="${u.lvl}"><span class="sk-dl">${esc(L(["Úroveň ", "Level "]))}</span><span class="sk-kr">${esc(L(["Úr. ", "Lv "]))}</span>${u.lvl}${ceka ? " !" : u.dosazeno ? "" : " 🔒"}</button>`; }).join("")}</div>` : "";
   const strom = skZal + stromU.filter((u) => u.lvl === HERO.skUr).map((u) => {
     const volba = u.dosazeno && !u.pevna && !u.potvrzeno;
     const hl = u.pevna ? L(["Úroveň 1 · základ původu", "Level 1"]) : L(["Úroveň ", "Level "]) + u.lvl + (volba ? L([" · vyber si jednu", " · choose one"]) : u.dosazeno ? "" : L([" · zatím zamčeno", " · locked"]));

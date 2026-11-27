@@ -4250,3 +4250,12 @@ html.mobil .vp-pasmo-obl b{font-size:.74rem;padding:1px 5px}
 /* 1.0-2-3: Batoh na nižších oknech PC (např. 1280×720) — sloty kolem postavy se zmenší, aby nepřekryly opasek */
 @media (min-width:1101px) and (max-height:860px){html:not(.mobil) .pn-sl{gap:2px}html:not(.mobil) .pn-sl .pn-dl{width:52px;height:52px}html:not(.mobil) .pn-sl .pn-slot{gap:1px}html:not(.mobil) .pn-sl .pn-jm{font-size:.55rem}}
 @media (min-width:1101px) and (max-height:720px){html:not(.mobil) .pn-sl .pn-dl{width:46px;height:46px}}
+/* 1.0-2-3: Postava → Schopnosti na telefonu — záložky se vejdou, úrovně v jednom řádku, víc místa pro samotné schopnosti */
+.sk-zal .sk-kr{display:none}
+html.mobil .hero-karty .hk-zalozky button{font-size:clamp(8px,2.6vw,11px)!important;letter-spacing:0!important;padding-left:1px!important;padding-right:1px!important}
+html.mobil .hk-schop .sk-zal{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+html.mobil .hk-schop .sk-zal .chip{padding:6px 0;font-size:11px;letter-spacing:0;white-space:nowrap;min-width:0;margin:0}
+html.mobil .hk-schop .sk-zal .sk-dl{display:none}html.mobil .hk-schop .sk-zal .sk-kr{display:inline}
+html.mobil .hk-schop .hk-vlastnost{gap:10px;padding:10px 12px!important}
+html.mobil .hk-schop .hk-vlastnost .hkv-pecet{width:40px;height:40px}html.mobil .hk-schop .hk-vlastnost .hkv-pecet svg{width:22px;height:22px}
+html.mobil .hk-schop .hk-vlastnost p{font-size:.95rem}
