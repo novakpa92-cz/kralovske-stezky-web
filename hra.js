@@ -294,7 +294,7 @@ $("#login-pw").addEventListener("submit", async (ev) => {   // r27-6: přihláš
   finally { btn.disabled = false; }
 });
 // r27-6: odkaz na náš Discord pro ty, koho hra nezná
-call("status", {}, true).then((r) => { if (r && r.discord) { $("#login-discord-a").href = r.discord; $("#login-discord").hidden = false; } }).catch(() => {});
+call("status", {}, true).then((r) => { if (r) novaVerze(r.build); if (r && r.discord) { $("#login-discord-a").href = r.discord; $("#login-discord").hidden = false; } }).catch(() => {});
 // r27-6: celá obrazovka — bez lišty prohlížeče, kurzor hry až k okrajům
 const CelaObr = {
   umi: () => !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen),
@@ -326,6 +326,13 @@ const CelaObr = {
     el.querySelector("[data-pn-plocha]").onclick = () => { zavri(); nabidniPlochu(); };
   },
 };
+{ const z = $("#tb-zvuk");                                   // 1.0-1-11: ztlumit / zapnout zvuk jedním klikem (i klávesou M)
+  const tl = [z, $("#login-zvuk")].filter(Boolean);           // i na přihlašovací obrazovce (hraje tam hudba)
+  const ukaz = () => tl.forEach((b) => { b.classList.toggle("ztlumeno", !Zvuk.V.on); b.title = Zvuk.V.on ? "Ztlumit zvuk (M)" : "Zapnout zvuk (M)"; });
+  const prepni = () => { Zvuk.set("on", !Zvuk.V.on); if (Zvuk.V.on) Zvuk.sfx("klik"); ukaz(); const c = $("#snd-on"); if (c) c.checked = Zvuk.V.on; };
+  tl.forEach((b) => { b.onclick = prepni; }); ukaz();
+  document.addEventListener("keydown", (e) => { if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.metaKey && !e.altKey && !/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || "") && !e.target.isContentEditable && !document.querySelector(".mh")) prepni(); });
+}
 { const b = $("#tb-full");
   if (b) { b.hidden = !CelaObr.umi() || /iPhone|iPad/.test(navigator.userAgent) || matchMedia("(display-mode: standalone)").matches; b.onclick = CelaObr.prepni; }   // z ikony na ploše už hra běží bez lišty
   const zmena = () => { document.body.classList.toggle("cela", CelaObr.je()); if (b) b.title = CelaObr.je() ? L(["Ukončit celou obrazovku (F)", "Exit fullscreen (F)"]) : L(["Celá obrazovka (F)", "Fullscreen (F)"]); };
@@ -403,11 +410,25 @@ setInterval(() => {
   const m = Math.floor(HODINY.min + (Date.now() - HODINY.t) / 60000 * HODINY.rychlost) % 1440;
   el.textContent = String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
 }, 5000);
+/** 1.0-1-11: server běží na nové verzi → pruh nahoře „obnov okno“ (stránka má ještě starý kód). */
+const VERZE = { moje: null };
+function novaVerze(b) {
+  if (!b) return;
+  if (!VERZE.moje) { VERZE.moje = b; return; }
+  if (b === VERZE.moje || document.getElementById("nova-verze")) return;
+  const el = document.createElement("div"); el.id = "nova-verze";
+  el.innerHTML = `<span>${esc(L(["⬆️ Vyšla nová verze hry. Obnov okno, ať máš všechny opravy.", "⬆️ A new version of the game is out. Reload to get it."]))}</span>
+    <button class="btn small primary">${esc(L(["Obnovit", "Reload"]))}</button><button class="btn small" data-pozdeji>${esc(L(["Později", "Later"]))}</button>`;
+  el.querySelector(".primary").onclick = () => location.reload();
+  el.querySelector("[data-pozdeji]").onclick = () => { el.remove(); VERZE.moje = b; };
+  document.body.appendChild(el);
+}
 setInterval(async () => {
   if (!S.token || !S.me || !S.me.has_character || document.visibilityState !== "visible") return;
   try {
     const r = await call("cas", {}, true);
     if (r.speed) HODINY.rychlost = r.speed;
+    novaVerze(r.build);
     const zmena = (S.me.kalendar || {}).doba !== r.kalendar.doba || S.me.weather !== r.weather || S.me.night !== r.night;
     S.me.kalendar = { ...(S.me.kalendar || {}), ...r.kalendar }; S.me.weather = r.weather; S.me.night = r.night;
     if (r.pozvanky) { S.me.pozvanky = r.pozvanky; pozvankyUkaz(); }   // r27-36
@@ -2915,7 +2936,7 @@ function skrolY() { const s = skrolEl(); return s ? s.scrollTop : window.scrollY
 function skrolNa(y) { const s = skrolEl(); if (s) s.scrollTop = y; else window.scrollTo(0, y); }
 const SPOTS = [   // klikací místa na mapě (% šířky a výšky obrázku mesto-mapa)
   { id: "hostinec", x: 22.2, y: 54.7, n: ["Hostinec", "Inn"], nad: true },   // r27-42 (příští verze): popisek nad budovou, ať se nepřekrývá se Střelmistrovou dílnou
-  { id: "kovar", x: 19.8, y: 66.6, n: ["Kovárna", "Smithy"], nad: true, nadY: 40 },   // 1.0-1-5: bod u výhně, popisek nad střechou; 1.0-1-9: bod i popisek o půl cm níž (Pavel)
+  { id: "kovar", x: 19.8, y: 66.6, n: ["Kovárna", "Smithy"], nad: true },   // 1.0-1-5: bod u výhně, popisek nad střechou; 1.0-1-9: bod i popisek o půl cm níž (Pavel)
   { id: "trziste", x: 37.5, y: 60.5, n: ["Tržiště", "Market"], nad: true },
   { id: "radnice", x: 43.9, y: 49.9, n: ["Radnice", "Town hall"], nad: true },
   { id: "banka", x: 58.9, y: 49.9, n: ["Směnárna", "Money changer"], nad: true },
@@ -5610,8 +5631,12 @@ function vejdiObchod(sel = ".obchod-sloupce .items") {
     if (pevne) {                                          // 1.0-1-9 (Pavel): prostor zboží pevný — tlačítko Zpět dole v rovině s obrázkem vlevo
       const sc = view.querySelector(".scene"), bk = view.querySelector("#back");
       if (sc && bk) {
-        const d = sc.getBoundingClientRect().bottom - bk.getBoundingClientRect().bottom;
+        const vr = view.getBoundingClientRect(), pb = parseFloat(getComputedStyle(view).paddingBottom) || 0;
+        const cil = Math.min(sc.getBoundingClientRect().bottom, vr.top + view.clientHeight - pb - 2);   // nikdy pod okraj okna (žádné posouvání)
+        const d = cil - bk.getBoundingClientRect().bottom;
         lists.forEach((l) => { l.style.height = l.style.maxHeight = Math.max(140, l.clientHeight + d) + "px"; l.style.overflowY = "auto"; });
+        const zbyva = view.scrollHeight - view.clientHeight;                // pojistka: kdyby se stránka i tak posouvala, zkrátit
+        if (zbyva > 0) lists.forEach((l) => { l.style.height = l.style.maxHeight = Math.max(140, l.clientHeight - zbyva - 2) + "px"; });
       }
     }
     view.scrollTop = 0;
@@ -5653,7 +5678,15 @@ VIEWS.obchod = async (view) => {
   const PODKAT = [[/obvaz|náplast|dlaha/i, ["Obvazy", "Bandages"]], [/odvar|elixír|lektvar|tinktur|nápoj/i, ["Odvary", "Potions"]], [/mast|čaj|bylin|olej|balzám/i, ["Byliny a masti", "Herbs and salves"]]];
   const slotKat = (i) => i.slot_name || OST;
   const jednaKat = new Set(data.items.map(slotKat)).size < 2;
-  const katOf = (i) => { if (!jednaKat) return slotKat(i); const h = PODKAT.find(([re]) => re.test(i.name)); return h ? L(h[1]) : slotKat(i); };
+  // 1.0-1-11 (Pavel): jemnější filtry — zbraně podle druhu, zbroje podle materiálu, u apatykáře obvazy / masti / odvary
+  const DRUH_ZBR = { "sečné": ["Sečné", "Edged"], "tupé": ["Tupé", "Blunt"], "bodné": ["Bodné", "Piercing"], "střelné": ["Střelné", "Ranged"], "palné": ["Palné", "Firearms"] };
+  const ZBROJ_KAT = [[/kroužk/i, ["Kroužková", "Mail"]], [/plát|kyrys|milán/i, ["Plátová", "Plate"]], [/brigantin|šupin/i, ["Brigantiny a šupiny", "Brigandine and scale"]], [/kožen|vycpáv|prošív|kazajk|kabát/i, ["Kožená a prošívaná", "Leather and padded"]]];
+  const APAT_KAT = [[/obvaz|náplast|dlaha/i, ["Obvazy", "Bandages"]], [/mast|čaj|balzám|olej/i, ["Masti a čaje", "Salves and teas"]]];
+  const katOf = (i) => {
+    if (i.slot === "zbraň" && i.druh && DRUH_ZBR[i.druh]) return L(DRUH_ZBR[i.druh]);
+    if (i.slot === "zbroj") { const h = ZBROJ_KAT.find(([re]) => re.test(i.id)); if (h) return L(h[1]); }
+    if (shopId === "Apatykář" && i.slot === "spotřební") { const h = APAT_KAT.find(([re]) => re.test(i.id)); return h ? L(h[1]) : L(["Odvary a lektvary", "Potions"]); }
+    if (!jednaKat) return slotKat(i); const h = PODKAT.find(([re]) => re.test(i.name)); return h ? L(h[1]) : slotKat(i); };
   const kats = [...new Set(data.items.map(katOf))];
   let kat = "", q = "", barvi = "";                    // r27-6: u oděvu, pláště, zbroje a štítu se při nákupu vybírá barva
   const zvol = {};                                     // zvolená barva u zboží (rozklikávací výběr)

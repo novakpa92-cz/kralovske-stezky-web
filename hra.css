@@ -4197,3 +4197,13 @@ html.mobil .mistr-obr{display:none}
 .dm-vb img{width:38px;height:38px}
 .dm-vb small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .dm-vb em{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 1.0-1-11: výzva k obnovení po nasazení nové verze */
+#nova-verze{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;gap:10px;align-items:center;background:#2a1d0e;border:2px solid #d9b45a;border-radius:10px;padding:10px 14px;box-shadow:0 6px 24px rgba(0,0,0,.6);color:#f1e2bd;font-size:1rem;max-width:calc(100vw - 24px)}
+#nova-verze span{flex:1}
+/* 1.0-1-11: tlačítko zvuku vedle celé obrazovky */
+.tb-zvuk .zv-off{display:none}
+.tb-zvuk.ztlumeno .zv-on{display:none}
+.tb-zvuk.ztlumeno .zv-off{display:inline}
+.tb-zvuk.ztlumeno{opacity:.75}
+.login-card{position:relative}
+.login-zvuk{position:absolute;top:14px;right:14px;margin:0}
