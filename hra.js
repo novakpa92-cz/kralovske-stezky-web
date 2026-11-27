@@ -264,7 +264,7 @@ $("#login-form").addEventListener("submit", async (ev) => {
   if (!code) return;
   const btn = ev.submitter || $("#login-form button");
   const pl = $("#plocha-chk-login");
-  if (pl && pl.checked && !$("#plocha-login").hidden) nabidniPlochu();    // r27-5: ještě v rámci kliknutí
+  try { if (pl && pl.checked && !$("#plocha-login").hidden) nabidniPlochu(); } catch { /* 1.0-1-8: ikona na plochu nesmí zastavit přihlášení */ }    // r27-5: ještě v rámci kliknutí
   btn.disabled = true; $("#login-msg").textContent = t("connecting");
   try {
     const res = await call("link", { code }, true);
