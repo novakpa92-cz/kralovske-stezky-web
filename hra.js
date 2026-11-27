@@ -154,7 +154,7 @@ let pending = 0;
 // a točící se ukazatel se ukáže jen u akcí hráče, které trvají déle než chvilku.
 const SPOJ = { letici: new Map(), ovladace: new Set(), busyT: 0 };
 const CTENI = new Set(["me", "raid", "mini", "chat", "cas", "place", "shop", "icons", "card", "mapa_obr", "vyhlasky", "denik", "zverinec", "napoje", "hraci", "cock",
-  "auctions", "duels", "people", "poradi", "kroniky", "farm", "truhla", "domov", "uloziste", "tapety", "dum_predat_info", "domy", "vareni", "podnik", "zakazky_hracu", "admin_check", "status"]);
+  "kampan", "auctions", "duels", "people", "poradi", "kroniky", "farm", "truhla", "domov", "uloziste", "tapety", "dum_predat_info", "domy", "vareni", "podnik", "zakazky_hracu", "admin_check", "status"]);
 const LIMIT = (op) => (["card", "mapa_obr", "icons"].includes(op) ? 45000 : op === "raid_click" ? 30000 : 15000);
 function busyUkaz(zap) {
   clearTimeout(SPOJ.busyT);
@@ -573,7 +573,7 @@ async function enterGame() {
   await nacitani(call("me").catch(() => { ok = !!S.token; }));
   if (!ok) return;
   $("#game").hidden = false;
-  { const zkus = (n) => call("admin_check", {}, true).then((r) => { const b = document.querySelector('[data-tab="admin"]'); if (b) b.hidden = !r.admin; if (!r.admin && n) setTimeout(() => zkus(n - 1), 4000); })
+  { const zkus = (n) => call("admin_check", {}, true).then((r) => { const b = document.querySelector('[data-tab="admin"]'); if (b) b.hidden = !r.admin; if (r.admin && S.tab === "misto" && S.arg === "brana") render(); if (!r.admin && n) setTimeout(() => zkus(n - 1), 4000); })
       .catch(() => { if (n) setTimeout(() => zkus(n - 1), 4000); });
     zkus(1); }   // r27-4: jen pro správce; r27-6: při chybě nebo pomalém Discordu zkusí ještě jednou
   { const z = store.get("tab") || "mesto"; go(z === "admin" || z.startsWith("panel/=") ? "mesto" : z); }   // r27-5: po načtení nic samo nemačkat
@@ -705,6 +705,7 @@ function render() {
 }
 
 const VIEWS = {};
+VIEWS.kampan = (view) => kampanView(view);                 // 1.0-3: Dobrodružství (kampan.js)
 VIEWS.novy = (view) => { if (S.me && S.me.has_character) { go("mesto"); return; } zalozitPostavu(view); };
 
 // --- postava
@@ -1588,10 +1589,10 @@ function onlineHtml(lidi) {
   return `<div class="chat-online"><b>● ${esc(L(["Ve hře", "Online"]))} ${lidi.length}</b><ul>${jm}</ul></div>`;
 }
 function chatHtml(room, msgs, online) {
-  const hospoda = room === "hostinec";
-  return `<div class="chat${hospoda ? " hospoda" : ""}" data-room="${esc(room)}"><div class="chat-h">${esc(hospoda ? L(["Hospodské řeči", "Tavern talk"]) : L(["Pokřik z hlediště", "Shouts from the stands"]))}<small>${esc(L(["zprávy po hodině zmizí", "messages vanish after an hour"]))}</small></div>
+  const hospoda = room === "hostinec", druzina = room.startsWith("kampan:");   // 1.0-3: domluva skupiny v dobrodružství
+  return `<div class="chat${hospoda ? " hospoda" : ""}${druzina ? " druzina" : ""}" data-room="${esc(room)}"><div class="chat-h">${esc(hospoda ? L(["Hospodské řeči", "Tavern talk"]) : druzina ? L(["Domluva skupiny", "Party talk"]) : L(["Pokřik z hlediště", "Shouts from the stands"]))}<small>${esc(L(["zprávy po hodině zmizí", "messages vanish after an hour"]))}</small></div>
     ${hospoda ? `<div class="chat-telo"><ul class="chat-list">${chatListHtml(room, msgs)}</ul>${onlineHtml(online)}</div>` : `<ul class="chat-list">${chatListHtml(room, msgs)}</ul>`}
-    <form class="chat-form"><input maxlength="200" placeholder="${esc(hospoda ? L(["Řekni něco ke stolu…", "Say something…"]) : L(["Fanděj, hecuj, sázej…", "Cheer, jeer, bet…"]))}" value="${esc(CHAT.draft[room] || "")}"><button class="btn small primary">${esc(hospoda ? L(["Říct", "Say"]) : L(["Zakřičet", "Shout"]))}</button></form></div>`;
+    <form class="chat-form"><input maxlength="200" placeholder="${esc(hospoda ? L(["Řekni něco ke stolu…", "Say something…"]) : druzina ? L(["Domluvte se — kdo co vidí, kdo kam jde…", "Talk to your party…"]) : L(["Fanděj, hecuj, sázej…", "Cheer, jeer, bet…"]))}" value="${esc(CHAT.draft[room] || "")}"><button class="btn small primary">${esc(hospoda ? L(["Říct", "Say"]) : druzina ? L(["Říct", "Say"]) : L(["Zakřičet", "Shout"]))}</button></form></div>`;
 }
 // hospodské řeči: obnova každé 4 s, jen dokud je hráč v lokálu
 const HOSPODA = { timer: null };
@@ -3171,7 +3172,7 @@ const PLACES = {
     opts: [
       { sect: ["Ven z města · Stezky", "Out of town · Trails"] },                 // r27-41: dlaždice s náhledem a krátkým popisem
       { go: "vyprava", ic: "🗺️", obr: "vypravy/rataje-01", n: ["Výprava", "Expedition"], d: ["Sám nebo s družinou do lesů, dolů a na hrad. Boje, truhly, kořist — vrať se, než vyprší čas.", "Solo or with a party into woods, mines, camps and castles."] },
-      { soon: true, ic: "📜", obr: "pribehy/pribeh-klaster", n: ["Dobrodružství", "Adventure"], d: ["Příběhová kampaň na pokračování — rozhovory, hádanky, volby s následky pro celé město. Ve vývoji.", "A story campaign with choices and consequences. In development."] },
+      { soon: true, ic: "📜", obr: "pribehy/pribeh-klaster", n: ["Dobrodružství", "Adventure"], d: ["Příběhová kampaň na pokračování — rozhovory, hádanky, volby s následky pro celé město. Už brzy.", "A story campaign with choices and consequences. Coming soon."] },
       { panel: "trails", ic: "🗡️", obr: "situace/sit-setkani", oddel: true, n: ["Na stezkách", "On the trails"], d: ["Po stopách cizí výpravy: přepadnout, obchodovat, nebo minout. Od 4. úrovně.", "Follow another expedition: ambush, trade or pass by."] },
       { sect: ["Za hradbami", "Outside the walls"] },          // r27-4: vidět jsou vždy, otevřít jdou až po koupi
       ...PODNIK_KARTY.map((o) => ({ ...o, n: { podnikprace: ["Výroba na usedlosti", "Farm crafting"], podnikuloziste: ["Komora usedlosti", "Farm storage"], podnikstav: ["Stav usedlosti", "Farm upkeep"] }[o.go], when: (m) => m.origin === "sedlak" && m.business })),
@@ -3403,7 +3404,7 @@ VIEWS.misto = (view) => {
     if (o.obr) {                                              // r27-41: dlaždice s malovaným náhledem a krátkým popisem
       const zam = o.lock && o.lock(S.me), pozdeji = o.soon;
       const target = zam ? `data-zamek="${esc(L(o.why(S.me)))}"` : pozdeji ? "data-soon" : o.act ? `data-act="${esc(o.act)}"` : o.panel ? `data-panel="${esc(o.panel)}"` : o.cid ? `data-pcid="${esc(o.cid)}"` : `data-go="${esc(o.go)}"`;
-      return `<button class="opt obr-karta${zam ? " zamceno" : ""}${pozdeji ? " vyvoj" : ""}${o.oddel ? " oddel" : ""}" ${target}><span class="ok-obr">${IMG(typeof o.obr === "function" ? o.obr() : o.obr)}${zam || pozdeji ? `<i class="ok-zamek">🔒 ${esc(pozdeji ? L(["Ve vývoji", "In development"]) : L(["Zamčeno", "Locked"]))}</i>` : ""}</span>
+      return `<button class="opt obr-karta${zam ? " zamceno" : ""}${pozdeji ? " vyvoj" : ""}${o.oddel ? " oddel" : ""}" ${target}><span class="ok-obr">${IMG(typeof o.obr === "function" ? o.obr() : o.obr)}${zam || pozdeji ? `<i class="ok-zamek">🔒 ${esc(pozdeji ? L(["Už brzy", "Coming soon"]) : L(["Zamčeno", "Locked"]))}</i>` : ""}</span>
         <span class="ok-txt"><b>${esc(L(o.n))}</b><small>${esc(L(o.d))}</small></span></button>`;
     }
     if (o.lock && o.lock(S.me)) return `<button class="opt zamceno" data-zamek="${esc(L(o.why(S.me)))}"><span class="ic">${o.ic}</span><b>${esc(L(o.n))}</b><small>${esc(L(["Zamčeno — ", "Locked — "]) + L(o.d))}</small></button>`;
