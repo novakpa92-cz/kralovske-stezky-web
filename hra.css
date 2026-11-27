@@ -4213,9 +4213,9 @@ html.mobil .mistr-obr{display:none}
 .tb-zvuk.ztlumeno{opacity:.75}
 .login-card{position:relative}
 .login-zvuk{position:absolute;top:14px;right:14px;margin:0}
-/* 1.0-1-12: filtry obchodu v jednom řádku (víc místa pro seznam zboží); co se nevejde, posune se kolečkem do strany */
-html:not(.mobil) .shop-kat{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
-html:not(.mobil) .shop-kat .chip{flex:0 0 auto}
+/* 1.0-2-3: filtry obchodu se řádkují pod sebe (řádek s posuvníkem roztahoval panel a uřízl tlačítka Koupit) */
+.obchod-sloupce>.panel,.truhla-sloupce>.panel{min-width:0}
+.shop-kat .chip{flex:0 0 auto}
 /* 1.0-1-14: výbava po kusech — štítek stupně u konkrétního kusu */
 .kus-st{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #c9a24a;border-radius:8px;color:#f0d78c;font-size:.78rem;font-weight:700;vertical-align:1px}
 .kus-st.obyc{border-color:#6b5a3a;color:#b9a477;font-weight:400}

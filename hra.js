@@ -3188,9 +3188,12 @@ const ZOBR = { pref: (typeof store !== "undefined" && store.get("zobrazeni")) ||
 function jeMobil() {
   if (ZOBR.pref === "pc") return false;
   if (ZOBR.pref === "tel") return true;
+  if (!innerWidth) return document.documentElement.classList.contains("mobil");   // 1.0-2-3: okno se šířkou 0 (minimalizované, na pozadí) nerozhoduje
   return matchMedia("(max-width:760px)").matches || (matchMedia("(pointer:coarse)").matches && Math.min(screen.width, screen.height) <= 540);
 }
 function nastavZobrazeni() {
+  // 1.0-2-3: minimalizované / skryté okno nebo karta otevřená na pozadí má chvíli šířku 0 — podle toho se rozložení nemění
+  if (ZOBR.pref === "auto" && (!innerWidth || document.visibilityState === "hidden")) return false;
   const m = jeMobil(), byl = document.documentElement.classList.contains("mobil");
   document.documentElement.classList.toggle("mobil", m);
   document.documentElement.classList.toggle("mobil-vynucen", m && ZOBR.pref === "tel");
@@ -3199,8 +3202,18 @@ function nastavZobrazeni() {
   return m !== byl;
 }
 nastavZobrazeni();
-addEventListener("resize", () => { if (nastavZobrazeni() && typeof render === "function" && S.me) render(); });
-addEventListener("load", nastavZobrazeni);
+/* 1.0-2-3: na PC se občas zůstalo v mobilním rozložení (okno bylo při načtení na chvíli úzké nebo skryté
+   a po návratu se už nepřekreslilo). Rozložení se teď ověří i po načtení, návratu na kartu a obnově z historie. */
+let zobrCas = 0;
+function hlidejZobrazeni() {
+  clearTimeout(zobrCas);
+  zobrCas = setTimeout(() => { if (nastavZobrazeni() && typeof render === "function" && S.me) render(); }, 120);
+}
+addEventListener("resize", hlidejZobrazeni);
+addEventListener("load", hlidejZobrazeni);
+addEventListener("pageshow", hlidejZobrazeni);
+addEventListener("focus", hlidejZobrazeni);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") hlidejZobrazeni(); });
 
 /** r27-12: spodní okno (na telefonu) — podrobnosti věci a akce na dosah palce. Akce se do okna přesunou i s obsluhou. */
 const LIST = { el: null, zpet: null };
