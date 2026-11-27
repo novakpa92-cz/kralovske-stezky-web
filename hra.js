@@ -135,6 +135,17 @@ function md(text) {
   }).join("<br>");
 }
 const h = (html) => { const d = document.createElement("template"); d.innerHTML = html.trim(); return d.content; };
+/** 1.0-1-14: výbava po kusech — řádek s konkrétním kusem (stupeň zušlechtění; 0 = obyčejný). Kliknutí v řádku si kus zapamatuje
+ *  a další dotaz na server ho pošle („kus“), takže se prodá / uloží / vezme přesně ten. */
+const kusAttr = (i) => i && i.kus != null ? ` data-kus="${esc(String(i.kus))}"${i.count ? ` data-q="${Number(i.count)}"` : ""}` : "";
+/** Počet pro řádek bez posuvníku: u konkrétního kusu jen jeho počet (jinak by šel celý stoh). */
+const kolikRadek = (b) => { const it = b.closest(".item"), r = it && it.querySelector("[data-kolik]"); return r ? +r.value : (it && it.dataset.q ? +it.dataset.q : null); };
+const kusTag = (i) => i && i.kus != null ? (Number(i.enh) ? ` <span class="kus-st">+${Number(i.enh)}</span>`
+    : (!i.color || i.color === "Přírodní") && !(i.wear < 100) ? ` <span class="kus-st obyc">${esc(L(["obyčejná", "plain"]))}</span>` : "")
+  + (i.color && i.color !== "Přírodní" ? barvaStitek(i.color, i.hex || "") : "")
+  + (i.wear != null && i.wear < 100 ? ` <span class="kus-st ${i.wear <= 0 ? "rozb" : "opotr"}">${esc(i.wear <= 0 ? L(["rozbitá", "broken"]) : i.wear + " %")}</span>` : "") : "";
+const KUS = { pristi: null };
+document.addEventListener("click", (e) => { const k = e.target && e.target.closest ? e.target.closest("[data-kus]") : null; KUS.pristi = k ? k.dataset.kus : null; }, true);
 
 // ------------------------------------------------------------------ API
 let pending = 0;
@@ -155,7 +166,7 @@ async function fetchApi(op, data) {
   const tm = setTimeout(() => ac.abort(), LIMIT(op));
   try {
     const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, signal: ac.signal, cache: "no-store",
-      body: JSON.stringify({ op, token: S.token, lang: S.lang === "pl" ? "en" : S.lang === "sk" ? "cs" : S.lang, ...data }) });
+      body: JSON.stringify({ op, token: S.token, lang: S.lang === "pl" ? "en" : S.lang === "sk" ? "cs" : S.lang, ...(KUS.pristi != null && !CTENI.has(op) ? { kus: KUS.pristi } : {}), ...data }) });
     return await r.json();
   } finally { clearTimeout(tm); SPOJ.ovladace.delete(ac); }
 }
@@ -1209,7 +1220,7 @@ const volnaMista = (n) => n > 0 ? `<div class="item volno souhrn"><span class="i
 const filtruj = (k, seznam, row) => BF[k] === "vse" ? seznam : seznam.filter((x) => druhVeci(row[x[0]]) === BF[k]);
 function filtrVeci(k, seznam, row) {
   if (!seznam.length) return "";
-  const pocet = (d) => d === "vse" ? seznam.length : seznam.filter((x) => druhVeci(row[x[0]]) === d).length;
+  const pocet = (d) => mist(d === "vse" ? seznam : seznam.filter((x) => druhVeci(row[x[0]]) === d));
   return `<div class="bf-filtr">${BF_DRUH.filter(([d]) => pocet(d)).map(([d, jm]) => `<button type="button" class="chip${BF[k] === d ? " on" : ""}" data-bf="${k}:${d}">${esc(L(jm))} <small>${pocet(d)}</small></button>`).join("")}</div>`;
 }
 // r27-42: opasek po pouzdrech — každé místo na opasku je záložka (Pouzdro 1, 2, 3…) s jednou věcí
@@ -1241,6 +1252,8 @@ function vybavenoZalozky(m, N, row, eqBez, vec) {
       ${vBatohu.length ? `<div class="sect vyb-sect">${esc(L(["V batohu — můžeš nasadit", "In your pack — can equip"]))}</div>${vBatohu.map((x) => vec(x)).join("")}` : ""}</div></div>`;
 }
 // 1.0-1: Batoh jako „panenka“ — postava s výbavou kolem, opasek, kapsy a batoh jako mřížky, vpravo (v mobilu zespodu) detail vybrané věci. Vše na jedné obrazovce.
+/** 1.0-1-14: kolik míst zabírá seznam — kusy téže věci (lišící se jen zušlechtěním) leží na jednom místě. */
+const mist = (seznam) => new Set((seznam || []).map((x) => x[0] + "|" + (x[2] || ""))).size;
 const PAN_L = [["hlava", ["Helma", "Helmet"]], ["plášť", ["Plášť", "Cloak"]], ["zbroj", ["Zbroj", "Armour"]], ["oděv", ["Oděv", "Clothes"]]];
 const PAN_P = [["zbraň", ["Zbraň", "Weapon"]], ["štít", ["Štít", "Shield"]], ["světlo", ["Světlo", "Light"]], ["opasek", ["Opasek", "Belt"]]];
 VIEWS.bag = (view) => {
@@ -1258,9 +1271,9 @@ VIEWS.bag = (view) => {
   let V = najdi(S.bagSel);
   if (!V && !mob) V = najdi({ k: "eq", i: "zbraň" }) || (N.pockets[0] && najdi({ k: "pockets", i: 0, id: N.pockets[0][0] })) || null;
   const jeVyb = (k, i) => V && V.k === k && (k === "eq" ? V.e.slot === i : V.x === (N[k] || [])[i]);
-  const dl = (id, k, i, { q, wear, enh, prazdne, lbl } = {}) => {
+  const dl = (id, k, i, { q, wear, enh, prazdne, lbl, kus } = {}) => {
     const w = wear == null ? "" : `<i class="pn-stav ${wear <= 30 ? "zle" : wear <= 60 ? "stredni" : "dobre"}"><b style="width:${Math.max(0, wear)}%"></b></i>`;
-    return id ? `<button type="button" class="pn-dl${jeVyb(k, i) ? " vyb" : ""}" data-pk="${k}" data-pi="${esc(String(i))}" data-pid="${esc(id)}" title="${esc((row[id] || {}).name || id)}">${icon(id)}${q > 1 ? `<span class="pn-q">${q}</span>` : ""}${enh ? `<span class="pn-enh">+${enh}</span>` : ""}${w}</button>`
+    return id ? `<button type="button" class="pn-dl${jeVyb(k, i) ? " vyb" : ""}"${kusAttr({ kus })} data-pk="${k}" data-pi="${esc(String(i))}" data-pid="${esc(id)}" title="${esc((row[id] || {}).name || id)}">${icon(id)}${q > 1 ? `<span class="pn-q">${q}</span>` : ""}${enh ? `<span class="pn-enh">+${enh}</span>` : ""}${w}</button>`
       : `<span class="pn-dl prazdne">${lbl ? `<small>${esc(lbl)}</small>` : ""}</span>`;
   };
   const eqDl = ([sl, jm]) => {
@@ -1274,14 +1287,15 @@ VIEWS.bag = (view) => {
     : `<span class="muted small">${esc(L(["Nemáš opasek — kup ho u krejčího nebo vetešníka.", "No belt yet."]))}</span>`;
   const mriz = (k, seznam, max) => {
     const vidim = k === "backpack" ? seznam.map((x, i) => [x, i]).filter(([x]) => BF.batoh === "vse" || druhVeci(row[x[0]]) === BF.batoh) : seznam.map((x, i) => [x, i]);
-    const volno = (k !== "backpack" || BF.batoh === "vse") ? Math.max(0, max - seznam.length) : 0;
-    return vidim.map(([x, i]) => dl(x[0], k, i, { q: x[1], wear: (row[x[0]] || {}).wear })).join("") + Array.from({ length: volno }, () => dl(null)).join("");
+    const volno = (k !== "backpack" || BF.batoh === "vse") ? Math.max(0, max - mist(seznam)) : 0;
+    return vidim.map(([x, i]) => dl(x[0], k, i, { q: x[1], wear: x[4] != null ? x[6] : (row[x[0]] || {}).wear, enh: x[5], kus: x[4] })).join("") + Array.from({ length: volno }, () => dl(null)).join("");
   };
   const batohF = N.backpack.length ? filtrVeci("batoh", N.backpack, row) : "";
   // detail vybrané věci
   let detail = `<p class="muted pn-nic">${esc(L(["Klepni na věc — tady uvidíš, co umí, a co s ní můžeš dělat.", "Tap an item to see details."]))}</p>`;
   if (V) {
-    const it = V.k === "eq" ? V.e : V.i, id = it.id;
+    const it0 = V.k === "eq" ? V.e : V.i, id = it0.id;
+    const it = V.x && V.x[4] != null ? { ...it0, enh: V.x[5], wear: V.x[6], enh_kusy: null } : it0;   // 1.0-1-14: vybraný konkrétní kus
     const x = V.x, q = x ? x[1] : 1, barva = x ? x[2] : it.color_name, hx = x ? x[3] : it.color;
     const tl = [];
     if (V.k === "eq") tl.push(`<button class="btn primary" data-unequip="${esc(V.e.slot)}">${esc(t("unequip"))}</button>`);
@@ -1296,14 +1310,14 @@ VIEWS.bag = (view) => {
     }
     const nas = V.k !== "eq" && it.equip && eq[it.slot] && eq[it.slot].id !== id ? eq[it.slot] : null;   // porovnání s tím, co máš na sobě
     const kde = { eq: L(["Máš na sobě", "Equipped"]), belt: L(["Na opasku", "On the belt"]), pockets: L(["V kapsách", "In pockets"]), backpack: L(["V batohu", "In the backpack"]) }[V.k];
-    detail = `<div class="pn-det-hl">${icon(id)}<div><div class="nm">${esc(it.name)}${q > 1 ? ` <span class="muted">× ${q}</span>` : ""}${it.enh ? ` <span class="muted">+${it.enh}${q > 1 && it.enh_kusy && it.enh_kusy.length < q ? L([` (zušlechtěno ${it.enh_kusy.length} z ${q})`, ` (${it.enh_kusy.length} of ${q} improved)`]) : ""}</span>` : ""}${barvaStitek(barva, hx)}</div>
+    detail = `<div class="pn-det-kus"${V.x && V.x[4] != null ? kusAttr({ kus: V.x[4] }) : ""}><div class="pn-det-hl">${icon(id)}<div><div class="nm">${esc(it.name)}${q > 1 ? ` <span class="muted">× ${q}</span>` : ""}${it.enh ? ` <span class="muted">+${it.enh}${q > 1 && it.enh_kusy && it.enh_kusy.length < q ? L([` (zušlechtěno ${it.enh_kusy.length} z ${q})`, ` (${it.enh_kusy.length} of ${q} improved)`]) : ""}</span>` : ""}${barvaStitek(barva, hx)}</div>
         <div class="meta">${esc([it.slot_name, kde, it.merchant_name ? t("sell_to", it.merchant_name) : ""].filter(Boolean).join(" · "))}</div>${it.fx ? `<div class="meta"><b class="fx">${esc(it.fx)}</b></div>` : ""}</div></div>
       ${it.popis ? `<p class="pn-popis">${esc(it.popis)}</p>` : ""}
       ${it.k_cemu && it.k_cemu !== it.slot && it.k_cemu !== it.fx ? `<p class="pn-kcemu"><b>${esc(L(["K čemu je: ", "Use: "]))}</b>${esc(it.k_cemu)}</p>` : ""}
       ${statyHtml(it)}${opotrebeni(it)}
       ${tl.length ? `<div class="pn-tl">${tl.join("")}</div>` : ""}
       ${nas ? `<div class="pn-por"><span class="pn-por-t">${esc(L(["Teď máš na sobě", "Currently equipped"]))}</span><div class="pn-por-r">${icon(nas.id)}<b>${esc(nas.name)}</b></div>${statyHtml(nas)}</div>` : ""}
-      ${(V.k === "eq" && (V.e.slot === "světlo" || id === "Louč")) ? svetloPanel(m) : ""}`;
+      ${(V.k === "eq" && (V.e.slot === "světlo" || id === "Louč")) ? svetloPanel(m) : ""}</div>`;
   }
   const zal = S.batohZal === "batoh" ? "batoh" : "kapsy";
   const figura = `<div class="pn-fig hero-fig live" data-img="mesto-pokoj" data-key="pokoj">${Postava.html(m, IMG_BASE)}</div>`;
@@ -1316,10 +1330,10 @@ VIEWS.bag = (view) => {
         <div class="pn-opasek"><span class="pn-lbl">${esc(L(["Opasek", "Belt"]))}${N.belt_max ? ` <small>${N.belt.length}/${N.belt_max}</small>` : ""}</span>${opasek}</div>
       </section>
       <section class="panel pn-nes">
-        ${mob ? `<div class="m-zalozky pn-zal"><button class="${zal === "kapsy" ? "on" : ""}" data-bz="kapsy">${esc(L(["Kapsy", "Pockets"]))}<small>${N.pockets.length}/${N.pockets_max}</small></button><button class="${zal === "batoh" ? "on" : ""}" data-bz="batoh">${esc(N.bag_name || L(["Batoh", "Backpack"]))}<small>${N.backpack.length}/${N.backpack_max}</small></button></div>` : ""}
-        <div class="pn-kont${mob && zal !== "kapsy" ? " skryt" : ""}"><div class="pn-hl"><h3>${esc(L(["Kapsy", "Pockets"]))}</h3><span class="pill">${N.pockets.length} / ${N.pockets_max}</span></div>
+        ${mob ? `<div class="m-zalozky pn-zal"><button class="${zal === "kapsy" ? "on" : ""}" data-bz="kapsy">${esc(L(["Kapsy", "Pockets"]))}<small>${mist(N.pockets)}/${N.pockets_max}</small></button><button class="${zal === "batoh" ? "on" : ""}" data-bz="batoh">${esc(N.bag_name || L(["Batoh", "Backpack"]))}<small>${mist(N.backpack)}/${N.backpack_max}</small></button></div>` : ""}
+        <div class="pn-kont${mob && zal !== "kapsy" ? " skryt" : ""}"><div class="pn-hl"><h3>${esc(L(["Kapsy", "Pockets"]))}</h3><span class="pill">${mist(N.pockets)} / ${N.pockets_max}</span></div>
           <div class="pn-mriz">${mriz("pockets", N.pockets, N.pockets_max)}</div></div>
-        <div class="pn-kont pn-batoh${mob && zal !== "batoh" ? " skryt" : ""}"><div class="pn-hl"><h3>${esc(N.bag_name || L(["Batoh", "Backpack"]))}</h3>${N.backpack_max ? `<span class="pill">${N.backpack.length} / ${N.backpack_max}</span>` : ""}</div>
+        <div class="pn-kont pn-batoh${mob && zal !== "batoh" ? " skryt" : ""}"><div class="pn-hl"><h3>${esc(N.bag_name || L(["Batoh", "Backpack"]))}</h3>${N.backpack_max ? `<span class="pill">${mist(N.backpack)} / ${N.backpack_max}</span>` : ""}</div>
           ${N.backpack_max ? `${batohF}<div class="pn-mriz">${mriz("backpack", N.backpack, N.backpack_max)}</div>` : `<div class="empty">${esc(L(["Nemáš batoh — kup ho u krejčího nebo vetešníka.", "No backpack yet."]))}</div>`}</div>
         ${mob ? "" : `<p class="pn-rada">${esc(L(["Klepni na věc · dvojklikem ji nasadíš nebo použiješ", "Click to select · double-click to equip or use"]))}</p>`}
       </section>
@@ -1397,7 +1411,7 @@ VIEWS.truhla = async (view) => {
   let T; try { T = (await call("truhla", {}, true)).truhla; } catch { return; }
   const C = T.chest;
   // r27-35: u víc kusů posuvník — kolik přesunout (výchozí vše)
-  const vec = (i, act, lbl, off) => `<div class="item">${icon(i.id)}<div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div>
+  const vec = (i, act, lbl, off) => `<div class="item"${kusAttr(i)}>${icon(i.id)}<div><div class="nm">${esc(i.name)}${kusTag(i)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div>
       ${i.count > 1 && !off ? `<label class="kolik"><input type="range" min="1" max="${i.count}" value="${i.count}" data-kolik><b>${i.count}</b></label>` : ""}</div>
     <div class="acts"><button class="btn small${act === "take" ? " primary" : ""}" data-tr="${act}" data-v="${esc(i.id)}"${off ? " disabled" : ""}>${esc(lbl)}</button></div></div>`;
   const plno = C && C.used >= C.slots;
@@ -1437,7 +1451,7 @@ VIEWS.truhla = async (view) => {
   };
   view.querySelectorAll("[data-kolik]").forEach((r) => r.oninput = () => { r.nextElementSibling.textContent = r.value; });
   view.querySelectorAll("[data-tr]").forEach((b) => b.onclick = () => { const r = b.closest(".item").querySelector("[data-kolik]");
-    klik("ks:innchest:" + b.dataset.tr, r ? [b.dataset.v, r.value] : [b.dataset.v], b); });
+    const q = kolikRadek(b); klik("ks:innchest:" + b.dataset.tr, r || q ? [b.dataset.v, String(q)] : [b.dataset.v], b); });
   view.querySelectorAll("[data-cid]").forEach((b) => b.onclick = () => klik(b.dataset.cid, [], b));
   loadIcons([...T.carried, ...(C ? C.items : [])].map((i) => i.id));
   view.querySelectorAll("[data-tf]").forEach((b) => b.onclick = () => { BF.truhla = b.dataset.tf; Zvuk.sfx("klik"); render(); });
@@ -1610,8 +1624,8 @@ VIEWS.dilna = async (view) => {
       ${r.repair.length > 1 ? `<button class="btn primary" id="opr-vse"${r.repair_all > r.coins ? " disabled" : ""}>${esc(L(["Opravit vše", "Repair all"]))} · ${esc(t("coins", r.repair_all))}</button>` : ""}</div>
       <div class="grid g2 truhla-sloupce" style="align-items:start">
         <div class="panel"><div class="spread"><h3>${esc(L(["Opravit", "Repair"]))}</h3><span class="pill">${r.repair.length}</span></div>
-          <div class="items">${r.repair.length ? r.repair.map((i) => `<div class="item">${icon(i.id)}
-            <div><div class="nm">${esc(i.name)}${i.equipped ? `<span class="tag ok">${esc(L(["nasazené", "worn"]))}</span>` : ""}</div>${opotrebeni(i)}</div>
+          <div class="items">${r.repair.length ? r.repair.map((i) => `<div class="item"${kusAttr(i)}>${icon(i.id)}
+            <div><div class="nm">${esc(i.name)}${i.equipped ? `<span class="tag ok">${esc(L(["nasazené", "worn"]))}</span>` : ""}${i.wear <= 0 ? `<span class="tag zle" title="${esc(L(["Rozbitá věc — oprava stojí trojnásobek její ceny.", "Broken — repair costs 3× the price."]))}">${esc(L(["3× cena", "3× price"]))}</span>` : ""}</div>${opotrebeni(i)}</div>
             <div class="acts"><span class="price">${esc(t("coins", i.price))}</span><button class="btn small primary" data-opr="${esc(i.id)}"${i.price > r.coins ? " disabled" : ""}>${esc(L(["Opravit", "Repair"]))}</button></div></div>`).join("")
             : `<div class="empty">${esc(L(["Nic opotřebeného, co by tu spravili.", "Nothing worn that they fix here."]))}</div>`}</div></div>
         <div class="panel"><div class="spread"><h3>${esc(L(["Zušlechtit", "Improve"]))}</h3><span class="pill">${r.enhance.length}</span></div>
@@ -2609,7 +2623,7 @@ function vztahyKresli(box, V) {
   const tl = (n) => `<div class="vz-bar"><i style="width:${Math.min(100, n)}%"></i><span>${n} / ${V.plna}</span></div>`;
   const dvor = (cil, za, ceka) => `<div class="vz-akce">${V.dvoreni.map((a) => `<button type="button" class="btn small vz-dvbtn" data-vz-dv="${esc(cil)}:${esc(a.k)}"${za || ceka ? " disabled" : ""} title="${esc(L(["náklonnost +", "affection +"]) + a.body)}"><img class="vz-ikona" alt="" src="${IMG_BASE}ucinky/dv-${esc(a.k)}.webp">${esc(a.n)}${a.cena ? " · " + a.cena + " gr." : ""}</button>`).join("")}</div>
     ${za ? `<p class="muted small">${esc(L(["Další dvoření za ", "Next courting in "]) + (Math.floor(za / 60) + 1) + " min.")}</p>` : ceka ? `<p class="muted small">${esc(L(["Čekáš na odpověď.", "Waiting for an answer."]))}</p>` : ""}
-    ${V.dary.length ? `<div class="vz-dar"><select data-vz-darsel="${esc(cil)}"><option value="">${esc(L(["Vyber dárek…", "Choose a gift…"]))}</option>${V.dary.map((d) => `<option value="${esc(d.n)}">${esc(d.n + (d.q > 1 ? " ×" + d.q : "") + " · až +" + d.body)}</option>`).join("")}</select>
+    ${V.dary.length ? `<div class="vz-dar"><select data-vz-darsel="${esc(cil)}"><option value="">${esc(L(["Vyber dárek…", "Choose a gift…"]))}</option>${V.dary.map((d) => `<option value="${esc(d.kus != null ? d.n + "§" + d.kus : d.n)}">${esc(d.n + (d.kus != null ? (d.enh ? " +" + d.enh : " " + L(["(obyčejná)", "(plain)"])) + (d.wear < 100 ? " · " + d.wear + " %" : "") : "") + (d.q > 1 ? " ×" + d.q : "") + " · až +" + d.body)}</option>`).join("")}</select>
       <button type="button" class="btn small primary" data-vz-dar="${esc(cil)}">${esc(L(["Darovat", "Give"]))}</button></div>` : ""}`;
   box.innerHTML = `<p class="kapitola">${esc(L(["Kapitola IX", "Chapter IX"]))}</p>${vzDruhHtml()}<h3 class="dk-nadpis">${esc(L(["Milostné vztahy a namlouvání", "Romance and courtship"]))}</h3>
     <p class="vz-stav">${esc(L(["Rodinný stav: ", "Status: "]))}<b>${esc(V.stav)}</b></p>
@@ -4911,7 +4925,7 @@ VIEWS.uloziste = async (view) => {
   if (!S.me.house) { go("mesto"); return; }
   let U; try { U = (await call("uloziste", {}, true)).uloziste; } catch { return; }
   if (S.tab !== "uloziste") return;
-  const vec = (i, act, lbl) => `<div class="item">${icon(i.id)}<div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div>
+  const vec = (i, act, lbl) => `<div class="item"${kusAttr(i)}>${icon(i.id)}<div><div class="nm">${esc(i.name)}${kusTag(i)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div>
       ${i.count > 1 ? `<label class="kolik"><input type="range" min="1" max="${i.count}" value="${i.count}" data-kolik><b>${i.count}</b></label>` : ""}</div>
     <div class="acts"><button class="btn small${act === "vezmi_doma" ? " primary" : ""}" data-ul="${act}" data-v="${esc(i.id)}">${esc(lbl)}</button></div></div>`;
   const nic = !U.kusy.length;
@@ -4919,7 +4933,7 @@ VIEWS.uloziste = async (view) => {
   const K = U.kusy[ULOZ.kus];
   view.replaceChildren(h(`${sceneHead(artReady("domov/nahled-dum-uloziste") ? "domov/nahled-dum-uloziste" : "domov/dum-svetnice", L(["Úložný prostor", "Storage"]), L(["Truhly: ", "Chests: "]) + U.chest[0] + " / " + U.chest[1] + L([" druhů · Spíž: ", " kinds · Pantry: "]) + U.pantry[0] + " / " + U.pantry[1], true)}
     ${nic ? `<div class="panel notice">${esc(L(["Nemáš žádnou truhlu, skříň ani spíž. Nábytek na ukládání prodává truhlář (Domov → Úprava místnosti).", "You have no chest, wardrobe or pantry."]))}</div>` : `<div class="ul-obal">
-    <div class="ul-truhly">${U.kusy.map((k, i) => `<button class="ul-truhla${i === ULOZ.kus ? " on" : ""}" data-kus="${i}"><img src="${nabSrc(k.name)}" alt="" onerror="this.style.visibility='hidden'">
+    <div class="ul-truhly">${U.kusy.map((k, i) => `<button class="ul-truhla${i === ULOZ.kus ? " on" : ""}" data-ultruhla="${i}"><img src="${nabSrc(k.name)}" alt="" onerror="this.style.visibility='hidden'">
         <b>${esc(k.name)}</b><small>${esc(L(ROOM_NAZ[k.room] || [k.room, k.room]) + " · " + k.items.length + " / " + k.slots)}</small></button>`).join("")}</div>
     <div class="m-zalozky truhla-zal"><button class="${ULOZ.strana === "ulozit" ? "on" : ""}" data-us="ulozit">${esc(L(["Uložit", "Store"]))}<small>${esc(L(["u sebe ", "carried "]) + U.carried.length)}</small></button>
       <button class="${ULOZ.strana !== "ulozit" ? "on" : ""}" data-us="vzit">${esc(L(["Vzít", "Take"]))}<small>${esc(L(["v truhle ", "inside "]) + K.items.length)}</small></button></div>
@@ -4931,14 +4945,14 @@ VIEWS.uloziste = async (view) => {
         <div class="items ul-items">${K.items.map((i) => vec(i, "vezmi_doma", L(["Vzít", "Take"]))).join("") || `<div class="empty">${esc(L(["Prázdná.", "Empty."]))}</div>`}</div></div>
     </div></div>`}
     <p><button class="btn" id="pback">← ${esc(t("back"))}</button></p>`));
-  view.querySelectorAll("[data-kus]").forEach((b) => b.onclick = () => { ULOZ.kus = +b.dataset.kus; ULOZ.strana = "vzit"; Zvuk.sfx("klik"); render(); });
+  view.querySelectorAll("[data-ultruhla]").forEach((b) => b.onclick = () => { ULOZ.kus = +b.dataset.ultruhla; ULOZ.strana = "vzit"; Zvuk.sfx("klik"); render(); });
   mountLive(view);
   $("#pback").onclick = () => go(domovZpet());
   view.querySelectorAll("[data-us]").forEach((b) => b.onclick = () => { ULOZ.strana = b.dataset.us; Zvuk.sfx("klik"); render(); });
   view.querySelectorAll("[data-kolik]").forEach((r) => r.oninput = () => { r.nextElementSibling.textContent = r.value; });
   view.querySelectorAll("[data-ul]").forEach((b) => b.onclick = async () => {
     b.disabled = true; const r = b.closest(".item").querySelector("[data-kolik]");
-    try { const x = await call(b.dataset.ul, { name: b.dataset.v, qty: r ? +r.value : null }); toast(x.zprava); Zvuk.sfx("klik"); } catch { b.disabled = false; return; }
+    try { const x = await call(b.dataset.ul, { name: b.dataset.v, qty: kolikRadek(b) }); toast(x.zprava); Zvuk.sfx("klik"); } catch { b.disabled = false; return; }
     render(); });
   loadIcons([...U.carried, ...U.kusy.flatMap((k) => k.items)].map((i) => i.id));
   vejdiObchod(".ul-sloupce .ul-items");
@@ -5414,7 +5428,7 @@ VIEWS.podnikuloziste = async (view) => {
   if (!S.me.business) { go("mesto"); return; }
   let P; try { P = (await call("podnik", {}, true)).podnik; } catch { return; }
   if (S.tab !== "podnikuloziste") return;
-  const vec = (i, act, lbl) => `<div class="item">${icon(i.id)}<div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div>
+  const vec = (i, act, lbl) => `<div class="item"${kusAttr(i)}>${icon(i.id)}<div><div class="nm">${esc(i.name)}${kusTag(i)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}</div>
       ${i.count > 1 ? `<label class="kolik"><input type="range" min="1" max="${i.count}" value="${i.count}" data-kolik><b>${i.count}</b></label>` : ""}</div>
     <div class="acts"><button class="btn small${act === "podnik_vezmi" ? " primary" : ""}" data-pu="${act}" data-v="${esc(i.id)}">${esc(lbl)}</button></div></div>`;
   const truhla = { kovar: "Okovaná truhla", lovci: "Truhla", apatykar: "Truhla", lapka: "Truhla", sedlak: "Truhla" }[S.me.origin] || "Truhla";
@@ -5436,7 +5450,7 @@ VIEWS.podnikuloziste = async (view) => {
   view.querySelectorAll("[data-us]").forEach((b) => b.onclick = () => { ULOZ.strana = b.dataset.us; Zvuk.sfx("klik"); render(); });
   view.querySelectorAll("[data-kolik]").forEach((r) => r.oninput = () => { r.nextElementSibling.textContent = r.value; });
   view.querySelectorAll("[data-pu]").forEach((b) => b.onclick = async () => { b.disabled = true; const r = b.closest(".item").querySelector("[data-kolik]");
-    try { toast((await call(b.dataset.pu, { name: b.dataset.v, qty: r ? +r.value : null })).zprava); } catch { b.disabled = false; return; } render(); });
+    try { toast((await call(b.dataset.pu, { name: b.dataset.v, qty: kolikRadek(b) })).zprava); } catch { b.disabled = false; return; } render(); });
   loadIcons([...P.chest, ...P.carried].map((i) => i.id));
   vejdiObchod(".ul-sloupce .ul-items");
 };
@@ -5724,8 +5738,8 @@ VIEWS.obchod = async (view) => {
         return `<button class="kup-vyber${barvi === i.id ? " on" : ""}" data-barvit="${esc(i.id)}"><i${hx ? ` style="--b:${hx}"` : ` class="prirodni"`}></i>${esc(L(["Barva: ", "Colour: "]) + c)}${hx ? ` <b>+${(i.dye_fees || {})[c] || 0} gr.</b>` : ""} <span>${barvi === i.id ? "▴" : "▾ " + esc(L(["vybrat barvu", "choose"]))}</span></button>
         ${barvi === i.id ? `<div class="kup-barva">${Object.entries(i.colors).sort(([a], [b]) => ((i.dye_fees || {})[a] || 0) - ((i.dye_fees || {})[b] || 0)).map(([cc, h2]) =>
           `<button class="kb${cc === c ? " on" : ""}" data-zvol="${esc(i.id)}" data-barva="${esc(cc)}" title="${esc(cc)}"><i${h2 ? ` style="--b:${h2}"` : ` class="prirodni"`}></i><small>${esc(cc)}</small><em>${(i.dye_fees || {})[cc] ? "+" + i.dye_fees[cc] + " gr." : L(["zdarma", "free"])}</em></button>`).join("")}</div>` : ""}`; })() : ""}</div>`; };
-  const prodat = (i) => `<div class="item${i.sell ? "" : " nechce"}">${icon(i.id)}
-      <div><div class="nm">${esc(i.name)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}${barvaStitek(i.color, i.hex)}${i.sell && i.best ? `<span class="tag ok">${esc(L(["nejlepší výkup", "best price"]))}</span>` : ""}</div>
+  const prodat = (i) => `<div class="item${i.sell ? "" : " nechce"}"${kusAttr(i)}>${icon(i.id)}
+      <div><div class="nm">${esc(i.name)}${kusTag(i)}${i.count > 1 ? ` <span class="muted">× ${i.count}</span>` : ""}${i.kus == null ? barvaStitek(i.color, i.hex) : ""}${i.sell && i.best ? `<span class="tag ok">${esc(L(["nejlepší výkup", "best price"]))}</span>` : ""}</div>
       <div class="meta">${esc(i.sell ? (i.best_shop ? L(["víc dá ", "more at "]) + i.best_shop + " (" + t("coins", i.best_price) + ")" : i.slot_name) : L(["tohle nevykupuje", "won't buy this"]))}</div>${opotrebeni(i)}</div>
       <div class="acts">${i.sell ? `${mnoz(i.count, i.sell)}<span class="price" data-cena-txt>${esc(t("coins", i.sell))}</span>
         <button class="btn small" data-sell="${esc(i.id)}"${i.color ? ` data-barva="${esc(i.color)}"` : ""}>${esc(t("sell"))}</button>` : ""}</div></div>`;
@@ -6479,10 +6493,20 @@ function drawRaidSetup(view, st) {
   const pasmoHtml = (dif) => { const l = locs.find((x) => x.id === String(VYP.loc || "").split("@")[0]); const p = l && l.pasma && l.pasma[dif]; if (!p) return "";
     const lv = st.level || 1, cl = lv > p[1] ? "pod" : lv < p[0] ? "nad" : "pro";
     return `<em class="vp-pasmo ${cl}">${esc(L(["úrovně ", "levels "]) + p[0] + "–" + p[1] + " · " + (cl === "pod" ? L(["pod tebe — menší odměny", "below you — smaller rewards"]) : cl === "nad" ? L(["nad tebe — nebezpečné", "above you — dangerous"]) : L(["pro tebe", "for you"])))}</em>`; };
+  // 1.0-1-14: průměr družiny, doporučené úrovně a varování, kdyby ses přidal(a) moc slabý(á)
+  const druzinaInfo = (di) => { if (!di) return ""; const [lo, hi] = di.pasmo, lv = (S.me && S.me.level) || 1;
+    const cl = di.prumer > hi ? "pod" : di.prumer < lo ? "nad" : "pro";
+    return `<span class="vp-pasmo-obl ${cl}"><b>${esc(L(["průměr úr. ", "avg lvl "]) + di.prumer)}</b>${esc(L(["doporučeno ", "recommended "]) + lo + "–" + hi)}</span>`
+      + (lv + 5 < lo ? `<small class="vp-smrt">⚠️ ${esc(L(["Pro tebe (úr. " + lv + ") je to smrtelně nebezpečné.", "Deadly for you (lvl " + lv + ")."]))}</small>` : ""); };
+  // 1.0-1-14 (Pavel): doporučené úrovně i u oblasti — od lehké po těžkou, zvýrazněné podle tvé úrovně
+  const pasmoOblasti = (l) => { const P = l.pasma && Object.values(l.pasma); if (!P || !P.length) return "";
+    const lo = Math.min(...P.map((p) => p[0])), hi = Math.max(...P.map((p) => p[1])), lv = (S.me && S.me.level) || st.level || 1;
+    const cl = lv > hi ? "pod" : lv < lo ? "nad" : "pro";
+    return `<span class="vp-pasmo-obl ${cl}"><b>${esc(L(["úr. ", "lvl "]) + lo + "–" + hi)}</b>${esc(cl === "pod" ? L(["pod tebe", "below you"]) : cl === "nad" ? L(["nad tebe", "above you"]) : L(["pro tebe", "for you"]))}</span>`; };
   view.replaceChildren(h(`${sceneHead("mesto-brana", L(["Městská brána", "Town gate"]), L(["Strážný: „Kam to bude, na stezky?“", "Guard: \"Off to the trails, then?\""]))}
     ${lob.length ? `<div class="panel vyp-druziny"><h3>${esc(L(["Družiny, které čekají na společníky", "Parties looking for members"]))}</h3>
       <div class="druziny">${lob.map((d) => `<div class="druzina"><div><b>${esc(d.location)}</b><small>${esc(d.difficulty)}${d.guard ? " · " + L(["s glejtem", "with writ"]) : ""}${d.hunt ? " · " + L(["po stopách", "tracking"]) : ""}</small>
-        <p>${esc(d.members.join(", "))} <span class="muted">(${d.members.length}/${d.cap})</span></p></div>
+        <p>${esc(d.members.join(", "))} <span class="muted">(${d.members.length}/${d.cap})</span></p>${druzinaInfo(d.druzina)}</div>
         <button class="btn primary" data-cid="ks:lobby:${esc(d.id)}:join"${d.members.length >= d.cap ? " disabled" : ""}>${esc(L(["Přidat se", "Join"]))}</button></div>`).join("")}</div></div>` : ""}
     <div class="panel vyp-priprava"><h3>${esc(L(["Příprava výpravy", "Prepare an expedition"]))}</h3>
       <div class="vp-krok"><span class="vp-c">1</span><b>${esc(L(["Kdo jde", "Who goes"]))}</b></div>
@@ -6494,7 +6518,7 @@ function drawRaidSetup(view, st) {
       ${(() => {   // r27-6: lokace po skupinách — Nováček na stezce / Zkušený na stezce
         const karta = (l) => `<button class="vp-volba vp-lok${String(VYP.loc || "").split("@")[0] === l.id ? " on" : ""}${st.level && l.level > st.level ? " tezke" : ""}" data-loc="${esc(l.id)}">
           ${VYP_OBR[l.id] ? `<span class="vl-obr">${IMG("vypravy/" + VYP_OBR[l.id] + "-01")}</span>` : ""}
-          <span class="vl-txt"><b>${esc(l.name)}</b><small>${esc(l.biome)}${l.camp ? "" : " · " + L(["od úrovně ", "level "]) + l.level}${l.places ? " · " + l.places + L([" míst", " places"]) : ""}</small>
+          <span class="vl-txt"><b>${esc(l.name)}</b>${pasmoOblasti(l)}<small>${esc(l.biome)}${l.camp ? "" : " · " + L(["od úrovně ", "level "]) + l.level}${l.places ? " · " + l.places + L([" míst", " places"]) : ""}</small>
           ${VYP_POPIS[l.id] ? `<em class="vl-popis">${esc(L(VYP_POPIS[l.id]))}</em>` : ""}</span></button>`;
         const T = st.tiers || [{ id: "vse", name: "", desc: "", keys: locs.map((l) => l.id) }];
         const kde = (l) => (T.find((t) => t.keys.includes(String(l.id).split("@")[0])) || T[0]).id;
@@ -6514,7 +6538,7 @@ function drawRaidSetup(view, st) {
       <div class="vp-volby">${diffs.map((d) => `<button class="vp-volba vp-lok vp-nahled${VYP.diff === d.id ? " on" : ""}" data-diff="${esc(d.id)}"><span class="vl-obr">${IMG("vypravy/vyber-" + d.id)}</span><span class="vl-txt"><b>${esc(noEmoji(d.name))}</b>
         <small>${esc(L(["glejt ", "writ "]) + (gp[d.id] || 0) + " gr. · " + L(["nosič ", "porter "]) + (pp[d.id] || 0) + " gr.")}</small>${pasmoHtml(d.id)}</span></button>`).join("")}</div>
       <div class="vp-krok"><span class="vp-c">4</span><b>${esc(L(["Služby u brány", "Services at the gate"]))}</b></div>
-      <div class="vp-volby">
+      <div class="vp-volby vp-sluzby">
         <button class="vp-volba vp-lok vp-nahled prepinac${VYP.guard ? " on" : ""}" data-tgl="guard"><span class="vl-obr">${IMG("vypravy/vyber-glejt")}</span><span class="vl-txt"><b>${esc(L(["Glejt", "Writ of passage"]))}${cena(gp) != null ? " · " + cena(gp) + " gr." : ""}</b>
           <small>${esc(L(["S glejtem výprava není v seznamu Na stezkách — nikdo cizí nepůjde po vašich stopách.", "Nobody can follow your tracks."]))}</small></span></button>
         <button class="vp-volba vp-lok vp-nahled prepinac${VYP.porter ? " on" : ""}" data-tgl="porter"><span class="vl-obr">${IMG("vypravy/vyber-nosic")}</span><span class="vl-txt"><b>${esc(L(["Nosič", "Porter"]))}${cena(pp) != null ? " · " + cena(pp) + " gr." : ""}</b>

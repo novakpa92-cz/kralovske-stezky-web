@@ -4216,3 +4216,32 @@ html.mobil .mistr-obr{display:none}
 /* 1.0-1-12: filtry obchodu v jednom řádku (víc místa pro seznam zboží); co se nevejde, posune se kolečkem do strany */
 html:not(.mobil) .shop-kat{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
 html:not(.mobil) .shop-kat .chip{flex:0 0 auto}
+/* 1.0-1-14: výbava po kusech — štítek stupně u konkrétního kusu */
+.kus-st{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #c9a24a;border-radius:8px;color:#f0d78c;font-size:.78rem;font-weight:700;vertical-align:1px}
+.kus-st.obyc{border-color:#6b5a3a;color:#b9a477;font-weight:400}
+.pn-det-kus{display:contents}
+.tag.zle{background:#5a1a10;color:#f3c9b5;border-color:#8a2a1a}
+.kus-st.opotr{border-color:#a0802a;color:#e0c070;font-weight:400}.kus-st.rozb{border-color:#8a2a1a;color:#f3a08a;background:#3a120a}
+/* 1.0-1-14: mobil — služby u brány pod sebou (obrázek vlevo užší, text na celou šířku); hláška nad lištou, ne přes menu */
+html.mobil #view .vp-volby.vp-sluzby{display:grid!important;grid-template-columns:1fr!important;gap:10px}
+html.mobil #view .vp-sluzby .vp-nahled.prepinac{width:100%!important;max-width:none!important;min-height:0}
+html.mobil #view .vp-sluzby .vp-nahled.prepinac .vl-obr{width:30%!important;flex:0 0 30%;min-height:118px}
+html.mobil #view .vp-sluzby .vp-nahled.prepinac .vl-txt{padding:10px 12px!important;text-align:left}
+html.mobil #view .vp-sluzby .vp-nahled.prepinac .vl-txt b{font-size:1.05rem}
+html.mobil #view .vp-sluzby .vp-nahled.prepinac .vl-txt small{font-size:.86rem;line-height:1.35}
+html.mobil #view .vp-sluzby .vp-nahled.prepinac.on::after{top:auto;bottom:8px;left:8px;font-size:.72rem}
+html.mobil .toast{bottom:auto;top:calc(env(safe-area-inset-top) + 64px);transform:translate(-50%,-14px);max-width:calc(100vw - 32px)}
+html.mobil .toast.show{transform:translate(-50%,0)}
+.tag.zle{white-space:nowrap}
+/* 1.0-1-14: doporučené úrovně oblasti na kartě */
+.vp-pasmo-obl{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin:4px 0 2px;padding:2px 9px 2px 3px;border-radius:12px;font-size:.78rem;font-weight:600;border:1px solid}
+.vp-pasmo-obl b{padding:1px 7px;border-radius:10px;font-size:.82rem}
+.vp-pasmo-obl.pro{color:#f0d78c;border-color:#c9a24a;background:#3a2a10cc}.vp-pasmo-obl.pro b{background:#c9a24a;color:#1e140a}
+.vp-pasmo-obl.pod{color:#a8c895;border-color:#5f8a4a;background:#1c2a14cc}.vp-pasmo-obl.pod b{background:#5f8a4a;color:#0e160a}
+.vp-pasmo-obl.nad{color:#f0a090;border-color:#a04a3a;background:#3a1610cc}.vp-pasmo-obl.nad b{background:#a04a3a;color:#fbe6df}
+.vp-pasmo-obl{white-space:nowrap;max-width:100%}
+html.mobil .vp-pasmo-obl{font-size:.72rem;gap:4px;padding-right:7px}
+html.mobil .vp-pasmo-obl b{font-size:.74rem;padding:1px 5px}
+.vp-smrt{display:block;margin-top:4px;color:#f0a090;font-weight:600}
+.druzina .vp-pasmo-obl{margin-top:6px}
+.druzina small.vp-smrt,.vp-smrt{text-transform:none!important;letter-spacing:normal!important;font-size:.85rem!important;color:#f0a090!important;font-weight:600}
