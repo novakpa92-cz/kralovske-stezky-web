@@ -4245,3 +4245,5 @@ html.mobil .vp-pasmo-obl b{font-size:.74rem;padding:1px 5px}
 .vp-smrt{display:block;margin-top:4px;color:#f0a090;font-weight:600}
 .druzina .vp-pasmo-obl{margin-top:6px}
 .druzina small.vp-smrt,.vp-smrt{text-transform:none!important;letter-spacing:normal!important;font-size:.85rem!important;color:#f0a090!important;font-weight:600}
+/* 1.0-2-3: sloupce se nikdy neroztáhnou přes okraj kvůli dlouhému obsahu (stejná chyba jako u obchodníků) */
+.grid>*,.g2>*,.ul-sloupce>*,.hs-sloupce>*{min-width:0}
