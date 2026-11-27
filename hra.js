@@ -114,8 +114,19 @@ function t(key, ...args) {
 }
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 /** Text z Discordu (markdown **tučně**, -# drobně) → bezpečné HTML. */
+/** 1.0-1-14: časové značky z Discordu (<t:…:R>, <t:…:t>) → „za 12 min“ / „14:05“ (dřív se ukazovaly syrové). */
+function dcCas(text) {
+  return String(text ?? "").replace(/<t:(\d+)(?::(\w))?>/g, (m, ts, st) => {
+    const ms = Number(ts) * 1000;
+    if (st === "R") { const min = Math.round((ms - Date.now()) / 60000);
+      return min > 0 ? L(["za ", "in "]) + (min >= 60 ? Math.floor(min / 60) + " h " + (min % 60) + " min" : min + " min") : min === 0 ? L(["teď", "now"]) : L(["před ", ""]) + (-min >= 60 ? Math.floor(-min / 60) + " h" : -min + " min") + L(["", " ago"]); }
+    const d = new Date(ms);
+    return st === "d" || st === "D" ? d.toLocaleDateString("cs-CZ") : d.toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
+  });
+}
 function md(text) {
   if (typeof obsahJazyk === "function") text = obsahJazyk(text);   // r27-5: obsah ze serveru slovensky / polsky
+  text = dcCas(text);
   return esc(text).split("\n").map((line) => {
     let small = false;
     if (line.startsWith("-# ")) { small = true; line = line.slice(3); }
@@ -1285,7 +1296,7 @@ VIEWS.bag = (view) => {
     }
     const nas = V.k !== "eq" && it.equip && eq[it.slot] && eq[it.slot].id !== id ? eq[it.slot] : null;   // porovnání s tím, co máš na sobě
     const kde = { eq: L(["Máš na sobě", "Equipped"]), belt: L(["Na opasku", "On the belt"]), pockets: L(["V kapsách", "In pockets"]), backpack: L(["V batohu", "In the backpack"]) }[V.k];
-    detail = `<div class="pn-det-hl">${icon(id)}<div><div class="nm">${esc(it.name)}${q > 1 ? ` <span class="muted">× ${q}</span>` : ""}${it.enh ? ` <span class="muted">+${it.enh}</span>` : ""}${barvaStitek(barva, hx)}</div>
+    detail = `<div class="pn-det-hl">${icon(id)}<div><div class="nm">${esc(it.name)}${q > 1 ? ` <span class="muted">× ${q}</span>` : ""}${it.enh ? ` <span class="muted">+${it.enh}${q > 1 && it.enh_kusy && it.enh_kusy.length < q ? L([` (zušlechtěno ${it.enh_kusy.length} z ${q})`, ` (${it.enh_kusy.length} of ${q} improved)`]) : ""}</span>` : ""}${barvaStitek(barva, hx)}</div>
         <div class="meta">${esc([it.slot_name, kde, it.merchant_name ? t("sell_to", it.merchant_name) : ""].filter(Boolean).join(" · "))}</div>${it.fx ? `<div class="meta"><b class="fx">${esc(it.fx)}</b></div>` : ""}</div></div>
       ${it.popis ? `<p class="pn-popis">${esc(it.popis)}</p>` : ""}
       ${it.k_cemu && it.k_cemu !== it.slot && it.k_cemu !== it.fx ? `<p class="pn-kcemu"><b>${esc(L(["K čemu je: ", "Use: "]))}</b>${esc(it.k_cemu)}</p>` : ""}
@@ -6338,6 +6349,9 @@ function drawRaid(view) {
       ${e.intent ? `<div class="vintent">${esc(e.intent)}</div>` : ""}
       ${e.pack && e.pack.length ? `<div class="vpack">${e.pack.map((p) => `<span>${esc(p.name.split(" — ")[0])}${p.health != null ? " · ❤️ " + p.health : ""}</span>`).join("")}</div>` : ""}</div>` : "";
   const vp = vypJenPribeh(m.content, m);   // r27-12: jen příběh; počítadla a varování do obrazu
+  // 1.0-1-14 (Pavel): během tahu zůstanou tlačítka boje na místě (zašedlá) — pergamen se nesmí roztáhnout
+  if (!combat) RAID.posledniOvl = null; else if ((m.controls || []).length) RAID.posledniOvl = m.controls;
+  const ovl = combat && !(m.controls || []).length && RAID.posledniOvl ? RAID.posledniOvl : m.controls;
   const hud = !combat && vp.info.prozkoumano ? `<div class="vhud">${vp.info.prozkoumano ? `<span title="${esc(L(["Prozkoumáno", "Explored"]))}">${esc(L(["prozkoumáno ", "explored "]) + vp.info.prozkoumano)}</span>` : ""}${vp.info.nalez ? `<span>${esc(L(["nálezy ", "finds "]) + vp.info.nalez)}</span>` : ""}</div>` : "";
   const sit = !combat && m.situation && SIT_ART[m.situation] ? `<div class="vsit">${IMG("situace/" + SIT_ART[m.situation])}</div>` : "";
   view.replaceChildren(h(`<div class="vyp v2${combat ? " boj" : ""}">
@@ -6349,7 +6363,7 @@ function drawRaid(view) {
     </div>
     <div class="vyp-telo">
       ${vp.text ? `<article class="vyp-pergamen"><div class="vtext">${dmd(vp.text)}</div></article>` : ""}
-      <div class="vyp-akce">${raidControlsHtml(m.controls, busy, combat, m.exit_dirs || [])}</div>
+      <div class="vyp-akce">${raidControlsHtml(ovl, busy || ovl !== m.controls, combat, m.exit_dirs || [])}</div>
     </div></div><div id="vpanel"></div>`));
   vypPergamen(view.querySelector(".vyp-pergamen"), m);
   const s = mountLive(view, { still: m.phase === "combat" });
