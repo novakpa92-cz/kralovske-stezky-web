@@ -1389,14 +1389,14 @@ VIEWS.bag = (view) => {
   const mriz = (k, seznam, max) => {
     const vidim = k === "backpack" ? seznam.map((x, i) => [x, i]).filter(([x]) => BF.batoh === "vse" || druhVeci(row[x[0]]) === BF.batoh) : seznam.map((x, i) => [x, i]);
     const volno = (k !== "backpack" || BF.batoh === "vse") ? Math.max(0, max - mist(seznam)) : 0;
-    return vidim.map(([x, i]) => dl(x[0], k, i, { q: x[1], wear: x[4] != null ? x[6] : (row[x[0]] || {}).wear, enh: x[5], kus: x[4] })).join("") + Array.from({ length: volno }, () => dl(null)).join("");
+    return vidim.map(([x, i]) => dl(x[0], k, i, { q: x[1], wear: x[6] != null ? x[6] : (row[x[0]] || {}).wear, enh: x[5], kus: x[4] })).join("") + Array.from({ length: volno }, () => dl(null)).join("");
   };
   const batohF = N.backpack.length ? filtrVeci("batoh", N.backpack, row) : "";
   // detail vybrané věci
   let detail = `<p class="muted pn-nic">${esc(L(["Klepni na věc — tady uvidíš, co umí, a co s ní můžeš dělat.", "Tap an item to see details."]))}</p>`;
   if (V) {
     const it0 = V.k === "eq" ? V.e : V.i, id = it0.id;
-    const it = V.x && V.x[4] != null ? { ...it0, enh: V.x[5], wear: V.x[6], enh_kusy: null } : it0;   // 1.0-1-14: vybraný konkrétní kus
+    const it = V.x && V.x[4] != null ? { ...it0, enh: V.x[5], wear: V.x[6], enh_kusy: null } : V.x && V.x[6] != null ? { ...it0, enh: 0, wear: V.x[6], enh_kusy: null } : it0;   // 1.0-3-16: nový kus = 100 %   // 1.0-1-14: vybraný konkrétní kus
     const x = V.x, q = x ? x[1] : 1, barva = x ? x[2] : it.color_name, hx = x ? x[3] : it.color;
     const tl = [];
     if (V.k === "eq") tl.push(`<button class="btn primary" data-unequip="${esc(V.e.slot)}">${esc(t("unequip"))}</button>`);
