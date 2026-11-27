@@ -2913,7 +2913,7 @@ function skrolY() { const s = skrolEl(); return s ? s.scrollTop : window.scrollY
 function skrolNa(y) { const s = skrolEl(); if (s) s.scrollTop = y; else window.scrollTo(0, y); }
 const SPOTS = [   // klikací místa na mapě (% šířky a výšky obrázku mesto-mapa)
   { id: "hostinec", x: 22.2, y: 54.7, n: ["Hostinec", "Inn"], nad: true },   // r27-42 (příští verze): popisek nad budovou, ať se nepřekrývá se Střelmistrovou dílnou
-  { id: "kovar", x: 19.8, y: 64.0, n: ["Kovárna", "Smithy"], nad: true, nadY: 40 },   // 1.0-1-5: bod u výhně, popisek nad střechou
+  { id: "kovar", x: 19.8, y: 66.6, n: ["Kovárna", "Smithy"], nad: true, nadY: 40 },   // 1.0-1-5: bod u výhně, popisek nad střechou; 1.0-1-9: bod i popisek o půl cm níž (Pavel)
   { id: "trziste", x: 37.5, y: 60.5, n: ["Tržiště", "Market"], nad: true },
   { id: "radnice", x: 43.9, y: 49.9, n: ["Radnice", "Town hall"], nad: true },
   { id: "banka", x: 58.9, y: 49.9, n: ["Směnárna", "Money changer"], nad: true },
@@ -5596,14 +5596,22 @@ function opotrebeni(i) {
 
 // r27-40: PC — seznam zboží se zkrátí tak, aby se celý obchod i s tlačítkem Zpět vešel bez posouvání stránky
 function vejdiObchod(sel = ".obchod-sloupce .items") {
+  const pevne = sel === ".obchod-sloupce .items";
   const view = $("#view");
   if (!view || document.documentElement.classList.contains("mobil") || innerWidth < 1100) return;
   const lists = [...view.querySelectorAll(sel)].filter((x) => x.offsetParent);
   if (!lists.length) return;
-  lists.forEach((l) => { l.style.maxHeight = ""; });
+  lists.forEach((l) => { l.style.maxHeight = ""; l.style.height = ""; });
   const run = () => {
     const navic = view.scrollHeight - view.clientHeight;
     if (navic > 0) lists.forEach((l) => { l.style.maxHeight = Math.max(140, l.clientHeight - navic - 4) + "px"; l.style.overflowY = "auto"; });
+    if (pevne) {                                          // 1.0-1-9 (Pavel): prostor zboží pevný — tlačítko Zpět dole v rovině s obrázkem vlevo
+      const sc = view.querySelector(".scene"), bk = view.querySelector("#back");
+      if (sc && bk) {
+        const d = sc.getBoundingClientRect().bottom - bk.getBoundingClientRect().bottom;
+        lists.forEach((l) => { l.style.height = l.style.maxHeight = Math.max(140, l.clientHeight + d) + "px"; l.style.overflowY = "auto"; });
+      }
+    }
     view.scrollTop = 0;
   };
   requestAnimationFrame(run); setTimeout(run, 300); setTimeout(run, 900);
@@ -5678,8 +5686,14 @@ VIEWS.obchod = async (view) => {
       fk.querySelectorAll("[data-kat]").forEach((b) => b.onclick = () => { kat = b.dataset.kat; drawShop(); });
     }
     const skup = kat || kats.length < 2 ? [[kat, rows]] : kats.map((k) => [k, rows.filter((i) => katOf(i) === k)]).filter(([, r]) => r.length);
-    $("#shop-items").innerHTML = rows.length ? skup.map(([k, r]) => (!kat && kats.length > 1 ? `<div class="sect kat-nadpis">${esc(k)}</div>` : "") + r.map(koupit).join("")).join("")
-      : `<div class="empty">${esc(t("empty"))}</div>`;
+    const mistr = (data.mistrovske || []).filter((x) => (!q || x.name.toLowerCase().includes(q.toLowerCase())) && (!kat || !x.slot_name || katOf(x) === kat)).map((x) => `<div class="item mistr-radek">${icon(x.id)}
+      <div><div class="nm">${esc(x.name)} <i class="pp-stupen">+1</i><span class="tag ok">${esc(L(["mistrovský kus · jen dnes", "masterwork · today only"]))}</span>${x.level > lvl ? `<span class="tag lock">${esc(t("from_level", x.level))}</span>` : ""}</div>
+      <div class="meta">${esc(L(["Už zušlechtěný na +1, jediný kus", "Already improved to +1, one piece only"]))}</div></div>
+      <div class="acts"><span class="price">${esc(t("coins", x.price))}</span><button class="btn small primary" data-mistr="${esc(x.id)}"${S.me.coins < x.price || lvl < x.level ? " disabled" : ""}>${esc(t("buy"))}</button></div></div>`).join("");   // 1.0-1-9 (Pavel): žádná přehlídka, běžný řádek nahoře v seznamu
+    $("#shop-items").innerHTML = mistr + (rows.length ? skup.map(([k, r]) => (!kat && kats.length > 1 ? `<div class="sect kat-nadpis">${esc(k)}</div>` : "") + r.map(koupit).join("")).join("")
+      : mistr ? "" : `<div class="empty">${esc(t("empty"))}</div>`);
+    box.querySelectorAll("[data-mistr]").forEach((b) => b.onclick = () => { b.disabled = true;   // 1.0-1-5: mistrovský kus +1
+      call("buy_mistrovske", { item: b.dataset.mistr, shop: shopId }).then((r) => { Zvuk.sfx("mince"); toast(L([`Mistrovský kus je tvůj za ${r.price} gr.`, `Masterwork bought for ${r.price} gr.`])); render(); }).catch(() => { b.disabled = false; }); });
     const mine = (data.mine || []).filter(sedi).sort((x, y) => (y.sell ? 1 : 0) - (x.sell ? 1 : 0) || (y.best ? 1 : 0) - (x.best ? 1 : 0));
     $("#shop-mine").innerHTML = mine.length ? mine.map(prodat).join("") : `<div class="empty">${esc(L(["Nic u sebe nemáš.", "Nothing carried."]))}</div>`;
     $("#mine-n").textContent = (data.mine || []).filter((i) => i.sell).length;
@@ -5725,10 +5739,6 @@ VIEWS.obchod = async (view) => {
     ${data.prebarvit || data.lecba ? `<div class="panel prebarvit"${S.shopStrana === "barvit" ? "" : " hidden"} id="prebarvit"></div>` : ""}
     <div class="grid g2 truhla-sloupce obchod-sloupce strana-${S.shopStrana === "prodat" ? "prodat" : "koupit"}" style="align-items:start"${(data.prebarvit || data.lecba) && S.shopStrana === "barvit" ? " hidden" : ""}>
       <div class="panel"><div class="spread"><h3>${esc(L(["Zboží", "For sale"]))}</h3><span class="pill">${data.items.length}</span></div>
-        ${(data.mistrovske || []).length ? `<div class="mistr-nab"><img class="mistr-obr" src="${ART_SRC("domov/nahled-mistrovske-" + ({ "Kovář": "kovar", "Střelmistr": "strelmistr", "Zbrojíř": "zbrojir" }[shopId] || "kovar"))}" alt="" onerror="this.remove()">
-          <div class="mistr-t"><b>${esc(L(["Mistrovský kus · jen dnes", "Masterwork · today only"]))}</b><small>${esc(L(["Už zušlechtěný na +1. Kus je jen jeden — kdo dřív přijde…", "Already improved to +1. Only one piece."]))}</small>
-          ${data.mistrovske.map((x) => `<div class="mistr-vec">${icon(x.id, 1)}<span><b>${esc(x.name)} <i class="pp-stupen">+1</i></b><small>${esc((x.level > 1 ? L(["od úrovně ", "level "]) + x.level + " · " : "") + x.price + " gr.")}</small></span>
-            <button class="btn small primary" data-mistr="${esc(x.id)}"${S.me.coins < x.price || (S.me.level || 1) < x.level ? " disabled" : ""}>${esc(L(["Koupit", "Buy"]))}</button></div>`).join("")}</div></div>` : ""}
         <div class="filter shop-kat" id="shop-kat"></div><div class="items" id="shop-items"></div></div>
       <div class="panel"><div class="spread"><h3>${esc(L(["Tvoje věci — prodej", "Your things — sell"]))}</h3><span class="pill" id="mine-n"></span></div>
         <p class="muted small">${esc(L(["Každý obchodník dá nejvíc za své zboží, jinde jen polovic.", "Each merchant pays most for his own trade."]))}</p>
@@ -5775,8 +5785,6 @@ VIEWS.obchod = async (view) => {
   const opr = $("#oprava");   // r27-4: oprava a zušlechtění = panel obchodníka jako na Discordu (výběr „Opravit výbavu“ a „Zušlechtit“)
   if (opr) opr.onclick = () => go("dilna/" + encodeURIComponent(shopId));
   $("#shop-q").oninput = (e) => { q = e.target.value.trim(); drawShop(); };
-  box.querySelectorAll("[data-mistr]").forEach((b) => b.onclick = () => { b.disabled = true;   // 1.0-1-5: mistrovský kus +1
-    call("buy_mistrovske", { item: b.dataset.mistr, shop: shopId }).then((r) => { Zvuk.sfx("mince"); toast(L([`Mistrovský kus je tvůj za ${r.price} gr.`, `Masterwork bought for ${r.price} gr.`])); render(); }).catch(() => { b.disabled = false; }); });
   loadIcons((data.mistrovske || []).map((x) => x.id));
   drawShop();
 };
