@@ -4247,3 +4247,6 @@ html.mobil .vp-pasmo-obl b{font-size:.74rem;padding:1px 5px}
 .druzina small.vp-smrt,.vp-smrt{text-transform:none!important;letter-spacing:normal!important;font-size:.85rem!important;color:#f0a090!important;font-weight:600}
 /* 1.0-2-3: sloupce se nikdy neroztáhnou přes okraj kvůli dlouhému obsahu (stejná chyba jako u obchodníků) */
 .grid>*,.g2>*,.ul-sloupce>*,.hs-sloupce>*{min-width:0}
+/* 1.0-2-3: Batoh na nižších oknech PC (např. 1280×720) — sloty kolem postavy se zmenší, aby nepřekryly opasek */
+@media (min-width:1101px) and (max-height:860px){html:not(.mobil) .pn-sl{gap:2px}html:not(.mobil) .pn-sl .pn-dl{width:52px;height:52px}html:not(.mobil) .pn-sl .pn-slot{gap:1px}html:not(.mobil) .pn-sl .pn-jm{font-size:.55rem}}
+@media (min-width:1101px) and (max-height:720px){html:not(.mobil) .pn-sl .pn-dl{width:46px;height:46px}}
