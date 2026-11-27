@@ -4259,3 +4259,5 @@ html.mobil .hk-schop .sk-zal .sk-dl{display:none}html.mobil .hk-schop .sk-zal .s
 html.mobil .hk-schop .hk-vlastnost{gap:10px;padding:10px 12px!important}
 html.mobil .hk-schop .hk-vlastnost .hkv-pecet{width:40px;height:40px}html.mobil .hk-schop .hk-vlastnost .hkv-pecet svg{width:22px;height:22px}
 html.mobil .hk-schop .hk-vlastnost p{font-size:.95rem}
+/* 1.0-2-3: důležité oznámení (někdo našel tvé tělo) */
+.vzk-obal .vzk-text{text-align:left;max-width:420px;margin:8px auto 0}.vzk-obal .vzk-text p{margin:6px 0;line-height:1.4}

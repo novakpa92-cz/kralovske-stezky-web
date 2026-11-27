@@ -454,6 +454,7 @@ setInterval(async () => {
     const zmena = (S.me.kalendar || {}).doba !== r.kalendar.doba || S.me.weather !== r.weather || S.me.night !== r.night;
     S.me.kalendar = { ...(S.me.kalendar || {}), ...r.kalendar }; S.me.weather = r.weather; S.me.night = r.night;
     if (r.pozvanky) { S.me.pozvanky = r.pozvanky; pozvankyUkaz(); }   // r27-36
+    if (r.vzkazy && r.vzkazy.length) vzkazyUkaz(r.vzkazy);              // 1.0-2-3: oznámení (např. někdo našel tvé tělo) do minuty
     const K = S.me.kalendar;
     $("#tb-clock").innerHTML = `<b class="tb-hod">${esc(K.hodina)}</b> <span class="tb-doba">${esc(K.doba)}</span><span class="tb-datum">${esc(K.text)} · ${esc(K.season)}</span>`;
     const [hh, mm] = K.hodina.split(":").map(Number); HODINY.min = hh * 60 + mm; HODINY.t = Date.now();
@@ -463,13 +464,32 @@ setInterval(async () => {
   } catch { /* nic */ }
 }, 60000);
 
+/** v1.0 + 1.0-2-3: zprávy hráči. Běžné jako krátké upozornění, důležité (s nadpisem — třeba někdo našel tvé tělo) jako okno k potvrzení. */
+const VZK = { videno: new Set(), fronta: [] };
+function vzkazyUkaz(seznam) {
+  const nove = (seznam || []).filter((v) => !VZK.videno.has(v.t + "|" + v.text));
+  if (!nove.length) return;
+  nove.forEach((v) => VZK.videno.add(v.t + "|" + v.text));
+  call("vzkazy_precteno", {}, true).catch(() => {});
+  nove.filter((v) => !v.nadpis).forEach((v, i) => setTimeout(() => toast(noEmoji(v.text)), 400 + i * 4200));
+  VZK.fronta.push(...nove.filter((v) => v.nadpis));
+  vzkazOkno();
+}
+function vzkazOkno() {
+  if (!VZK.fronta.length || document.querySelector(".vzk-obal")) return;
+  const v = VZK.fronta.shift();
+  const o = document.createElement("div");
+  o.className = "rekap-obal vysv-obal vzk-obal";
+  o.innerHTML = `<div class="rekap vyp-pergamen vysv"><h2>${esc(v.nadpis)}</h2>
+    <div class="vzk-text">${String(v.text).split("\n").map((r) => `<p>${dmdInline(r)}</p>`).join("")}</div>
+    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-vzk-ok>${esc(L(["Rozumím", "OK"]))}</button></div></div>`;
+  o.querySelector("[data-vzk-ok]").onclick = () => { o.remove(); setTimeout(vzkazOkno, 250); };
+  document.body.appendChild(o);
+  if (typeof Zvuk !== "undefined") Zvuk.sfx("klik");
+}
+
 function setMe(me) {
-  if (me && me.vzkazy && me.vzkazy.length && !setMe._vz) {   // v1.0: zprávy hráči (dřív do vlákna na Discordu)
-    setMe._vz = true; const vz = me.vzkazy.slice();
-    vz.forEach((v, i) => setTimeout(() => toast(noEmoji(v.text)), 400 + i * 4200));
-    setTimeout(() => { setMe._vz = false; }, 400 + vz.length * 4200);
-    call("vzkazy_precteno", {}, true).catch(() => {});
-  }
+  if (me && me.vzkazy && me.vzkazy.length) vzkazyUkaz(me.vzkazy);   // v1.0: zprávy hráči (dřív do vlákna na Discordu)
   if (me && me.has_arms && ERBSTIT.url) me.erbStit = ERBSTIT.url;   // r27-6: erb na štítu zůstane i po obnově profilu
   S.me = me;
   if (me && me.has_arms && !ERBSTIT.url) setTimeout(erbNaStit, 300);
