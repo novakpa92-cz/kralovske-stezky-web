@@ -6440,6 +6440,13 @@ function drawRaid(view) {
       <div class="vyp-akce">${raidControlsHtml(ovl, busy || ovl !== m.controls, combat, m.exit_dirs || [])}</div>
     </div></div><div id="vpanel"></div>`));
   vypPergamen(view.querySelector(".vyp-pergamen"), m);
+  { // 1.0-2-7: v boji bez tlačítek (tah nepřítele hned na začátku souboje, obnova stránky uprostřed tahu) drží místo po tlačítkách — pergamen se neroztáhne
+    const ak = view.querySelector(".vyp-akce");
+    if (ak && combat) {
+      if ((ovl || []).length) { const v = ak.offsetHeight; if (v > 40) { RAID.ctlH = v; try { store.set("vyp-ctl-h", String(v)); } catch { /* bez úložiště */ } } }
+      else ak.style.minHeight = (RAID.ctlH || +(store.get("vyp-ctl-h") || 0) || (jeMobil() ? 0 : 290)) + "px";
+    }
+  }
   const s = mountLive(view, { still: m.phase === "combat" });
   if (s && m.under) s.el.classList.add("is-night");
   Zvuk.scene(m.under ? ["fire"] : ["forest"], { ...(S.me || {}), weather: m.weather || (S.me || {}).weather }, !!m.under);
