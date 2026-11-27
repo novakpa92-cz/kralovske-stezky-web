@@ -841,7 +841,7 @@ VIEWS.hero = (view) => {
         ${hp < 35 ? `<p class="upozorneni ne">${esc(L(["Jsi těžce raněný — ošetři se u apatykáře, obvazem nebo noclehem.", "Badly wounded."]))}</p>` : ""}
         <div class="sb-sekce" data-vysv="boj" title="${esc(L(["Zásah = k20 + útok + zdatnost proti obraně nepřítele; 20 je kritický zásah.", "Hit = d20 + attack + proficiency vs defence."]))}"><small>${esc(L(["Do boje", "In battle"]))} ⓘ</small></div>
         <div class="znaky">
-          ${znak("stit", m.armor_class, t("armor_class"), L(["čím víc, tím hůř tě zasáhnou", "harder to hit"]))}
+          ${znak("stit", m.armor_class, t("armor_class"), m.tlumeni ? L([`zbroj tlumí ${m.tlumeni} z každé rány`, `armour soaks ${m.tlumeni} per hit`]) : L(["čím víc, tím hůř tě zasáhnou", "harder to hit"]))}
           ${znak("mec", sg(m.attack), t("attack"), L(["k hodu na zásah", "to hit"]))}
           ${znak("hvezda", sg(P.proficiency || 0), L(["Zdatnost", "Proficiency"]), L(["k útoku i zkouškám", "attack and checks"]))}
           ${znak("kostka", m.damage, t("damage"), L(["kostky zbraně + bonus", "weapon dice + bonus"]))}
