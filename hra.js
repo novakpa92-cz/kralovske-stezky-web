@@ -6406,6 +6406,7 @@ function drawRaid(view) {
     raidLoad().then((x) => { RAID.st = { ...(x || st), _docteno: true }; }).catch(() => {}).finally(() => { RAID.dociti = false; if (S.tab === "vyprava") drawRaid($("#view")); });
   }
   if (!m) { drawRaidSetup(view, st); return; }
+  view.classList.remove("rozdel");   // 1.0-2-6: příprava výpravy dává na PC rozložení „obraz vlevo“ — rozjetá výprava ho mít nesmí (byla úzká vpravo, dokud se neobnovila stránka)
   if (m.status === "lobby") { drawLobby(view, m); return; }
   const e = m.enemy, combat = m.phase === "combat" && e;
   const busy = m.busy_until && m.busy_until * 1000 > Date.now();
