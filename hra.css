@@ -4261,3 +4261,6 @@ html.mobil .hk-schop .hk-vlastnost .hkv-pecet{width:40px;height:40px}html.mobil 
 html.mobil .hk-schop .hk-vlastnost p{font-size:.95rem}
 /* 1.0-2-3: důležité oznámení (někdo našel tvé tělo) */
 .vzk-obal .vzk-text{text-align:left;max-width:420px;margin:8px auto 0}.vzk-obal .vzk-text p{margin:6px 0;line-height:1.4}
+.vzk-obal .vzk-text b{color:#5e1a10}
+/* 1.0-2-5: výzva k obnovení po nové verzi — na užším okně se nesmí smrštit na sloupec slov */
+#nova-verze{width:max-content;max-width:calc(100vw - 24px)}
