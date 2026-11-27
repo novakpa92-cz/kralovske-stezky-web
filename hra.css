@@ -4174,3 +4174,26 @@ html.mobil .mistr-obr{display:none}
 
 /* 1.0-1-6: živá ekonomika — šipka ceny */
 .cena-sipka { font-size: .8rem; margin-left: 3px; font-weight: 700; cursor: help; } .cena-sipka.nahoru { color: #d0685a; } .cena-sipka.dolu { color: #7fa86a; }
+
+/* 1.0-1-6: zásoba dříví u pece a krbu */
+.dm-drivi{margin-top:10px;padding:10px 12px;border:1px solid #6b5236;border-radius:8px;background:rgba(40,28,18,.55);display:flex;flex-direction:column;gap:4px}
+.dm-drivi small{color:#c9b98f}.dm-drivi-tl{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px}
+/* 1.0-1-7: Domov — stav na hlavní obrazovce (dlaždice vedou tam, kde se to řeší), nástroje označeného kusu */
+.dm-stav>button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:#1a120b;border:1px solid #5a4326;border-radius:6px;padding:5px 8px;color:inherit;font:inherit;cursor:var(--k-klik,pointer);min-width:0}
+.dm-stav>button:hover{border-color:#b8913f;background:#21170d}
+.dm-stav>button small{color:#bba67f;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+.dm-stav>button b{color:#f1e2bd;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.dm-stav>button.ne b{color:#a89878;font-weight:400;font-style:italic}
+.dm-odkazy{display:flex;gap:6px;justify-content:flex-end;margin:-4px 0 10px}
+.dm-ed-nazev{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.dm-ed-nazev img{width:40px;height:40px;object-fit:contain}
+.dm-ed-nazev b{font-family:var(--serif);font-size:1.05rem}
+.dm-ed-nastroje .dm-ed-tl{align-items:center}
+.dm-ed-nastroje.prazdne small{display:block;line-height:1.35}
+.btn.dm-vynest{border-color:#8a3a2a;color:#f0c8b8}
+.btn.dm-vynest:hover{background:#4a1d14}
+.dm-pta{color:#f0c8b8;font-size:.85rem;margin-right:4px}
+.dm-vb{padding:3px 8px;min-height:0}
+.dm-vb img{width:38px;height:38px}
+.dm-vb small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dm-vb em{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

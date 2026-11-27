@@ -4587,9 +4587,9 @@ const ROOM_NAZ = { "světnice": ["Světnice", "Living room"], "zbrojnice": ["Zbr
 // 1.0-1-5: Domov — vpravo nahoře přepínače místností, pod nimi tři dlaždice (Přehled vybavení · Funkce domu · Úprava místnosti);
 // každá otevře svou část. Zpět vždy o jeden krok a zarovnané se spodkem náhledu místnosti.
 const DOMOV_SEKCE = {
-  prehled: { obr: "domov/nahled-dum-vybaveni", n: ["Přehled vybavení", "Furnishings"], d: ["Sumář nábytku, stav domu, teplo a útulnost", "Furniture summary, upkeep, warmth"] },
+  prehled: { obr: "domov/nahled-dum-vybaveni", n: ["Přehled vybavení", "Furnishings"], d: ["Co v místnosti stojí a k čemu to je", "What stands in the room and what it does"] },
   funkce: { obr: "domov/nahled-dum-funkce", n: ["Funkce domu", "House functions"], d: ["Spánek, jídlo, vaření, oheň, dílna — podle místnosti", "Sleep, food, cooking, fire, workshop"] },
-  uprava: { obr: "domov/nahled-dum-uprava", n: ["Úprava místnosti", "Arrange the room"], d: ["Rozmístit, otočit a zvětšit nábytek, výstava, stěny", "Place, rotate and scale furniture, walls"] },
+  uprava: { obr: "domov/nahled-dum-uprava", n: ["Úprava místnosti", "Arrange the room"], d: ["Koupit, posunout, otočit, přenést či vynést nábytek; stěny", "Buy, move, rotate, carry or remove furniture; walls"] },
 };
 // funkce domu: [klíč, druhy nábytku, domovské místnosti, název, popis]
 const DOMOV_FUNKCE = [
@@ -4600,12 +4600,12 @@ const DOMOV_FUNKCE = [
   ["ohen:hearth", ["hearth"], ["síň trofejí"], ["Zapálit krb", "Light the hearth"], ["Teplo na celý herní den", "Warmth for a game day"]],
   ["uloziste", ["chest", "pantry"], ["světnice", "zbrojnice", "komnata odznaků"], ["Úložný prostor", "Storage"], ["Truhly, skříně a spíž — uložit a vzít věci", "Chests and pantry"]],
   ["dilna:brus", ["grind"], ["zbrojnice"], ["Nabrousit zbraň", "Sharpen a weapon"], ["Brusný kámen — minihra", "Grindstone"]],
-  ["dilna:ponk", ["mend"], ["zbrojnice"], ["Spravit zbroj a štít", "Mend armour"], ["Zbrojířský ponk — minihra", "Armourer's bench"]],
+  ["dilna:ponk", ["mend"], ["zbrojnice"], ["Spravit zbroj, štít a tupou zbraň", "Mend armour and blunt weapons"], ["Zbrojířský ponk — minihra", "Armourer's bench"]],
   ["dilna:figurina", ["drill"], ["zbrojnice"], ["Cvičit u figuríny", "Train at the dummy"], ["Až +20 zkušeností denně", "Up to +20 XP a day"]],
 ];
 const DRUH_NAZ = { bed: "postel (slamník, lůžko)", chest: "truhla nebo skříň", pantry: "spíž", oven: "pec s plotnou", hearth: "krb", grind: "brusný kámen", mend: "zbrojířský ponk", drill: "cvičná figurína",
   armor: "stojan na zbroj", weapons: "stojan na zbraně", trophies: "police na trofeje", badges: "vitrína odznaků" };
-const DOMOV_ED = { vyber: "" };
+const DOMOV_ED = { vyber: "", vynest: "" };
 VIEWS.domov = async (view) => {
   const m = S.me;
   if (!m.house) { go("domy"); return; }
@@ -4630,12 +4630,12 @@ VIEWS.domov = async (view) => {
   const druhy = new Set(kusyMist.map((k) => k.kind));
   const vys = domovVystaveni(D);
   const bgImg = domovStena(D, room, svetnice ? prazdna : pokojImg(room));
-  const tah = sekce === "uprava" && !D.zamek;
+  const tah = sekce === "uprava";   // 1.0-1-7: v Úpravě se dá táhnout vždy (zámek zrušen)
   if (!kusyMist.some((k) => k.klic === DOMOV_ED.vyber)) DOMOV_ED.vyber = "";
+  if (DOMOV_ED.vynest !== DOMOV_ED.vyber) DOMOV_ED.vynest = "";
   const ohenKus = (k) => k.kind === "oven" || k.kind === "hearth";
   const tip = !kusyMist.length ? L(["Místnost je prázdná. Nábytek ti udělá truhlář — Úprava místnosti.", "The room is empty. Buy furniture in Arrange the room."])
-    : sekce !== "uprava" ? "" : D.zamek ? L(["Rozvržení je zamčené. Odemkni ho vpravo.", "The layout is locked. Unlock it on the right."])
-    : L(["Táhni nábytek myší. Klikni na kus a vpravo ho otoč, překlop nebo zvětši.", "Drag furniture. Click a piece to rotate, flip or resize it."]);
+    : sekce !== "uprava" || DOMOV_ED.vyber ? "" : L(["Klikni na kus nábytku — vpravo ho otočíš, přeneseš nebo vyneseš. Tažením ho posuneš.", "Click a piece to rotate, carry or remove it. Drag to move it."]);
   const dlazdice = (k) => { const X = DOMOV_SEKCE[k], o = chal && k === "prehled" ? "domov/chalupa-svetnice" : X.obr;
     return `<button class="opt obr-karta dm-dl" data-sekce="${k}"><span class="ok-obr"><img src="${ART_SRC(o)}" alt="" onerror="this.onerror=null;this.src='${ART_SRC("domov/dum-svetnice")}'"></span>
       <span class="ok-txt"><b>${esc(L(X.n))}</b><small>${esc(L(X.d))}</small></span></button>`; };
@@ -4653,8 +4653,8 @@ VIEWS.domov = async (view) => {
           <span class="dm-nah" style="background-image:url('${ART_SRC(domovStena(D, r.key, r.key === "světnice" ? prazdna : pokojImg(r.key)))}')"></span>
           <span class="dm-mtxt"><b>${esc(L(ROOM_NAZ[r.key] || [r.key, r.key]))}</b><small>${esc(r.used + " / " + r.slots + L([" míst", " slots"]))}</small>
           <em>${esc(r.kusy.map((x) => x.name).join(", ") || L(["prázdná", "empty"]))}</em></span></button>`).join("")}</div>` : ""}
-      ${!sekce ? `<div class="opts dm-dlazdice">${Object.keys(DOMOV_SEKCE).map(dlazdice).join("")}</div>`
-        : sekce === "prehled" ? domovPrehledHtml(D, chal)
+      ${!sekce ? domovStavHtml(D) + `<div class="opts dm-dlazdice">${Object.keys(DOMOV_SEKCE).map(dlazdice).join("")}</div>`
+        : sekce === "prehled" ? domovPrehledHtml(D, room, R)
         : sekce === "funkce" ? domovFunkceHtml(D, room, druhy, chal)
         : domovUpravaHtml(D, room, R, chal)}
     </div></div>
@@ -4681,19 +4681,22 @@ VIEWS.domov = async (view) => {
   view.querySelectorAll("[data-dgo]").forEach((b) => b.onclick = () => { Zvuk.sfx("klik"); DOMOV.zpet = "domov/" + sekce; go(b.dataset.dgo); });
   view.querySelectorAll("[data-truhlar]").forEach((b) => b.onclick = () => { PANEL.back = "domov/uprava"; go("panel/carpenter"); });
   view.querySelectorAll("[data-ohen]").forEach((b) => b.onclick = async () => { b.disabled = true;
-    try { const x = await call("domov_ohen", { kind: b.dataset.ohen }); toast(x.zprava); Zvuk.sfx("klik"); } catch { b.disabled = false; return; } render(); });
+    try { const x = await call("domov_ohen", { kind: b.dataset.ohen, uhasit: !!b.dataset.uhasit }); toast(x.zprava); Zvuk.sfx("klik"); } catch { b.disabled = false; return; } render(); });
   view.querySelectorAll("[data-dilna]").forEach((b) => b.onclick = () => { Zvuk.sfx("klik"); go("dilnadoma/" + b.dataset.dilna); });
   view.querySelectorAll("[data-zas]").forEach((b) => b.onclick = async () => { b.disabled = true;
     try { const x = await call("domov_zasoby", { co: b.dataset.zas, qty: +b.dataset.q }); toast(x.zprava); Zvuk.sfx("klik"); } catch { b.disabled = false; return; } render(); });
-  view.querySelectorAll("[data-presun]").forEach((b) => b.onclick = async () => {
+  view.querySelectorAll("[data-ds]").forEach((b) => b.onclick = () => { Zvuk.sfx("klik"); go("domov/" + b.dataset.ds); });
+  view.querySelectorAll("[data-prenest]").forEach((b) => b.onclick = async () => {   // 1.0-1-7: označený kus do jiné místnosti
     b.disabled = true; Zvuk.sfx("klik");
-    try { await call("domov_presun", { name: b.dataset.presun, room: b.dataset.kam }); toast(b.dataset.presun + " → " + L(ROOM_NAZ[b.dataset.kam] || ["", ""])); } catch { b.disabled = false; return; }
-    render(); });
-  view.querySelectorAll("[data-zaridit]").forEach((zb) => zb.onclick = async () => {   // odemknout ↔ zamknout rozvržení
+    try { const x = await call("domov_presun_klic", { klic: DOMOV_ED.vyber, room: b.dataset.prenest }); toast(x.zprava); } catch { b.disabled = false; return; }
+    DOMOV_ED.vyber = ""; render(); });
+  view.querySelectorAll("[data-vynest]").forEach((b) => b.onclick = async () => {    // 1.0-1-7: vynést označený kus (napoprvé se zeptá)
     Zvuk.sfx("klik");
-    try { await call("domov_zamek", { zamek: !D.zamek }); } catch { return; }
-    if (!D.zamek) { DOMOV_ED.vyber = ""; toast(L(["Rozvržení je zamčené.", "Layout locked."])); }
-    render(); });
+    if (DOMOV_ED.vynest !== DOMOV_ED.vyber) { DOMOV_ED.vynest = DOMOV_ED.vyber; render(); return; }
+    if (b.dataset.vynest === "ne") { DOMOV_ED.vynest = ""; render(); return; }
+    b.disabled = true;
+    try { const x = await call("domov_vynest", { klic: DOMOV_ED.vyber }); toast(x.zprava); } catch { b.disabled = false; return; }
+    DOMOV_ED.vyber = DOMOV_ED.vynest = ""; render(); });
   view.querySelectorAll("[data-tf]").forEach((b) => b.onclick = async () => {   // otočit / překlopit / velikost vybraného kusu
     const k = kusyMist.find((x) => x.klic === DOMOV_ED.vyber); if (!k) return;
     const t0 = { r: 0, f: false, s: 1, ...(k.tf || {}) }, co = b.dataset.tf;
@@ -4710,21 +4713,27 @@ VIEWS.domov = async (view) => {
   const srovnej = () => { if (jeMobil()) { pr.style.height = ""; return; } pr.style.height = sc.getBoundingClientRect().height + "px"; };
   srovnej(); new ResizeObserver(srovnej).observe(sc);
 };
-function domovPrehledHtml(D, chal) {
+// 1.0-1-7 (Pavel): stav domu na hlavní obrazovce Domova; dlaždice vedou rovnou tam, kde se to řeší
+function domovStavHtml(D) {
   const st = D.stav, z = D.zasoby || {};
-  const tile = (k, v, ok = true) => `<span class="${ok ? "" : "ne"}"><small>${esc(k)}</small><b>${esc(v)}</b></span>`;
+  const tile = (k, v, ok, kam, tit) => `<button class="${ok ? "" : "ne"}" ${kam.startsWith("@") ? `data-dgo="${kam.slice(1)}"` : `data-ds="${kam}"`} title="${esc(tit)}"><small>${esc(k)}</small><b>${esc(v)}</b></button>`;
   const sp = ["žádná postel", "slamník", "lůžko", "lůžko s nebesy"][D.bed] || "";
-  return `<div class="dm-stav">${tile(L(["Spaní", "Bed"]), sp, D.bed > 0)}${tile(L(["Truhly", "Chests"]), D.chest[0] + " / " + D.chest[1], D.chest[1] > 0)}
-      ${tile(L(["Spíž", "Pantry"]), D.pantry[0] + " / " + D.pantry[1], D.pantry[1] > 0)}${tile(L(["Vaření", "Cooking"]), D.cook[0] + " / " + D.cook[1], D.oven)}
-      ${tile(L(["Teplota", "Warmth"]), D.teplota + " °C · " + D.teplota_slovem, D.teplota >= 14)}${tile(L(["Útulnost", "Cosiness"]), D.utulnost + " %", D.utulnost >= 40)}
-      ${tile(L(["Stav", "Upkeep"]), st.cistota + " / " + st.opravy + " %", st.cistota >= 40 && st.opravy >= 40)}${tile(L(["Dříví v zásobě", "Firewood stored"]), (z["Palivové dříví"] || 0) + " / " + D.zasoby_max, (z["Palivové dříví"] || 0) > 0)}</div>
-    <div class="sect">${esc(L(["Vybavení domu", "Furniture"]) + " · " + D.vybaveni.reduce((a, v) => a + v.pocet, 0) + L([" kusů", " pieces"]))}</div>
-    <div class="dm-vybaveni">${D.vybaveni.map((v) => `<div class="dm-vb"><img src="${nabSrc(v.name)}" alt="" onerror="this.style.visibility='hidden'">
-        <span><b>${esc(v.name + (v.pocet > 1 ? " ×" + v.pocet : ""))}</b><small>${esc(v.popis)}</small>
-        <em>${esc(v.kde.map((r) => L(ROOM_NAZ[r] || [r, r])).join(", "))}</em></span></div>`).join("") || `<div class="empty">${esc(L(["Dům je zatím prázdný.", "No furniture yet."]))}</div>`}</div>
-    <div class="opts dm-dlazdice dm-male">
-      <button class="opt obr-karta" data-dgo="stavdomu"><span class="ok-obr"><img src="${ART_SRC("domov/nahled-dum-stav")}" alt=""></span><span class="ok-txt"><b>${esc(L(["Stav domu", "Upkeep"]))}</b><small>${esc(L(["Čistota, opravy, zásoby, teplo", "Cleanliness, repairs, supplies"]))}</small></span></button>
-      <button class="opt obr-karta" data-dgo="prodejdomu"><span class="ok-obr"><img src="${ART_SRC("domov/nahled-dum-prodej")}" alt=""></span><span class="ok-txt"><b>${esc(L(["Prodat či darovat", "Sell or give away"]))}</b><small>${esc(L(["Radnici za 75 % ceny, městu nebo hráči", "Town hall 75 %, the town or a player"]))}</small></span></button></div>`;
+  return `<div class="dm-stav">${tile(L(["Spaní", "Bed"]), sp, D.bed > 0, "funkce", L(["Funkce domu", "House functions"]))}${tile(L(["Truhly", "Chests"]), D.chest[0] + " / " + D.chest[1], D.chest[1] > 0, "@uloziste", L(["Úložný prostor", "Storage"]))}
+      ${tile(L(["Spíž", "Pantry"]), D.pantry[0] + " / " + D.pantry[1], D.pantry[1] > 0, "@uloziste", L(["Úložný prostor", "Storage"]))}${tile(L(["Vaření", "Cooking"]), D.cook[0] + " / " + D.cook[1], D.oven, "funkce", L(["Funkce domu", "House functions"]))}
+      ${tile(L(["Teplota", "Warmth"]), D.teplota + " °C · " + D.teplota_slovem, D.teplota >= 14, "funkce", L(["Oheň v peci a krbu", "Stove and hearth"]))}${tile(L(["Útulnost", "Cosiness"]), D.utulnost + " %", D.utulnost >= 40, "uprava", L(["Nábytek a stěny", "Furniture and walls"]))}
+      ${tile(L(["Stav", "Upkeep"]), st.cistota + " / " + st.opravy + " %", st.cistota >= 40 && st.opravy >= 40, "@stavdomu", L(["Stav domu — úklid a opravy", "Upkeep"]))}${tile(L(["Dříví v zásobě", "Firewood stored"]), (z["Palivové dříví"] || 0) + " / " + D.zasoby_max, (z["Palivové dříví"] || 0) > 0, "funkce", L(["Zásoba dříví u pece", "Firewood store"]))}</div>
+    <p class="dm-odkazy"><button class="btn small" data-dgo="prodejdomu">${esc(L(["Prodat či darovat dům", "Sell or give away"]))}</button></p>`;
+}
+// 1.0-1-7: přehled vybavení jen vybrané místnosti
+function domovPrehledHtml(D, room, R) {
+  const sk = {};
+  R.kusy.forEach((k) => { (sk[k.name] = sk[k.name] || { ...k, pocet: 0 }).pocet++; });
+  const v = Object.values(sk);
+  return `<div class="sect">${esc(L(ROOM_NAZ[room] || [room, room]) + " · " + R.used + " / " + R.slots + L([" míst", " slots"]))}</div>
+    <div class="dm-vybaveni">${v.map((k) => `<div class="dm-vb"><img src="${nabSrc(k.name)}" alt="" onerror="this.style.visibility='hidden'">
+        <span><b>${esc(k.name + (k.pocet > 1 ? " ×" + k.pocet : ""))}</b><small>${esc(k.popis)}</small>
+        ${k.domov !== room ? `<em>${esc(L(["patří do místnosti ", "belongs to "]) + L(ROOM_NAZ[k.domov] || [k.domov, k.domov]))}</em>` : ""}</span></div>`).join("")
+      || `<div class="empty">${esc(L(["V místnosti zatím nic nestojí. Nábytek koupíš v Úpravě místnosti.", "Nothing here yet."]))}</div>`}</div>`;
 }
 function domovFunkceHtml(D, room, druhy, chal) {
   const A = D.akce;
@@ -4734,7 +4743,7 @@ function domovFunkceHtml(D, room, druhy, chal) {
   const tl = DOMOV_FUNKCE.filter(([, kinds, rooms]) => vRoom(kinds) || (chal ? !kinds.every((k) => chalNe.includes(k)) : rooms.includes(room))).map(([k, kinds, , n, d]) => {
     let ok = vRoom(kinds) || (chal && false), proc = ok ? "" : chybi(kinds), attr = "", extra = "";
     if (k.startsWith("ohen:")) { const kind = k.slice(5), O = D.ohen[kind];
-      if (ok && O.hori) return `<button class="btn dm-hori" disabled><span>${esc(L(kind === "oven" ? ["V peci hoří", "Stove lit"] : ["V krbu hoří", "Hearth lit"]))}</span><small>${esc(L(["hoří — teplo celý herní den", "burning"]))}</small></button>`;
+      if (ok && O.hori) return `<button class="btn dm-hori" data-ohen="${kind}" data-uhasit="1"><span>${esc(L(kind === "oven" ? ["V peci hoří — uhasit", "Stove lit — put out"] : ["V krbu hoří — uhasit", "Hearth lit — put out"]))}</span><small>${esc(L(["hoří celý herní den; uhašený se sám nezapálí", "burning; once put out it won't relight by itself"]))}</small></button>`;
       const dr = D.drivi + ((D.zasoby || {})["Palivové dříví"] || 0);
       if (ok && dr < 1) { ok = false; proc = L(["Chybí palivové dříví (vetešník, hostinský).", "No firewood."]); }
       attr = `data-ohen="${kind}"`; }
@@ -4742,35 +4751,46 @@ function domovFunkceHtml(D, room, druhy, chal) {
     else if (k === "uloziste") attr = `data-dgo="uloziste"`;
     else { attr = `data-dcid="ks:home:${k}"`; if (ok && !A[k].ok) { ok = false; proc = A[k].proc; } }
     return `<button class="btn${ok ? (k === "rest" ? " primary" : "") : " zamc"}" ${attr}${ok ? "" : " disabled"} title="${esc(proc || L(d))}"><span>${esc(L(n))}</span><small>${esc(ok ? L(d) : proc)}</small></button>${extra}`; });
-  return tl.length ? `<div class="dm-akce dm-funkce">${tl.join("")}</div>
+  // 1.0-1-6 (Pavel): zásoba dříví přímo u pece a krbu (dřív jen ve Stavu domu)
+  const ohenTu = DOMOV_FUNKCE.some(([k, kinds]) => k.startsWith("ohen:") && vRoom(kinds));
+  const zq = (D.zasoby || {})["Palivové dříví"] || 0, zu = D.drivi || 0, zmax = D.zasoby_max || 0, zvol = Math.max(0, zmax - zq);
+  const drivi = ohenTu ? `<div class="dm-drivi"><b>${esc(L(["Zásoba dříví", "Firewood store"]))}</b>
+      <small>${esc(L(["V zásobě ", "Stored "]) + zq + " / " + zmax + L([" · u sebe ", " · carried "]) + zu + L([" · z ní se pec a krb mimo léto zatápějí samy", " · heats the stove and hearth outside summer"]))}</small>
+      <div class="dm-drivi-tl">${[1, 5].filter((k) => k <= Math.min(zu, zvol)).map((k) => `<button class="btn small" data-zas="ulozit" data-q="${k}">${esc(L(["Uložit ", "Store "]) + k)}</button>`).join("")}
+        ${zu > 0 && zvol > 0 ? `<button class="btn small primary" data-zas="ulozit" data-q="${Math.min(zu, zvol)}">${esc(L(["Uložit vše", "Store all"]))}</button>` : ""}
+        ${zq > 0 ? `<button class="btn small" data-zas="vzit" data-q="1">${esc(L(["Vzít 1", "Take 1"]))}</button>` : ""}
+        ${!zu && !zq ? `<span class="muted small">${esc(L(["Dříví prodává vetešník a hostinský.", "Firewood: junk dealer and innkeeper."]))}</span>` : ""}</div></div>` : "";
+  return tl.length ? `<div class="dm-akce dm-funkce">${tl.join("")}</div>${drivi}
       <p class="muted small">${esc(L(["Zobrazují se funkce nábytku v této místnosti. Teplo: ", "Functions of the furniture in this room. Warmth: "]) + D.teplota + " °C (" + D.teplota_slovem + ")" + L([" · dříví u sebe ", " · firewood carried "]) + D.drivi + L([", v zásobě ", ", stored "]) + ((D.zasoby || {})["Palivové dříví"] || 0))}</p>`
     : `<p class="muted">${esc(L(["V této místnosti zatím není nic, co by se dalo použít. Nábytek koupíš v Úpravě místnosti.", "Nothing to use in this room yet."]))}</p>`;
 }
 function domovUpravaHtml(D, room, R, chal) {
   const A = D.akce, vyb = R.kusy.find((k) => k.klic === DOMOV_ED.vyber);
   const tf = { r: 0, f: false, s: 1, ...((vyb || {}).tf || {}) };
-  const sem = chal ? [] : D.rooms.filter((r) => r.key !== room).flatMap((r) => r.kusy.filter((k) => room === "světnice" || k.domov === room).map((k) => k.name)).filter((n, i, a) => a.indexOf(n) === i);
-  const pryc = chal ? [] : [...new Set(R.kusy.map((k) => k.name))].map((n) => { const k = R.kusy.find((x) => x.name === n); const kam = room === "světnice" ? (k.domov !== "světnice" ? k.domov : "") : "světnice"; return kam ? [n, kam] : null; }).filter(Boolean);
   const vystava = R.kusy.some((k) => ["armor", "weapons", "trophies"].includes(k.kind));
   const b = (ok, attr, n, proc = "") => `<button class="btn${ok ? "" : " zamc"}" ${attr}${ok ? "" : " disabled"}><span>${esc(L(n))}</span>${proc ? `<small>${esc(proc)}</small>` : ""}</button>`;
-  return `<div class="dm-ed-hlava"><button class="btn${D.zamek ? " primary" : " dm-odemceno"}" data-zaridit>${esc(D.zamek ? L(["Odemknout rozvržení", "Unlock the layout"]) : L(["Hotovo — zamknout rozvržení", "Done — lock the layout"]))}</button>
-      <small class="muted">${esc(D.zamek ? L(["Zamčené rozvržení chrání nábytek před náhodným posunutím.", "Locked layout keeps furniture in place."]) : L(["Táhni nábytek v náhledu. Kliknutím kus vybereš.", "Drag furniture. Click to select a piece."]))}</small></div>
-    ${!D.zamek ? `<div class="dm-ed-nastroje${vyb ? "" : " prazdne"}"><b>${esc(vyb ? vyb.name : L(["Vyber kus nábytku v náhledu", "Select a piece in the room"]))}</b>
-      ${vyb ? `<div class="dm-ed-tl">
+  // kam smí označený kus: do světnice nebo do své vlastní místnosti (ne tam, kde už je)
+  const kam = !vyb || chal ? [] : D.rooms.filter((r) => r.key !== room && (r.key === "světnice" || r.key === vyb.domov));
+  const pta = vyb && DOMOV_ED.vynest === vyb.klic;
+  const nastroje = vyb ? `<div class="dm-ed-nastroje"><div class="dm-ed-nazev"><img src="${nabSrc(vyb.name)}" alt=""><b>${esc(vyb.name)}</b>
+        <small class="muted">${esc(L(["otočení ", "rotation "]) + tf.r + "° · " + L(["velikost ", "size "]) + Math.round(tf.s * 100) + " %" + (tf.f ? L([" · překlopeno", " · flipped"]) : ""))}</small></div>
+      <div class="dm-ed-tl">
         <button class="btn small" data-tf="vlevo" title="${esc(L(["Otočit doleva", "Rotate left"]))}">⟲ 15°</button><button class="btn small" data-tf="vpravo" title="${esc(L(["Otočit doprava", "Rotate right"]))}">⟳ 15°</button>
         <button class="btn small${tf.f ? " on" : ""}" data-tf="preklop">⇋ ${esc(L(["Překlopit", "Flip"]))}</button>
         <button class="btn small" data-tf="mensi">− ${esc(L(["Zmenšit", "Smaller"]))}</button><button class="btn small" data-tf="vetsi">+ ${esc(L(["Zvětšit", "Bigger"]))}</button>
         <button class="btn small" data-tf="zpet">${esc(L(["Původní", "Reset"]))}</button></div>
-        <small class="muted">${esc(L(["Otočení ", "Rotation "]) + tf.r + "° · " + L(["velikost ", "size "]) + Math.round(tf.s * 100) + " %" + (tf.f ? L([" · překlopeno", " · flipped"]) : ""))}</small>` : ""}</div>` : ""}
-    <div class="sect">${esc(L(["Vybavení místnosti", "Furniture"]) + " · " + R.used + " / " + R.slots)}</div>
+      ${kam.length ? `<div class="dm-ed-tl"><small class="muted">${esc(L(["Přenést do:", "Carry to:"]))}</small>${kam.map((r) => `<button class="btn small" data-prenest="${esc(r.key)}"${r.used >= r.slots ? ` disabled title="${esc(L(["plno", "full"]))}"` : ""}>${esc(L(ROOM_NAZ[r.key] || [r.key, r.key]) + " (" + r.used + "/" + r.slots + ")")}</button>`).join("")}</div>` : ""}
+      <div class="dm-ed-tl">${pta
+        ? `<span class="dm-pta">${esc(L(["Opravdu vynést? Truhlář vrátí ", "Really remove? You get "]) + vyb.vratka + " gr.")}</span><button class="btn small dm-vynest" data-vynest="ano">${esc(L(["Ano, vynést", "Yes, remove"]))}</button><button class="btn small" data-vynest="ne">${esc(L(["Ne", "No"]))}</button>`
+        : `<button class="btn small dm-vynest" data-vynest="1">${esc(L(["Vynést z domu", "Remove from the house"]))} <small>+${vyb.vratka} gr</small></button>`}</div></div>`
+    : `<div class="dm-ed-nastroje prazdne"><b>${esc(L(["Klikni na kus nábytku v náhledu", "Click a piece of furniture"]))}</b><small class="muted">${esc(L(["Pak ho tu otočíš, zvětšíš, přeneseš do jiné místnosti nebo vyneseš. Tažením myší ho posuneš.", "Then rotate, resize, carry or remove it here. Drag to move."]))}</small></div>`;
+  return `${nastroje}
+    <div class="sect">${esc(L(ROOM_NAZ[room] || [room, room]) + " · " + R.used + " / " + R.slots + L([" míst", " slots"]))}</div>
     <div class="dm-akce">
       ${b(true, "data-truhlar", ["Koupit nábytek", "Buy furniture"], L(["u truhláře", "from the carpenter"]))}
-      ${b(A.out.ok, `data-dcid="ks:home:out"`, ["Vynést nábytek", "Remove furniture"], A.out.ok ? L(["truhlář vrátí třetinu ceny", "a third back"]) : A.out.proc)}
       ${vystava || A.show.ok ? b(A.show.ok, `data-dcid="ks:home:show"`, ["Vystavit předmět", "Display an item"], A.show.ok ? L(["zbroj, zbraně, trofeje", "armour, weapons, trophies"]) : A.show.proc) : ""}
       ${vystava || A.unshow.ok ? b(A.unshow.ok, `data-dcid="ks:home:unshow"`, ["Sundat předmět", "Take an item down"], A.unshow.ok ? "" : A.unshow.proc) : ""}
-      ${b(true, `data-dgo="calounik"`, ["Vzhled stěn", "Walls"], L(["čalouník a malíř", "tapestries and paint"]))}</div>
-    ${sem.length ? `<div class="dm-presun"><small>${esc(L(["Umístit sem z jiné místnosti:", "Place here from another room:"]))}</small>${sem.map((n) => `<button class="btn small" data-presun="${esc(n)}" data-kam="${esc(room)}">${esc(n + " → " + L(ROOM_NAZ[room] || [room, room]))}</button>`).join("")}</div>` : ""}
-    ${pryc.length ? `<div class="dm-presun"><small>${esc(L(["Odebrat z místnosti (přestěhovat):", "Move out of this room:"]))}</small>${pryc.map(([n, kam]) => `<button class="btn small" data-presun="${esc(n)}" data-kam="${esc(kam)}">${esc(n + " → " + L(ROOM_NAZ[kam] || [kam, kam]))}</button>`).join("")}</div>` : ""}`;
+      ${b(true, `data-dgo="calounik"`, ["Vzhled stěn", "Walls"], L(["čalouník a malíř", "tapestries and paint"]))}</div>`;
 }
 function domovPodokno(r) {
   DOMOV.sub = true;
@@ -5017,13 +5037,18 @@ function miniTrefa(box, { kola = 3, nazvy = [], zona = 22, rychlost = 1.1, uz = 
     const pole = box.querySelector(".mt-pole"), ruc = box.querySelector(".mt-ruc"), nz = box.querySelector(".mt-nazev"), kk = box.querySelectorAll(".mt-kola i");
     const nove = () => { const w = Math.max(8, zona * Math.pow(uz, kolo)); z0 = 6 + Math.random() * (88 - w); pole.style.left = z0 + "%"; pole.style.width = w + "%"; pole.dataset.w = w;
       nz.textContent = nazvy[kolo] || L(["Kolo ", "Round "]) + (kolo + 1); t0 = performance.now(); };
-    const krok = (t) => { if (!bezi) return; const f = rychlost * (1 + kolo * 0.18); x = 50 + 48 * Math.sin((t - t0) / 1000 * f * Math.PI); ruc.style.left = x + "%"; raf = requestAnimationFrame(krok); };
-    const klik = () => { if (!bezi) return; const w = +pole.dataset.w, hit = x >= z0 && x <= z0 + w;
+    // 1.0-1-6 (Pavel): pomalejší ručička a zásah přesně v okamžiku stisku (ne až při puštění tlačítka — to ručička mezitím ujela)
+    const poloha = (t) => 50 + 48 * Math.sin((t - t0) / 1000 * rychlost * 0.6 * (1 + kolo * 0.1) * Math.PI);
+    const krok = (t) => { if (!bezi) return; x = poloha(t); ruc.style.left = x + "%"; raf = requestAnimationFrame(krok); };
+    const klik = (e) => { if (!bezi) return; const tc = e && e.timeStamp ? e.timeStamp : performance.now(); x = poloha(tc); ruc.style.left = x + "%";
+      const w = +pole.dataset.w, hit = x >= z0 && x <= z0 + w;
       if (hit) zasahy++; kk[kolo].className = hit ? "ok" : "ne"; Zvuk.sfx(hit ? "mince" : "klik");
       box.querySelector(".mt-lista").classList.add(hit ? "zasah" : "vedle"); setTimeout(() => box.querySelector(".mt-lista")?.classList.remove("zasah", "vedle"), 260);
       kolo++; if (kolo >= kola) { bezi = false; cancelAnimationFrame(raf); removeEventListener("keydown", kl); setTimeout(() => hotovo(zasahy), 450); } else nove(); };
-    const kl = (e) => { if (e.code === "Space") { e.preventDefault(); klik(); } };
-    box.querySelector(".mt-ted").onclick = klik; addEventListener("keydown", kl);
+    const kl = (e) => { if (e.code === "Space" && !e.repeat) { e.preventDefault(); klik(e); } };
+    const ted = box.querySelector(".mt-ted"), lista = box.querySelector(".mt-lista");
+    ted.onpointerdown = (e) => { e.preventDefault(); klik(e); }; ted.onclick = (e) => e.preventDefault();
+    lista.onpointerdown = (e) => { e.preventDefault(); klik(e); }; addEventListener("keydown", kl);
     nove(); raf = requestAnimationFrame(krok);
   });
 }
