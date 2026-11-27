@@ -7,19 +7,36 @@ const Postava = (() => {
   const BATOH_HOTOVY = true;    // r27-3: brašna přes rameno (dřívější batoh vypadal jako šle)
   const slug = (s) => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const ODEV = { "Lněná košile": ["muz", "lnena-kosile"], "Suknice": ["muz", "suknice"], "Vlněný kabátec": ["muz", "vlneny-kabatec"], "Kožich": ["muz", "kozich"],
-    "Lněná košilka": ["zena", "lnena-kosilka"], "Šaty": ["zena", "saty"], "Vlněné šaty": ["zena", "vlnene-saty"], "Kožíšek": ["zena", "kozisek"] };
-  const PAIR = { "lnena-kosile": "lnena-kosilka", "suknice": "saty", "vlneny-kabatec": "vlnene-saty", "kozich": "kozisek" };
+    "Lněná košilka": ["zena", "lnena-kosilka"], "Šaty": ["zena", "saty"], "Vlněné šaty": ["zena", "vlnene-saty"], "Kožíšek": ["zena", "kozisek"],
+    // 1.0-1-15: nové oděvy (zatím za NOVINKY_VYBAVA); ženské šaty bez mužského protějšku nosí muž jako měšťanský kabát
+    "Krátký kabátec": ["muz", "kratky-kabatec"], "Měšťanský kabát": ["muz", "mestansky-kabat"], "Živůtek se sukní": ["zena", "zivutek-se-sukni"],
+    "Měšťanské šaty": ["zena", "mestanske-saty"], "Sváteční šaty se zlatým lemem": ["zena", "svatecni-saty-se-zlatym-lemem"],
+    "Šaty s vlečkou a kožešinou": ["zena", "saty-s-vleckou-a-kozesinou"] };
+  const PAIR = { "lnena-kosile": "lnena-kosilka", "suknice": "saty", "vlneny-kabatec": "vlnene-saty", "kozich": "kozisek",
+    "kratky-kabatec": "zivutek-se-sukni", "mestansky-kabat": "mestanske-saty" };
+  const JEN_ZENSKE = { "svatecni-saty-se-zlatym-lemem": "mestansky-kabat", "saty-s-vleckou-a-kozesinou": "mestansky-kabat" };   // muž místo nich
   const ZBROJ = { "Brigantina": "brigantina", "Gotický plát": "goticky-plat", "Kapitánova brigantina": "kapitanova-brigantina", "Kožená zbroj": "kozena",
     "Kroužková zbroj": "krouzkova", "Plát Černého rytíře": "cerny-plat", "Plátová zbroj": "platova", "Plátový kyrys": "platovy-kyrys",
-    "Prošívaná zbroj": "prosivana", "Purkrabího brigantina": "purkrabiho-brigantina", "Uherská brigantina": "purkrabiho-brigantina", "Zbroj z medvědí kůže": "medvedi" };
+    "Prošívaná zbroj": "prosivana", "Purkrabího brigantina": "purkrabiho-brigantina", "Uherská brigantina": "purkrabiho-brigantina", "Zbroj z medvědí kůže": "medvedi",
+    // 1.0-1-15: nové zbroje (zatím za NOVINKY_VYBAVA)
+    "Lovecký kabátec": "lovecky-kabatec", "Vycpávaná kazajka": "vycpavana-kazajka", "Kroužková košile": "krouzkova-kosile", "Šupinová zbroj": "supinova-zbroj",
+    "Brigantina s plátovými rameny": "brigantina-s-platovymi-rameny", "Milánská zbroj": "milanska-zbroj" };
   const HELMA = { "Batvat": "batvat", "Havířská helma": "havirska", "Kroužková kukla": "krouzkova-kukla", "Helmice": "helmice", "Kapalín": "kapalin",
-    "Rytířský helm": "rytirsky-helm", "Nosová přilba": "nosova", "Bascinet": "bascinet", "Velká přilba": "velka" };
+    "Rytířský helm": "rytirsky-helm", "Nosová přilba": "nosova", "Bascinet": "bascinet", "Velká přilba": "velka",
+    // 1.0-1-15: čepice a nové helmy (zatím za NOVINKY_VYBAVA) — samostatná vrstva přes vlasy podle postavy
+    "Železná čepice": "zelezna-cepice", "Barbuta": "barbuta", "Bascinet s psí kuklou": "bascinet-s-psi-kuklou", "Kožená čepice": "kozena-cepice",
+    "Plátěná čepice": "platena-cepice", "Vyšívaná čepice": "vysivana-cepice", "Sametový baret": "sametovy-baret", "Měkká čepice s pérem": "mekka-cepice-s-perem",
+    "Černý baret s pérem": "cerny-baret-s-perem", "Brokátová čepice": "brokatova-cepice", "Baret s chocholem": "baret-s-chocholem", "Věneček": "venecek",
+    "Perlový čepec": "perlovy-cepec" };
   const HELMA_JEN_MUZ = new Set(["batvat", "havirska"]);           // ženská verze zatím není — použije se mužská
-  const SKRYJE_VLASY = new Set(["krouzkova-kukla", "bascinet", "velka", "rytirsky-helm"]);
+  const HELMA_JEN_ZENA = new Set(["venecek", "perlovy-cepec"]);   // 1.0-1-15: mužská verze není — použije se ženská
+  // 1.0-1-15 (Pavel): holá hlava + vlasy podle postavy + čepice navrch. Vlasy se nekreslí jen pod helmou, která zakryje celou hlavu;
+  // jinak je kryje maska helma-<x>-skryva.webp (vlasy pod čepicí a nad jejím okrajem), věneček sedí na vlasech bez masky.
+  const SKRYJE_VLASY = new Set(["krouzkova-kukla", "bascinet", "velka", "rytirsky-helm", "barbuta", "bascinet-s-psi-kuklou", "batvat", "havirska"]);
   const SKRYJE_VOUSY = new Set(["velka", "rytirsky-helm"]);
-  // Pod otevřenou helmou se vlasy nad okrajem helmy schovají (jinak by trčely nad kovem). Hodnota = řádek okraje na plátně 1536.
-  const OKRAJ = { "kapalin": 185, "helmice": 185, "nosova": 185, "batvat": 172, "havirska": 172 };
-  const PLAST = { "Cestovní plášť": "cestovni", "Lehký plášť": "lehky", "Vlněný plášť s kápí": "vlneny-s-kapi" };
+  const PLAST = { "Cestovní plášť": "cestovni", "Lehký plášť": "lehky", "Vlněný plášť s kápí": "vlneny-s-kapi", "Kožešinový plášť": "kozesinovy", "Plášť s kápí a lemem": "s-kapi-a-lemem" };
+  const STIN_CLS = new Set(["odev", "zbroj", "plast", "helma"]);
+  const PLAST_BEZ_HELMY = new Set(["s-kapi-a-lemem"]);              // 1.0-1-15: plášť bez masky „helma pod pláštěm“
   const SVETLO = { "Louč": "louc", "Lucerna": "lucerna" };
   const VLASY = { "Krátké": "kratke", "Střední": "stredni", "Dlouhé": "dlouhe", "Ofina": "ofina", "Kudrnaté": "kudrnate", "Copánek": "copanek", "Tonzura": "tonzura" };
   const VOUSY = { "Strniště": "strniste", "Knírek": "knirek", "Bradka": "bradka", "Knír s bradkou": "knir-s-bradkou", "Plnovous": "plnovous",
@@ -30,12 +47,24 @@ const Postava = (() => {
   const STAVBA = { "Hubená": .94, "Normální": 1, "Široká": 1.07, "Svalnatá": 1.04 };
   const VYSKA = { "Nízká": .95, "Normální": 1, "Vysoká": 1.04 };
   const STIT = { "Lehký dřevěný štít": "stit-lehky-dreveny", "Těžký dřevěný štít": "stit-tezky-dreveny", "Pavéza": "stit-paveza",
-    "Okovaný štít": "stit-okovany", "Rytířský štít": "stit-rytirsky" };
+    "Okovaný štít": "stit-okovany", "Rytířský štít": "stit-rytirsky",
+    "Pěstní štít": "stit-pestni", "Jezdecký štít": "stit-jezdecky", "Malovaná pavéza": "stit-malovana-paveza", "Mistrovský štít": "stit-mistrovsky" };   // 1.0-1-15
   // r27-4: zbraně, které postava drží v ruce (vrstvy zbran-ruka-<slug>-<sx>); luk drží levá, ostatní pravá
   const ZBRAN_RUKA = Object.fromEntries(["dlouhy-mec", "kratky-mec", "jeskuv-mec", "cepel-cerneho-rytire", "bastard", "dvourucni-mec", "savle", "tesak",
     "krysaruv-tesak", "dyka", "palcat", "hejtmanuv-palcat", "sekyrka", "valecne-kladivo", "dutohlavova-sekera", "prak", "halapartna", "kopi", "sudlice",
-    "vidle", "kosa", "cep", "obourucni-sekera", "obourucni-kladivo", "lehka-kuse", "tezka-kuse", "arbalest", "hakovnice", "pistala"].map((k) => [k, "prava"])
-    .concat(["dlouhy-luk", "kratky-luk", "kompozitni-luk"].map((k) => [k, "luk"])));
+    "vidle", "kosa", "cep", "obourucni-sekera", "obourucni-kladivo", "lehka-kuse", "tezka-kuse", "arbalest", "hakovnice", "pistala",
+    "rondel", "lovecky-tesak", "jezdecky-mec", "remdih", "bojova-sekera", "cakan", "rytirsky-mec", "kropac", "partyzana", "dvourucni-cakan",
+    "kuse-s-heverem"].map((k) => [k, "prava"])
+    .concat(["dlouhy-luk", "kratky-luk", "kompozitni-luk", "valecny-luk"].map((k) => [k, "luk"])));
+  // 1.0-1-15 (Pavel 27. 11.): pěst natočená se zbraní — úhel podle druhu (vrstvy ruka-pest-prava-<sx>-<m51…>, zbraň se štítem zbran-ruka-<slug>-<sx>-stit)
+  const DYKY = new Set(["dyka", "rondel", "tesak", "krysaruv-tesak", "lovecky-tesak"]);
+  const HLAVICE = new Set(["sekyrka", "palcat", "hejtmanuv-palcat", "valecne-kladivo", "remdih", "bojova-sekera", "cakan"]);
+  const ROVNE = new Set(["dlouhy-mec", "jeskuv-mec", "cepel-cerneho-rytire", "dvourucni-mec", "prak", "dutohlavova-sekera", "halapartna", "kopi", "sudlice",
+    "vidle", "kosa", "cep", "obourucni-sekera", "obourucni-kladivo", "kropac", "partyzana", "dvourucni-cakan"]);   // hrotem na zemi / svisle — pěst rovně
+  const KUSE = new Set(["lehka-kuse", "tezka-kuse", "arbalest", "hakovnice", "pistala", "kuse-s-heverem"]);
+  const SE_STITEM = (z) => !DYKY.has(z) && !ROVNE.has(z) && !KUSE.has(z);
+  const UHEL = (z, stit) => ROVNE.has(z) ? "" : KUSE.has(z) ? "-p35" : DYKY.has(z) ? "-m60" : HLAVICE.has(z) ? "-m67" : stit ? "-m61" : "-m51";
+  const LEVA = { "Dýka": "dyka", "Rondel": "rondel", "Tesák": "tesak", "Lovecký tesák": "lovecky-tesak", "Krysařův tesák": "krysaruv-tesak" };   // druhá zbraň v levé ruce
 
   const ZBRAN_ALIAS = { "imrovo-valecne-kladivo": "valecne-kladivo" };   // r27-10: legendy kreslené jako běžná zbraň
   /** Seznam vrstev [{src, filter, cls}] pro postavu z API (me). */
@@ -49,7 +78,7 @@ const Postava = (() => {
     const zada = [nese("Krumpáč") && "krumpac", nese("Lopata") && "lopata"].filter(Boolean).join("-");
     const out = [...(zada ? [{ src: P("naradi-zada-" + zada), cls: "zada" }] : []), { src: P("postava-telo-" + sx), cls: "telo" }];
     const od = ODEV[eq["oděv"]];
-    let odKey = od ? (od[0] === sx ? od[1] : fem ? PAIR[od[1]] || od[1] : Object.keys(PAIR).find((k) => PAIR[k] === od[1]) || od[1]) : "";
+    let odKey = od ? (od[0] === sx ? od[1] : fem ? PAIR[od[1]] || od[1] : JEN_ZENSKE[od[1]] || Object.keys(PAIR).find((k) => PAIR[k] === od[1]) || od[1]) : "";
     // r27-3: ženský kožíšek (kabátek se širokou sukní) pod plátem a kyrysem nesedí — pod nimi je vidět jen sukně, tak se kreslí vlněné šaty
     if (fem && odKey === "kozisek" && ["platova", "goticky-plat", "cerny-plat", "platovy-kyrys"].includes(ZBROJ[eq.zbroj])) odKey = "vlnene-saty";
     if (odKey) out.push({ src: P("odev-" + sx + "-" + odKey), cls: "odev", bar: bar["oděv"] });
@@ -67,22 +96,28 @@ const Postava = (() => {
     // r27-4: zbraň, štít a louč v rukou — sevřená pěst přes rukojeť; otevřenou dlaň těla (a kovovou rukavici zbroje) schová maska „ruka-dlan“
     const zbSlug = ZBRAN_ALIAS[slug(eq["zbraň"] || "")] || slug(eq["zbraň"] || "");
     const zb = ZBRAN_RUKA[zbSlug], st = STIT[eq["štít"]];
-    const pravaZb = zb && zb !== "luk", levaZb = zb === "luk", louc = eq["světlo"] === "Louč" && !st && !levaZb;
-    const kov = !fem && ["platova", "goticky-plat", "cerny-plat"].includes(ZBROJ[eq.zbroj]);
-    const pest = (strana) => ({ src: P((kov ? "rukavice" : "ruka") + "-pest-" + strana + (kov ? "-muz" : "-" + sx)), cls: "pest",
+    const pravaZb = zb && zb !== "luk", levaZb = zb === "luk", louc = eq["světlo"] === "Louč" && !st && !levaZb && !LEVA[eq["štít"]];
+    const kov = !fem && ["platova", "goticky-plat", "cerny-plat", "milanska-zbroj"].includes(ZBROJ[eq.zbroj]);   // 1.0-1-15: milánská má plátové rukavice
+    const levaDyka = LEVA[eq["štít"]] && !st ? LEVA[eq["štít"]] : null;      // 1.0-1-15: druhá dýka v levé pěsti
+    const pest = (strana, uhel = "") => ({ src: P((kov ? "rukavice" : "ruka") + "-pest-" + strana + (kov ? "-muz" : "-" + sx) + uhel), cls: "pest",
       filter: kov && ZBROJ[eq.zbroj] === "cerny-plat" ? "brightness(.32) saturate(.4)" : "none" });
-    if (pravaZb) out.push({ src: P("ruka-dlan-prava-" + sx), cls: "dlan" }, { src: P("zbran-ruka-" + zbSlug + "-" + sx), cls: "zbran" }, pest("prava"));
-    if (levaZb || st || louc) out.push({ src: P("ruka-dlan-leva-" + sx), cls: "dlan" });
+    const sStitem = !!st && SE_STITEM(zbSlug);
+    if (pravaZb) out.push({ src: P("ruka-dlan-prava-" + sx), cls: "dlan" }, { src: P("zbran-ruka-" + zbSlug + "-" + sx + (sStitem ? "-stit" : "")), cls: "zbran" },
+      pest("prava", UHEL(zbSlug, sStitem)));
+    if (levaZb || st || louc || levaDyka) out.push({ src: P("ruka-dlan-leva-" + sx), cls: "dlan" });
+    if (levaDyka) out.push({ src: P("zbran-leva-" + levaDyka + "-" + sx), cls: "zbran" }, pest("leva", "-p20"));
     if (levaZb) out.push({ src: P("zbran-ruka-" + zbSlug + "-" + sx), cls: "zbran" }, pest("leva"));
     if (louc) out.push({ src: P("svetlo-louc-ruka-" + sx), cls: "svetlo ohen" }, pest("leva"));
     const helm = HELMA[eq.hlava];
     const hair = L.vlasy === "Bez vlasů" ? null : (VLASY[L.vlasy] || "kratke");   // r27-6: tělo je holé, vlasy nese jen vrstva účesu
     const kape = PLAST[eq["plášť"]] === "vlneny-s-kapi";          // r27-3: v kápi je hlava uvnitř — vlasy pod kápí, ne přes ni
-    const vlasy = () => { if (hair && !helm) out.push({ src: P("vlasy-" + sx + "-" + hair), filter: BARVA[L["barva vlasů"]] || "none", cls: "vlasy",
-      clip: OKRAJ[helm] ? `inset(${((OKRAJ[helm] + (fem ? 3 : 0)) / 15.36).toFixed(2)}% 0 0 0)` : "", maskIn: kape ? P("plast-vlneny-s-kapi-vlasy") : "" });
-      if (hair === "tonzura" && !fem && !helm) out.push({ src: P("vlasy-muz-tonzura-kuze"), cls: "kuze", maskIn: kape ? P("plast-vlneny-s-kapi-vlasy") : "" }); };   // r27-6: lysina se nebarví s vlasy
-    const helma = () => { if (helm) out.push({ src: P("helma-" + helm + (fem && !HELMA_JEN_MUZ.has(helm) ? "-zena" : "")), cls: "helma",
-      maskIn: kape ? P(helm === "kapalin" ? "plast-vlneny-s-kapi-vlasy" : "plast-vlneny-s-kapi-helma") : PLAST[eq["plášť"]] ? P("plast-muz-" + PLAST[eq["plášť"]] + "-helma") : "" }); };   // r27-3: bez kápě se helma (závěs) schová pod plášť   // r27-3: helma v kápi — co trčí z kápě ven, se nekreslí
+    const sVlasy = hair && !SKRYJE_VLASY.has(helm);                  // 1.0-1-15: pod čepicí a otevřenou helmou vlasy zůstanou
+    const vlasy = () => { if (sVlasy) out.push({ src: P("vlasy-" + sx + "-" + hair), filter: BARVA[L["barva vlasů"]] || "none", cls: "vlasy",
+      maskIn: kape ? P("plast-vlneny-s-kapi-vlasy") : "" });
+      if (sVlasy && hair === "tonzura" && !fem) out.push({ src: P("vlasy-muz-tonzura-kuze"), cls: "kuze", maskIn: kape ? P("plast-vlneny-s-kapi-vlasy") : "" }); };   // r27-6: lysina se nebarví s vlasy
+    const helmaSrc = helm ? "helma-" + helm + (HELMA_JEN_ZENA.has(helm) || (fem && !HELMA_JEN_MUZ.has(helm)) ? "-zena" : "") : "";
+    const helma = () => { if (helm) out.push({ src: P(helmaSrc), cls: "helma",
+      maskIn: kape ? P(helm === "kapalin" ? "plast-vlneny-s-kapi-vlasy" : "plast-vlneny-s-kapi-helma") : PLAST[eq["plášť"]] && !PLAST_BEZ_HELMY.has(PLAST[eq["plášť"]]) ? P("plast-muz-" + PLAST[eq["plášť"]] + "-helma") : "" }); };   // r27-3: bez kápě se helma (závěs) schová pod plášť   // r27-3: helma v kápi — co trčí z kápě ven, se nekreslí
     // r27-3: pravidlo vnoření — co je pod pláštěm, je pod ním: brašna (řemen), helma i vlasy v kápi
     const brasna = () => { const velky = me.gear.batoh === "Velký batoh"; if (velky) sekeraHlava();
       out.push({ src: P((velky ? "batoh-velky" : "batoh") + (fem ? "-zena" : "")), cls: "batoh" }); if (!velky) sekeraHlava();
@@ -97,7 +132,8 @@ const Postava = (() => {
     const beard = !fem && VOUSY[L.vousy];
     if (beard && !SKRYJE_VOUSY.has(helm)) out.push({ src: P("vousy-" + beard), filter: BARVA[L["barva vousů"]] || "none", cls: "vousy" });
     if (st) out.push({ src: P("stit-ruka-" + st.replace(/^stit-/, "") + "-" + sx), cls: "stit", erb: me.erbStit || "" });   // r27-6: vlastní erb na štítu   // r27-4: štít vždy navrch přes všechny vrstvy (i plášť, brašnu a vousy)
-    return out;
+    // 1.0-1-15 (Pavel: vrstvy plynule navazují): za oděvem, zbrojí, pláštěm a pokrývkou hlavy jemný kontaktní stín <díl>-stin.webp
+    return out.flatMap((l) => STIN_CLS.has((l.cls || "").split(" ")[0]) && !(l.cls === "helma" && kape) ? [l, { src: l.src.replace(/\.webp$/, "-stin.webp"), cls: "stin" }] : [l]);
   }
 
   /* Stavba a výška bez deformace hlavy. Vrstvy se složí na plátno a pak se překreslí po řádcích:
@@ -193,10 +229,10 @@ const Postava = (() => {
     const maskyT = job.list.map((l, i) => i > 0 && l.cls !== "telo" && sez.t.has(jm(l)) ? cesta(l, "-skryva-telo.webp") : null);
     const barvit = job.list.map((l) => l.bar ? l.src.replace(/\.webp$/, "-barva.webp") : null);
     const barveneVlasy = job.list.map((l) => !!(l.filter && l.filter !== "none" && /vlasy|vousy/.test(l.cls || "")));
-    if (job.kx === 1 && job.ky === 1 && !masky.some(Boolean) && !maskyT.some(Boolean) && !barvit.some(Boolean) && !barveneVlasy.some(Boolean) && !job.list.some((l) => l.erb)) return;   // nic k úpravě: zůstanou obyčejné vrstvy
+    if (job.kx === 1 && job.ky === 1 && !masky.some(Boolean) && !maskyT.some(Boolean) && !barvit.some(Boolean) && !barveneVlasy.some(Boolean) && !job.list.some((l) => l.erb || l.cls === "stin")) return;   // nic k úpravě: zůstanou obyčejné vrstvy
     let obr, mobr, tobr;
     try {
-      obr = await Promise.all(job.list.map((l) => nacti(l.src)));
+      obr = await Promise.all(job.list.map((l) => l.cls === "stin" ? nacti(l.src).catch(() => null) : nacti(l.src)));   // chybějící stín nevadí
       mobr = await Promise.all(masky.map((m) => m ? nacti(m).catch(() => null) : null));
       tobr = await Promise.all(maskyT.map((m) => m ? nacti(m).catch(() => null) : null));
       var vobr = await Promise.all(job.list.map((l) => l.maskIn ? nacti(l.maskIn).catch(() => null) : null));
@@ -214,6 +250,10 @@ const Postava = (() => {
     const sat = document.createElement("canvas"); sat.width = W; sat.height = H;   // oblečení zvlášť, ať maska nesmaže tělo
     const so = sat.getContext("2d");
     job.list.forEach((l, i) => {
+      if (l.cls === "stin") {                       // 1.0-1-15: kontaktní stín jen na to, co už je pod ním (tělo i oblečení)
+        if (obr[i]) for (const c of [o, so]) { c.save(); c.globalCompositeOperation = "source-atop"; c.drawImage(obr[i], 0, 0, W, H); c.restore(); }
+        return;
+      }
       const g = i === 0 || l.cls === "zada" || l.cls === "telo" ? o : so;   // záda a tělo dole, oblečení zvlášť
       if (mobr[i]) { g.save(); g.globalCompositeOperation = "destination-out"; g.drawImage(mobr[i], 0, 0, W, H); g.restore(); }
       g.save();
@@ -257,9 +297,9 @@ const Postava = (() => {
     const eq = {};
     (me.equipped || []).forEach((e) => { eq[e.slot] = e; });
     const inHand = eq["zbraň"] && ZBRAN_RUKA[slug(eq["zbraň"].id)];
-    const weapon = inHand ? null : eq["zbraň"], shield = eq["štít"] && STIT[eq["štít"].id] ? null : eq["štít"];
+    const weapon = inHand ? null : eq["zbraň"], shield = eq["štít"] && (STIT[eq["štít"].id] || LEVA[eq["štít"].id]) ? null : eq["štít"];
     const torch = eq["světlo"]?.id === "Louč" && (eq["štít"] || inHand === "luk") ? eq["světlo"] : null;   // r27-4: v ruce, jinak vedle postavy
-    const imgs = layers(me, base).map((l) => { const st = (l.filter && l.filter !== "none" ? `filter:${l.filter};` : "") + (l.clip ? `clip-path:${l.clip};` : "")
+    const imgs = layers(me, base).filter((l) => l.cls !== "stin").map((l) => { const st = (l.filter && l.filter !== "none" ? `filter:${l.filter};` : "") + (l.clip ? `clip-path:${l.clip};` : "")
       + (l.maskIn ? `-webkit-mask-image:url('${l.maskIn}');mask-image:url('${l.maskIn}');-webkit-mask-size:100% 100%;mask-size:100% 100%;` : "");
       return `<img class="vrstva ${l.cls}" src="${l.src}" alt="" decoding="async"${st ? ` style="${st}"` : ""}>`; }).join("");
     const side = (e, src) => e ? `<figure class="vyzbroj"><img src="${src}" alt="" loading="lazy"><figcaption>${escH(e.name)}</figcaption></figure>` : "";
