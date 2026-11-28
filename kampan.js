@@ -314,7 +314,7 @@ function kpPlizeni(R, M) {
 }
 
 function kpBoj(R, B) {
-  const nep = B.nep.map((e) => `<button class="kp-nep${e.hp <= 0 ? " padl" : ""}${KAMP.pick.cil === e.i ? " cil" : ""}" data-cil="${e.i}"${e.hp <= 0 ? " disabled" : ""}><b>${esc(e.jm)}</b>
+  const nep = B.nep.map((e) => `<button class="kp-nep${e.hp <= 0 ? " padl" : ""}${KAMP.pick.cil === e.i ? " cil" : ""}" data-cil="${e.i}"${e.hp <= 0 ? " disabled" : ""}>${e.img ? `<span class="kp-nep-obr">${IMG(e.img)}</span>` : ""}<b>${esc(e.jm)}</b>
       <span class="kp-hp"><i style="width:${Math.round(100 * e.hp / e.max)}%"></i></span><small>${e.hp}/${e.max}</small></button>`).join("");
   const hr = B.hraci.map((p) => `<div class="kp-bh${p.hp <= 0 ? " padl" : ""}" style="--b:${p.barva}"><b>${esc(p.jm)}${p.zvolil ? " ✔" : ""}</b><span class="kp-hp ja"><i style="width:${Math.round(100 * p.hp / p.max)}%"></i></span><small>${p.hp <= 0 ? "omráčený" : p.hp + "/" + p.max}</small></div>`).join("");
   const padli = B.hraci.filter((p) => p.hp <= 0 && !p.ja);

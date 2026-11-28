@@ -4569,3 +4569,8 @@ html.mobil .hero-karty .hk-zalozky{grid-template-columns:none!important;grid-aut
   .hero-karty .hk-zalozky button{font-size:clamp(7px,2.05vw,11px)!important;letter-spacing:-.01em!important;padding:10px 0!important;white-space:nowrap;overflow:hidden;text-overflow:clip;gap:2px}
   .hero-karty .hk-zalozky .hk-pocet{font-size:8px!important;min-width:13px!important;height:13px!important;line-height:13px!important;padding:0 3px!important;margin-left:1px}}
 html.mobil .hero-karty .hk-zalozky button{font-size:clamp(7px,2.05vw,11px)!important;letter-spacing:-.01em!important;padding-left:0!important;padding-right:0!important;text-overflow:clip}
+
+/* 1.0-3-28: portrét bosse v boji Dobrodružství */
+.kp-nep-obr{display:block;width:100%;height:150px;border-radius:6px;overflow:hidden;background:#1a0f0a}
+.kp-nep-obr img{width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+html.mobil .kp-nep-obr{height:96px}
