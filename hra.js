@@ -539,6 +539,7 @@ function setMe(me) {
   if (me && me.vzkazy && me.vzkazy.length) vzkazyUkaz(me.vzkazy);   // v1.0: zprávy hráči (dřív do vlákna na Discordu)
   if (me && me.has_arms && ERBSTIT.url) me.erbStit = ERBSTIT.url;   // r27-6: erb na štítu zůstane i po obnově profilu
   S.me = me;
+  if (me) [...(me.inventory || []), ...(me.equipped || [])].forEach((i) => { if (i && i.id) ITEM_SLOT[i.id] = i.slot; });   // 1.0-3-17
   if (me && me.has_arms && !ERBSTIT.url) setTimeout(erbNaStit, 300);
   S.card = null;                                   // karta se překreslí při dalším zobrazení postavy
   const has = me && me.has_character;
@@ -1354,7 +1355,10 @@ function vybavenoZalozky(m, N, row, eqBez, vec) {
 }
 // 1.0-1: Batoh jako „panenka“ — postava s výbavou kolem, opasek, kapsy a batoh jako mřížky, vpravo (v mobilu zespodu) detail vybrané věci. Vše na jedné obrazovce.
 /** 1.0-1-14: kolik míst zabírá seznam — kusy téže věci (lišící se jen zušlechtěním) leží na jednom místě. */
-const mist = (seznam) => new Set((seznam || []).map((x) => x[0] + "|" + (x[2] || ""))).size;
+// 1.0-3-17: řádek s počtem 1 a stavem (index 6) u zbraně/zbroje/helmy/štítu je samostatný kus = samostatné místo
+const KUSOVE = new Set(["zbraň", "zbroj", "hlava", "štít"]);
+const ITEM_SLOT = {};   // id → druh (plní se z profilu)
+const mist = (seznam) => new Set((seznam || []).map((x, i) => KUSOVE.has((ITEM_SLOT[x[0]] || "")) ? x[0] + "#" + i : x[0] + "|" + (x[2] || ""))).size;
 const PAN_L = [["hlava", ["Helma", "Helmet"]], ["plášť", ["Plášť", "Cloak"]], ["zbroj", ["Zbroj", "Armour"]], ["oděv", ["Oděv", "Clothes"]]];
 const PAN_P = [["zbraň", ["Zbraň", "Weapon"]], ["štít", ["Štít", "Shield"]], ["světlo", ["Světlo", "Light"]], ["opasek", ["Opasek", "Belt"]]];
 VIEWS.bag = (view) => {
