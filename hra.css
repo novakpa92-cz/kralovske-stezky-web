@@ -4562,3 +4562,10 @@ button.dv-kruh{border:0;padding:0;cursor:help;font:inherit;position:relative;ove
 .dg-rozpis small{opacity:.75;margin-left:4px;text-transform:none;letter-spacing:0;display:inline;font-size:.85em}
 .dg-znamka > div:last-child{flex:1;min-width:0}
 .dg-znamka .z1{color:#7fbf5a}.dg-znamka .z2{color:#b5c95a}.dg-znamka .z3{color:#e8c46a}.dg-znamka .z4{color:#e8915a}.dg-znamka .z5{color:#e05a4a}
+/* 1.0-3-25 (Pavel): záložky postavy na mobilu v jednom řádku (Vzhled · Postava · Schopnosti · Dovednosti · Účinky) */
+html.mobil .hero-karty .hk-zalozky{grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+@media(max-width:760px){.hero-karty .hk-zalozky{display:grid!important;grid-template-columns:none!important;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+  .hero-karty .hk-zalozky{gap:3px!important;padding:6px 4px 0!important}
+  .hero-karty .hk-zalozky button{font-size:clamp(7px,2.05vw,11px)!important;letter-spacing:-.01em!important;padding:10px 0!important;white-space:nowrap;overflow:hidden;text-overflow:clip;gap:2px}
+  .hero-karty .hk-zalozky .hk-pocet{font-size:8px!important;min-width:13px!important;height:13px!important;line-height:13px!important;padding:0 3px!important;margin-left:1px}}
+html.mobil .hero-karty .hk-zalozky button{font-size:clamp(7px,2.05vw,11px)!important;letter-spacing:-.01em!important;padding-left:0!important;padding-right:0!important;text-overflow:clip}

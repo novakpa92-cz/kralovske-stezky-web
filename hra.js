@@ -893,7 +893,7 @@ VIEWS.hero = (view) => {
     }).join("") : `<div class="empty">${esc(L(["Na postavu teď nic zvláštního nepůsobí. Požehnání v chrámu, odvary nebo mazlíček přidají bonusy; hlad, únava a zima ubírají.", "Nothing special affects you now."]))}</div>`;
   const HK = [["stav", L(["Postava", "Character"])],   // r27-5: záložka „Postava“ (dřív Stav a boj) — tělo, boj a pod Do boje i vlastnosti
     ["schop", L(["Schopnosti", "Abilities"]) + ((P.ceka || []).length ? ` <i class="hk-pocet">${P.ceka.length}</i>` : "")],   // r27-17: čeká volba
-    ["dov", L(["Dovednosti", "Skills"])], ["cesta", L(["Cesta", "Path"])],   // 1.0-3-8: záložky Dovednosti a Cesta byly omylem v komentáři
+    ["dov", L(["Dovednosti", "Skills"])],   // 1.0-3-25 (Pavel): záložka Cesta odebrána
     ["uc", L(["Účinky", "Effects"]) + (U.length ? ` <i class="hk-pocet${U.some((x) => x.kind === "postih") ? " zle" : ""}">${U.length}</i>` : "")]];
   if (!HK.some(([k]) => k === HERO.karta) && !(HERO.karta === "vzhled" && jeMobil())) HERO.karta = "stav";   // (záložka „boj“ je teď součástí „stav“)
   const obsah = {
