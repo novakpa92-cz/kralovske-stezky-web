@@ -207,7 +207,7 @@ function kpVyhen(R, M) {
   if (role.includes("mech")) tl.push(`<span class="row">Měch${M.zvoleno.mech ? " ✔" : ""}: <button class="btn small" data-mini='{"mech":"silne"}'>💨 Silně</button><button class="btn small" data-mini='{"mech":"slabe"}'>Slabě</button><button class="btn small" data-mini='{"mech":"nic"}'>Nechat</button></span>`);
   if (role.includes("kladivo")) tl.push(`<span class="row">Kladivo${M.zvoleno.kladivo ? " ✔" : ""}: <button class="btn small primary" data-mini='{"kladivo":"uder"}'>🔨 Udeřit</button><button class="btn small" data-mini='{"kladivo":"cekat"}'>Počkat</button></span>`);
   if (role.includes("uhli")) tl.push(`<span class="row">Uhlí: <button class="btn small" data-mini='{"uhli":1}'>⚫ Přiložit</button></span>`);
-  return `<div class="kp-vyhen-scena" style="--obr:url('${kobr("mesto-kovar")}')"><div class="kp-vy-sl">${zar}</div><div class="kp-vy-kov">${pruh}</div>
+  return `<div class="kp-vyhen-scena" style="--obr:url('${kobr("kampan/kp-vyhen")}')"><div class="kp-vy-sl">${zar}</div><div class="kp-vy-kov">${pruh}</div>
       <div class="kp-vy-stav">Kolo ${M.kolo + 1}/${M.max_kol} · dobré rány <b>${M.dobre}/5</b> · uhlí ${M.uhli}</div></div>
     ${tl.length ? `<div class="kp-vy-tl">${tl.join("")}</div>` : `<p class="muted">Měch: ${esc(M.kdo.mech || "")} · kladivo: ${esc(M.kdo.kladivo || "")}</p>`}`;
 }
@@ -228,7 +228,7 @@ function kpUlice(R, M) {
   }
   const vedle = M.vojta && M.hraci.some((p) => Math.abs(p.p[0] - M.vojta[0]) + Math.abs(p.p[1] - M.vojta[1]) <= 1);
   const oko = `<span class="kp-oko">${[0, 1, 2].map((i) => `<i class="${i < M.oko ? "on" : ""}"></i>`).join("")}</span>`;
-  return `<div class="kp-mesto" style="--w:${W};--obr:url('${kobr("mesto-mapa")}')">${cells}</div>
+  return `<div class="kp-mesto" style="--w:${W};--obr:url('${kobr("kampan/kp-ctvrt-mapa")}')">${cells}</div>
     <p class="row">Podezření ${oko} ${M.muj_tah ? "· tah zadán, čeká se na ostatní" : "· klepni na pole, kam jdeš (nejvýš 2 po ulici)"}
       ${vedle ? `<button class="btn small primary" data-mini='{"chytit":1}'>✋ Chytit ho!</button>` : ""}</p>
     ${!M.vojta ? `<p class="muted small">Vojtu teď nevidíš — je moc daleko!</p>` : ""}`;

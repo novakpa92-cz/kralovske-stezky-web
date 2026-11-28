@@ -4503,3 +4503,36 @@ html.mobil #vyzvy-panel{bottom:76px;right:8px;left:8px;max-width:none}
 .kp-kapitoly{list-style:none;margin:10px 0;padding:0;display:flex;flex-direction:column;gap:4px}
 .kp-kap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:6px 10px;border:1px solid var(--line2);border-radius:6px;background:#120c0899}
 .kp-kap small{color:var(--muted)}.kp-kap.hotovo small{color:var(--green)}.kp-kap.zamceno{opacity:.7}
+
+/* 1.0-3-18: nemoci */
+.nm-telo{display:flex;flex-direction:column;gap:10px;max-width:880px}
+.nm-karta{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px solid #8a6a3c66;background:#00000033}
+.nm-karta.st1{border-color:#c08a3a}.nm-karta.st2{border-color:#c04a36;background:#3a0f0a55}.nm-karta.zdrav{border-color:#5c7d3a}
+.nm-karta p{margin:.25em 0}.nm-ik{flex:0 0 72px;height:72px;border-radius:50%;overflow:hidden;border:2px solid #c9a55a;background:#1c140a}
+.nm-ik img{width:100%;height:100%;object-fit:cover}
+.nm-sluzby{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.nm-sluzba{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;border:1px solid #8a6a3c55;background:#00000026}
+.nm-sluzba.ne{opacity:.55}.nm-sluzba p{margin:.2em 0 0}.nm-sluzba>div{flex:1}
+.nm-obr{flex:0 0 64px;height:64px;border-radius:8px;overflow:hidden;background:#1c140a}.nm-obr img{width:100%;height:100%;object-fit:cover}
+
+/* 1.0-3-18: dovednosti — malovaná ikona v kruhu, popis v okénku */
+button.dv-kruh{border:0;padding:0;cursor:help;font:inherit;position:relative;overflow:hidden}
+.dv-kruh .dv-obr{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);border-radius:50%;object-fit:cover;z-index:1}
+.dv-kruh .dv-obr + span{visibility:hidden}
+/* 1.0-3-18 (Pavel): nová příručka — kapitola s obrázkem a kartami */
+.pr2-hlava{position:relative;border-radius:10px;overflow:hidden;margin-bottom:12px;max-height:200px}
+.pr2-hlava picture img{width:100%;height:200px;object-fit:cover;display:block}
+.pr2-uvod{position:absolute;inset:auto 0 0 0;padding:28px 16px 12px;background:linear-gradient(transparent,rgba(20,12,6,.88));color:#f6ead0}
+.pr2-uvod h3{margin:0 0 2px;font-size:1.35rem}.pr2-uvod p{margin:0;font-size:.95rem}
+.pr2-karty{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.pr2-karta{display:flex;gap:10px;align-items:flex-start;background:rgba(255,248,228,.55);border:1px solid rgba(120,80,40,.25);border-radius:9px;padding:8px}
+.pr2-karta b{display:block;margin-bottom:2px}.pr2-karta p{margin:0;font-size:.9rem;line-height:1.35}
+.pr2-obr{flex:0 0 64px;width:64px;height:64px;border-radius:8px;overflow:hidden;position:relative;background:#e9d7ae;display:flex;align-items:center;justify-content:center}
+.pr2-obr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pr2-obr i{font-style:normal;font-size:1.8rem}
+.pr2-obr img + i{display:none}
+.pr2-podkap{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.pr2 .pr-zalozky i{font-style:normal}
+@media (max-width:760px){.pr2-hlava picture img{height:140px}.pr2-karty{grid-template-columns:1fr}}
+.nm-sluzby.jeden{grid-template-columns:1fr}   /* 1.0-3-18: důl a lekce — jedna služba na řádek */
+.nm-sluzba.hotovo{border-color:#6f8f3c88}

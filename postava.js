@@ -235,14 +235,17 @@ const Postava = (() => {
     const w = W / 4 | 0, h = H / 4 | 0, m = document.createElement("canvas"); m.width = w; m.height = h;
     const mg = m.getContext("2d"); mg.drawImage(tg.canvas, 0, 0, w, h);
     const d = mg.getImageData(0, 0, w, h), a = d.data, lab = new Int32Array(w * h), st = [];
-    const pryc = mg.createImageData(w, h); let nic = true;
+    const pryc = mg.createImageData(w, h); let nic = true; const kusy = [];
     for (let i = 0, id = 0; i < w * h; i++) {
       if (lab[i] || a[i * 4 + 3] < 5) continue;
       const kus = []; let max = 0; lab[i] = ++id; st.push(i);
       while (st.length) { const j = st.pop(); kus.push(j); max = Math.max(max, a[j * 4 + 3]); const x = j % w;
         for (const k of [j - 1, j + 1, j - w, j + w]) if (k >= 0 && k < w * h && !lab[k] && a[k * 4 + 3] >= 5 && Math.abs((k % w) - x) <= 1) { lab[k] = id; st.push(k); } }
-      if (kus.length < 50 || max < 150) { nic = false; for (const j of kus) pryc.data[j * 4 + 3] = 255; }
+      kusy.push([kus, max]);
     }
+    // 1.0-3-18 (Pavel): hlavice/konec rukojeti vedle pláště — zůstane jen hlavní kus zbraně, malé odtržené kousky (< 30 % největšího) pryč
+    const nej = Math.max(0, ...kusy.map((k) => k[0].length));
+    for (const [kus, max] of kusy) if (kus.length < 50 || max < 150 || kus.length < nej * .3) { nic = false; for (const j of kus) pryc.data[j * 4 + 3] = 255; }
     if (nic) return;
     mg.clearRect(0, 0, w, h); mg.putImageData(pryc, 0, 0);
     tg.save(); tg.globalCompositeOperation = "destination-out"; tg.filter = "blur(2px)";
@@ -259,7 +262,14 @@ const Postava = (() => {
     const k = W / 128, cx = n ? sx / n * k : W / 2, cy = n ? sy / n * k : H / 2;
     if (pl) {   // plášť kryje zbraň jen na straně ruky — přes druhou půlku pláště (za rozparkem) zbraň přesahuje navrch
       tg.save(); tg.beginPath(); if (!n) tg.rect(0, 0, W, H); else if (cx < W / 2) tg.rect(0, 0, W / 2, H); else tg.rect(W / 2, 0, W / 2, H); tg.clip();
-      tg.globalCompositeOperation = "destination-out"; tg.drawImage(pl, 0, 0, W, H); tg.restore();
+      tg.globalCompositeOperation = "destination-out"; tg.drawImage(pl, 0, 0, W, H);
+      // 1.0-3-18 (Pavel): na straně ruky je ze zbraně vidět jen to, co visí pod lemem pláště — nic vedle pláště (hlavice, konec rukojeti)
+      if (n) { const lw = 128, lh = 192, lc = document.createElement("canvas"); lc.width = lw; lc.height = lh;
+        const lg = lc.getContext("2d"); lg.drawImage(pl, 0, 0, lw, lh); const la = lg.getImageData(0, 0, lw, lh).data;
+        let lem = lh; const x0 = cx < W / 2 ? 0 : lw / 2, x1 = cx < W / 2 ? lw / 2 : lw;
+        for (let x = x0; x < x1; x++) { let dno = -1; for (let y = 0; y < lh; y++) if (la[(y * lw + x) * 4 + 3] > 40) dno = y; if (dno > lh * .5) lem = Math.min(lem, dno); }
+        if (lem < lh) tg.fillRect(cx < W / 2 ? 0 : W / 2, 0, W / 2, (lem - 2) * H / lh); }
+      tg.restore();
     }
     if (!n) { if (pl) drobky(tg); return t; }
     const r0 = 62 * W / 1024, r1 = 118 * W / 1024;
