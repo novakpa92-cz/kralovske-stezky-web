@@ -4552,3 +4552,13 @@ button.dv-kruh{border:0;padding:0;cursor:help;font:inherit;position:relative;ove
 .kp-si-nez{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.kp-si-vol{display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px}
 .kp-si-vol i{font-style:normal;font-size:1.2rem;color:var(--gold2)}.kp-si-vol select{min-height:36px}
 .kp-tvrz{background:#1a140e}.kp-straz{font-style:normal;color:#ff9a7a;font-size:1rem;text-shadow:0 0 6px #000}
+/* 1.0-3-24: diagnostika — školní známka */
+.dg-znamka{display:flex;gap:16px;align-items:flex-start;margin-bottom:12px}
+.dg-cislo{flex:0 0 72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.6rem;font-weight:700;border:3px solid currentColor}
+.dg-znamka h4{margin:2px 0 4px}.dg-znamka p{margin:0 0 8px}
+.dg-rozpis{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 14px}
+.dg-rozpis b{display:inline-block;width:22px;text-align:center;border-radius:4px;margin-right:6px}
+.z1{color:#7fbf5a}.z2{color:#b5c95a}.z3{color:#e8c46a}.z4{color:#e8915a}.z5{color:#e05a4a}
+.dg-rozpis small{opacity:.75;margin-left:4px;text-transform:none;letter-spacing:0;display:inline;font-size:.85em}
+.dg-znamka > div:last-child{flex:1;min-width:0}
+.dg-znamka .z1{color:#7fbf5a}.dg-znamka .z2{color:#b5c95a}.dg-znamka .z3{color:#e8c46a}.dg-znamka .z4{color:#e8915a}.dg-znamka .z5{color:#e05a4a}

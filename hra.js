@@ -1231,7 +1231,10 @@ VIEWS.admin = async (view) => {
   if (diagBox) {                                           // 1.0-3-21: Admin → Diagnostika
     const f = (n) => Number(n || 0).toLocaleString("cs-CZ");
     const kresli = (x) => { const d = x.diag || {};
+      const H = d.hodnoceni;                               // 1.0-3-24: známka 1–5 jako ve škole
       diagBox.innerHTML = `${x.text ? `<div class="panel notice">${esc(noEmoji(x.text).replace(/\*\*/g, ""))}</div>` : ""}
+        ${H ? `<section class="vl-box dg-znamka"><div class="dg-cislo z${H.znamka}">${H.znamka}</div><div><h4>Hodnocení: <span class="z${H.znamka}">${esc(H.slovo)}</span></h4><p>${esc(H.popis)}</p>
+          <ul class="dg-rozpis">${H.rozpis.map((r_) => `<li><b class="z${r_.znamka}">${r_.znamka}</b> ${esc(r_.co)} <small>${esc(r_.pozn)}</small></li>`).join("")}</ul></div></section>` : ""}
         <div class="vl-radek hs-dl">
           <div class="vl-box"><small>Stav hry</small><b>${f(d.kb)} kB</b><em>databáze ${d.db_kb != null ? f(d.db_kb) + " kB" : "—"}</em></div>
           <div class="vl-box"><small>Jeden zápis</small><b>${f(d.dump_ms)} ms</b><em>${d.odlozene ? "sloučené ukládání zapnuto" : "ukládá se hned"} · zápisů ${f(d.zapisu)}</em></div>
