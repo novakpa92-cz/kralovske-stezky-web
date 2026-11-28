@@ -66,6 +66,9 @@ function kampanKresli() {
   wireKp(box);
   if (R && R.chat) wireChat(box, () => kampanNacti(true));
   if (R && R.mini) kpMiniPo(box, R.mini);
+  const jb = box.querySelector("[data-jdi-boj]");                 // 1.0-3-33: boj z dobrodružství = okno boje výpravy
+  if (jb) jb.onclick = () => go("vyprava");
+  if (R && R.boj && R.boj.vyprava && S.tab === "kampan" && KAMP.bojMid !== R.boj.mid) { KAMP.bojMid = R.boj.mid; setTimeout(() => go("vyprava"), 900); }
   const log = box.querySelector(".kp-log");
   if (log && R && R.v !== KAMP.v) { log.scrollTop = 0; }
   if (R && R.v !== KAMP.v) { kpZvuky(R); KAMP.v = R.v; }
@@ -84,9 +87,10 @@ function kpUvod(s) {
     <span class="row"><button class="btn small primary" data-kp="kampan_odpoved" data-rid="${esc(p.id)}" data-ano="1">Přidat se</button><button class="btn small" data-kp="kampan_odpoved" data-rid="${esc(p.id)}" data-ano="0">Odmítnout</button></span></div>`).join("");
   const kron = (s.kroniky || []).map((k) => `<div class="panel kp-kronika"><h3>📖 Tvoje kronika — kapitola ${k.faze}: ${esc(k.nazev)}</h3><ul>${k.kronika.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
   const nf = s.dalsi_faze;
-  const kap = (s.kapitoly || []).map((k) => `<li class="kp-kap${k.hotovo ? " hotovo" : ""}${k.odemceno ? "" : " zamceno"}"><b>Kapitola ${k.n}</b> — ${esc(k.nazev)}
-      <small>${k.hotovo ? "✔ odehráno" : k.odemceno ? (nf && nf.faze === k.n ? "▶ na řadě" : "odemčeno") : "🔒 odemkne se " + esc(k.kdy)}</small></li>`).join("")
-    + `<li class="kp-kap zamceno"><b>Další kapitoly</b> <small>přepracovávají se — termíny ohlásíme</small></li>`;
+  const kap = (s.kapitoly || []).map((k) => `<li class="kp-kap${k.hotovo ? " hotovo" : ""}${k.odemceno ? "" : " zamceno"}">${k.obr ? `<span class="kp-kap-obr">${IMG(k.obr)}</span>` : ""}
+      <span class="kp-kap-txt"><b>Kapitola ${k.n} — ${esc(k.nazev)}</b>${k.popis ? `<i>${esc(k.popis)}</i>` : ""}</span>
+      <small>${k.hotovo ? "✔ odehráno" : k.odemceno ? (nf && nf.faze === k.n ? "▶ na řadě" : "odemčeno") : k.kdy ? "🔒 odemkne se " + esc(k.kdy) : "🔒 ve vývoji"}</small></li>`).join("")
+    + `<li class="kp-kap zamceno"><b>Další kapitoly</b> <small>🔒 ve vývoji</small></li>`;
   const admin = s.admin ? `<div class="panel kp-admin"><h3>⚙ Testeři dobrodružství</h3><p class="muted small">Dokud není dobrodružství pro všechny, vidí ho jen správce, zkušební postava a tihle testeři: <b>${esc((s.testeri || []).join(", ") || "nikdo")}</b></p>
     <form class="row" data-tester><input name="jm" placeholder="jméno postavy" required><button class="btn small" name="p" value="1">Přidat</button><button class="btn small" name="p" value="0">Odebrat</button></form></div>` : "";
   return `<div class="kp-uvod" style="--obr:url('${kobr("pribehy/pribeh-klaster")}')"><div class="kp-uvod-text"><small>Dobrodružství 1</small><h2>${esc(s.dil || "Falešné stříbro")}</h2>
@@ -120,7 +124,7 @@ function kpKonec(s, R) {
   return `<div class="kp-hra">${kpHlava(R)}<div class="panel kp-konec"><div class="kp-log">${R.log.slice(-3).map((x) => `<div class="kp-txt">${kmd(x.t)}</div>`).join("")}</div>
     <h3>📖 Kronika kapitoly</h3><ul>${(R.kronika || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
     <p class="kp-odmena">Odměna: <b>${o.zk || 0} ZK</b> a <b>${o.gr || 0} gr.</b> pro každého.${R.dalsi ? "" : " Další kapitola se připravuje."}</p>
-    <p class="row">${R.dalsi ? (!R.dalsi.odemceno ? `<span class="muted">Kapitola ${R.dalsi.faze} — ${esc(R.dalsi.nazev)} se odemkne ${esc(R.dalsi.kdy)}.</span>`
+    <p class="row">${R.dalsi ? (!R.dalsi.odemceno ? `<span class="muted">Kapitola ${R.dalsi.faze} — ${esc(R.dalsi.nazev)} ${R.dalsi.kdy ? "se odemkne " + esc(R.dalsi.kdy) + "." : "je ve vývoji."}</span>`
       : R.vudce ? `<button class="btn primary" data-kp="kampan_pokracovat">▶ Pokračovat: kapitola ${R.dalsi.faze} — ${esc(R.dalsi.nazev)}</button>` : `<span class="muted">Na pokračování kapitolou ${R.dalsi.faze} rozhoduje vůdce.</span>`) : ""}
       <button class="btn${R.dalsi && R.dalsi.odemceno ? "" : " primary"}" data-kp="kampan_ukoncit">${R.dalsi && R.dalsi.odemceno ? "Teď ne, dohraju později" : "Zavřít kroniku"}</button></p></div></div>`;
 }
@@ -135,6 +139,7 @@ function kpHra(s, R) {
   const log = kpDenik(R.log);
   let akce = "";
   if (R.mini) akce = kpMini(R, R.mini);
+  else if (R.boj && R.boj.vyprava) akce = `<div class="panel kp-boj-vyp"><p><b>⚔️ ${esc(R.boj.nazev)}</b></p><p class="muted">Boj probíhá na bojišti — stejně jako na výpravě.</p><button class="btn primary" data-jdi-boj>⚔️ Na bojiště</button></div>`;
   else if (R.boj) akce = kpBoj(R, R.boj);
   else akce = kpVolby(R);
   const nal = (R.nalezy || []).length ? `<div class="kp-nalezy">${R.nalezy.map((n) => `<span>${esc(n)}</span>`).join("")}</div>` : "";
@@ -194,7 +199,7 @@ function kpVahy(R, M) {
       </g></svg>
       <div class="kp-misky" style="--nl:${naklon}deg">${misku("l")}${misku("r")}</div></div>
     <div class="kp-tray">${tray}</div>
-    <p class="kp-vahy-stav">${ja ? `<b>Jsi na tahu.</b> Klepni na groš a pak na misku (nebo ho přetáhni). ` : `Na tahu je <b>${esc(M.tah_jm)}</b>. `}Vážení ${M.vazeni.length}/${M.max}. Falešný může být lehčí i těžší.${M.napoveda ? ` <span class="muted">Nápověda: ${esc(M.napoveda)}</span>` : ""}</p>
+    <p class="kp-vahy-stav">${ja ? `<b>Jsi na tahu.</b> Klepni na groš a pak na misku (nebo ho přetáhni). ` : `Na tahu je <b>${esc(M.tah_jm)}</b>. `}${M.pokus > 1 ? `Pokus ${M.pokus}. ` : ""}Vážení ${M.vazeni.length}/${M.max}. Falešný může být lehčí i těžší.${M.napoveda ? ` <span class="muted">Nápověda: ${esc(M.napoveda)}</span>` : ""}</p>
     ${ja ? `<p class="row"><button class="btn small" data-vmis="l">← Na levou</button><button class="btn small" data-vmis="r">Na pravou →</button><button class="btn small" data-vmis="x">Zpět na pult</button>
       <button class="btn small primary" data-mini='{"vazit":1}'${M.misky.l.length && M.misky.r.length && M.vazeni.length < M.max ? "" : " disabled"}>⚖ Vážit</button>
       <button class="btn small" data-vukaz${M.vazeni.length && KAMP.pick.vahy != null && !M.misky.l.includes(KAMP.pick.vahy) && !M.misky.r.includes(KAMP.pick.vahy) ? "" : " disabled"}>👉 Falešný a lehčí${KAMP.pick.vahy != null ? " (č. " + (KAMP.pick.vahy + 1) + ")" : ""}</button>
@@ -221,18 +226,30 @@ function kpPokoj(R, M) {
       <button class="btn small" data-mini='{"hotovo":1}'${M.tahy ? "" : " disabled"}>Dost hledání</button></p>${ost ? `<div class="kp-ostatni">${ost}</div>` : ""}`;
 }
 
-function kpVyhen(R, M) {
+function kpVyhen(R, M) {   // 1.0-3-32: tři fáze — rozpálit, kovat, kalit; zakázka a příhoda
   const role = M.role || [];
-  const barva = (p) => p == null ? "#333" : p < 35 ? "#5a1a10" : p < 58 ? "#b2321a" : p <= 82 ? "#f3c232" : "#fff6d8";
+  const od = M.od || 62, doo = M.do || 78;
+  const barva = (p) => p == null ? "#333" : p < 35 ? "#5a1a10" : p < od - 4 ? "#b2321a" : p <= doo ? "#f3c232" : "#fff6d8";
+  const BARVY = { "bílá": "#fff8e6", "žlutá": "#f6d24a", "slámová": "#e2b85c", "hnědá": "#8a5a2b", "fialová": "#7a4a8f", "modrá": "#3d5fa8", "šedá": "#777" };
   const zar = M.zar == null ? `<div class="kp-skryto">žár vidí ${esc(M.kdo.mech || "")}</div>` : `<div class="kp-zar"><i class="pas"></i><i class="hod" style="height:${M.zar}%"></i></div><small>žár ${M.zar}</small>`;
-  const pruh = M.pruh == null ? `<div class="kp-skryto">železo vidí ${esc(M.kdo.kladivo || "")}</div>` : `<div class="kp-pruh" style="--c:${barva(M.pruh)}"></div><small>${M.pruh < (M.od || 62) ? "studené" : M.pruh <= (M.do || 78) ? "žluté — bij!" : "přehřáté"}</small>`;
+  const kov = M.faze === "kaleni"
+    ? (M.barva == null ? `<div class="kp-skryto">železo vidí ${esc(M.kdo.kladivo || "")}</div>` : `<div class="kp-pruh" style="--c:${BARVY[M.barva] || "#777"}"></div><small>železo je <b>${esc(M.barva)}</b></small>`)
+    : (M.pruh == null ? `<div class="kp-skryto">železo vidí ${esc(M.kdo.kladivo || "")}</div>` : `<div class="kp-pruh" style="--c:${barva(M.pruh)}"></div><small>${M.pruh < od ? "studené" : M.pruh <= doo ? "žluté — bij!" : "přehřáté"}</small>`);
+  const z = M.zakazka || {};
+  const faze = { rozpal: "1 · Rozpálit výheň", kovani: "2 · Kování", kaleni: "3 · Kalení" }[M.faze] || "";
   const tl = [];
-  if (role.includes("mech")) tl.push(`<span class="row">Měch${M.zvoleno.mech ? " ✔" : ""}: <button class="btn small" data-mini='{"mech":"silne"}'>💨 Silně</button><button class="btn small" data-mini='{"mech":"slabe"}'>Slabě</button><button class="btn small" data-mini='{"mech":"nic"}'>Nechat</button></span>`);
-  if (role.includes("kladivo")) tl.push(`<span class="row">Kladivo${M.zvoleno.kladivo ? " ✔" : ""}: <button class="btn small primary" data-mini='{"kladivo":"uder"}'>🔨 Udeřit</button><button class="btn small" data-mini='{"kladivo":"cekat"}'>Počkat</button></span>`);
-  if (role.includes("uhli")) tl.push(`<span class="row">Uhlí: <button class="btn small" data-mini='{"uhli":1}'>⚫ Přiložit</button></span>`);
-  return `<div class="kp-vyhen-scena" style="--obr:url('${kobr("kampan/kp-vyhen")}')"><div class="kp-vy-sl">${zar}</div><div class="kp-vy-kov">${pruh}</div>
-      <div class="kp-vy-stav">Kolo ${M.kolo + 1}/${M.max_kol} · dobré rány <b>${M.dobre}/5</b> · uhlí ${M.uhli}</div></div>
-    ${tl.length ? `<div class="kp-vy-tl">${tl.join("")}</div>` : `<p class="muted">Měch: ${esc(M.kdo.mech || "")} · kladivo: ${esc(M.kdo.kladivo || "")}</p>`}`;
+  if (M.udalost) {
+    tl.push(`<div class="kp-vy-udalost"><p>${kmd(M.udalost.t)}</p>${M.udalost.ja ? `<span class="row">${M.udalost.volby.map(([k, t]) => `<button class="btn small" data-mini='{"udalost":"${k}"}'>${esc(t)}</button>`).join("")}</span>` : `<p class="muted">Rozhoduje ${esc(M.udalost.kdo)}…</p>`}</div>`);
+  } else {
+    if (role.includes("mech") && M.faze !== "kaleni") tl.push(`<span class="row">Měch${M.zvoleno.mech ? " ✔" : ""}: <button class="btn small" data-mini='{"mech":"silne"}'>💨 Silně</button><button class="btn small" data-mini='{"mech":"slabe"}'>Slabě</button><button class="btn small" data-mini='{"mech":"nic"}'>Nechat</button></span>`);
+    if (role.includes("kladivo") && M.faze === "kovani") tl.push(`<span class="row">Kladivo${M.zvoleno.kladivo ? " ✔" : ""}: <button class="btn small primary" data-mini='{"kladivo":"uder"}'>🔨 Udeřit</button><button class="btn small" data-mini='{"kladivo":"ohen"}'>🔥 Do ohně</button><button class="btn small" data-mini='{"kladivo":"cekat"}'>Počkat</button></span>`);
+    if (role.includes("kladivo") && M.faze === "kaleni") tl.push(`<span class="row">Kalit: <button class="btn small primary" data-mini='{"kladivo":"voda"}'>💧 Do vody</button><button class="btn small primary" data-mini='{"kladivo":"olej"}'>🫗 Do oleje</button><button class="btn small" data-mini='{"kladivo":"cekat"}'>Ještě počkat</button></span>`);
+    if (role.includes("uhli") && M.faze !== "kaleni") tl.push(`<span class="row">Uhlí: <button class="btn small" data-mini='{"uhli":1}'>⚫ Přiložit</button></span>`);
+  }
+  return `<p class="kp-vy-zak">📜 Zakázka: <b>${esc(z.jm || "")}</b> — ${z.rany} dobrých ran, kalit do <b>${z.kalit === "voda" ? "vody" : "oleje"}</b>, až bude železo <b>${esc(z.barva || "")}</b>.</p>
+    <div class="kp-vyhen-scena" style="--obr:url('${kobr("kampan/kp-vyhen")}')"><div class="kp-vy-sl">${zar}</div><div class="kp-vy-kov">${kov}</div>
+      <div class="kp-vy-stav"><b>${faze}</b> · kolo ${M.kolo + 1}/${M.max_kol} · rány <b>${M.dobre}/${z.rany}</b>${M.kazy ? ` · kazy ${M.kazy}/3` : ""} · uhlí ${M.uhli}</div></div>
+    ${tl.length ? `<div class="kp-vy-tl">${tl.join("")}</div>` : `<p class="muted">Měch: ${esc(M.kdo.mech || "")} · kladivo: ${esc(M.kdo.kladivo || "")}${M.kdo.uhli ? " · uhlí: " + esc(M.kdo.uhli) : ""}</p>`}`;
 }
 
 function kpUlice(R, M) {
@@ -250,7 +267,7 @@ function kpUlice(R, M) {
     cells += `<button class="kp-pole p-${c === "#" ? "dum" : c === "u" ? "ukryt" : c === "B" ? "brana" : "ulice"}${vidi.has(k) ? " videno" : ""}${M.cil && M.cil[0] === x && M.cil[1] === y ? " cil" : ""}${muj ? " muj" : ""}${lze ? " lze" : ""}" data-pole="${x},${y}"${lze ? "" : " disabled"}>${c === "u" ? "<s class=\"sud\"></s>" : c === "B" ? "<s class=\"brana\">brána</s>" : ""}${vojta}${kdo}</button>`;
   }
   const vedle = M.vojta && M.hraci.some((p) => Math.abs(p.p[0] - M.vojta[0]) + Math.abs(p.p[1] - M.vojta[1]) <= 1);
-  const oko = `<span class="kp-oko">${[0, 1].map((i) => `<i class="${i < M.oko ? "on" : ""}"></i>`).join("")}</span>`;
+  const oko = `<span class="kp-oko">${[0, 1, 2].map((i) => `<i class="${i < M.oko ? "on" : ""}"></i>`).join("")}</span>`;
   return `<div class="kp-mesto" style="--w:${W};--obr:url('${kobr("kampan/kp-ctvrt-mapa")}')">${cells}</div>
     <p class="row">Podezření ${oko} ${M.muj_tah ? "· tah zadán, čeká se na ostatní" : "· klepni na pole, kam jdeš (nejvýš 2 po ulici)"}
       ${vedle ? `<button class="btn small primary" data-mini='{"chytit":1}'>✋ Chytit ho!</button>` : ""}</p>

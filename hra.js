@@ -3471,7 +3471,7 @@ const PLACES = {
     opts: [
       { sect: ["Ven z města · Stezky", "Out of town · Trails"] },                 // r27-41: dlaždice s náhledem a krátkým popisem
       { go: "vyprava", ic: "🗺️", obr: "vypravy/rataje-01", n: ["Výprava", "Expedition"], d: ["Sám nebo s družinou do lesů, dolů a na hrad. Boje, truhly, kořist — vrať se, než vyprší čas.", "Solo or with a party into woods, mines, camps and castles."] },
-      { go: "kampan", soon: (m) => !(m.kampan || (typeof kpJeAdmin === "function" && kpJeAdmin())), ic: "📜", obr: "pribehy/pribeh-klaster", n: ["Dobrodružství", "Adventure"],   // 1.0-3-19: odemyká se po kapitolách
+      { go: "kampan", soon: (m) => !(m.kampan || (typeof kpJeAdmin === "function" && kpJeAdmin())), soonT: (m) => m.kampan_od ? ["Otevře se " + m.kampan_od, "Opens " + m.kampan_od] : null, ic: "📜", obr: "pribehy/pribeh-klaster", n: ["Dobrodružství", "Adventure"],   // 1.0-3-19: odemyká se po kapitolách
         d: ["Falešné stříbro — příběh po kapitolách: rozhovory, hádanky, minihry a volby s následky. Sám, nebo se skupinou.", "False Silver — a story in chapters: talks, riddles, mini-games and choices with consequences."] },
       { panel: "trails", ic: "🗡️", obr: "situace/sit-setkani", oddel: true, n: ["Na stezkách", "On the trails"], d: ["Po stopách cizí výpravy: přepadnout, obchodovat, nebo minout. Od 4. úrovně.", "Follow another expedition: ambush, trade or pass by."] },
       { sect: ["Řemeslníci u brány", "Craftsmen at the gate"] },             // 1.0-3-18 (Pavel): dřevorubec a rolník
@@ -3711,7 +3711,7 @@ VIEWS.misto = (view) => {
     if (o.obr) {                                              // r27-41: dlaždice s malovaným náhledem a krátkým popisem
       const zam = o.lock && o.lock(S.me), pozdeji = typeof o.soon === "function" ? o.soon(S.me) : o.soon;
       const target = zam ? `data-zamek="${esc(L(o.why(S.me)))}"` : pozdeji ? "data-soon" : o.act ? `data-act="${esc(o.act)}"` : o.panel ? `data-panel="${esc(o.panel)}"` : o.cid ? `data-pcid="${esc(o.cid)}"` : `data-go="${esc(o.go)}"`;
-      return `<button class="opt obr-karta${zam ? " zamceno" : ""}${pozdeji ? " vyvoj" : ""}${o.oddel ? " oddel" : ""}" ${target}><span class="ok-obr">${IMG(typeof o.obr === "function" ? o.obr() : o.obr)}${zam || pozdeji ? `<i class="ok-zamek">🔒 ${esc(pozdeji ? L(["Už brzy", "Coming soon"]) : L(["Zamčeno", "Locked"]))}</i>` : ""}</span>
+      return `<button class="opt obr-karta${zam ? " zamceno" : ""}${pozdeji ? " vyvoj" : ""}${o.oddel ? " oddel" : ""}" ${target}><span class="ok-obr">${IMG(typeof o.obr === "function" ? o.obr() : o.obr)}${zam || pozdeji ? `<i class="ok-zamek">🔒 ${esc(pozdeji ? L((o.soonT && o.soonT(S.me)) || ["Už brzy", "Coming soon"]) : L(["Zamčeno", "Locked"]))}</i>` : ""}</span>
         <span class="ok-txt"><b>${esc(L(o.n))}</b><small>${esc(L(o.d))}</small></span></button>`;
     }
     if (o.lock && o.lock(S.me)) return `<button class="opt zamceno" data-zamek="${esc(L(o.why(S.me)))}"><span class="ic">${o.ic}</span><b>${esc(L(o.n))}</b><small>${esc(L(["Zamčeno — ", "Locked — "]) + L(o.d))}</small></button>`;
@@ -6619,6 +6619,7 @@ const RAID = { st: null, key: "", timer: null, panel: null, busy: false };
 
 function raidScene(m) {
   if (!m) return { img: "mesto-brana", key: "brana" };
+  if (m.kampan_obr) return { img: m.kampan_obr, key: "boj" };       // 1.0-3-33: boj z dobrodružství — kulisa scény
   const pre = AREA_ART[m.location_id];
   const img = pre && m.node_id ? `vypravy/${pre}-${String(m.node_id).padStart(2, "0")}` : "mesto-brana";
   return { img, key: m.phase === "combat" ? "boj" : m.under ? "podzemi" : "vyprava" };
@@ -6734,6 +6735,7 @@ function drawRaid(view) {
     RAID.dociti = true;
     raidLoad().then((x) => { RAID.st = { ...(x || st), _docteno: true }; }).catch(() => {}).finally(() => { RAID.dociti = false; if (S.tab === "vyprava") drawRaid($("#view")); });
   }
+  if (!m && st.kampan_zpet) { RAID.st = null; go("kampan"); return; }      // 1.0-3-33: boj z dobrodružství skončil
   if (!m) { drawRaidSetup(view, st); return; }
   view.classList.remove("rozdel");   // 1.0-2-6: příprava výpravy dává na PC rozložení „obraz vlevo“ — rozjetá výprava ho mít nesmí (byla úzká vpravo, dokud se neobnovila stránka)
   if (m.status === "lobby") { drawLobby(view, m); return; }
@@ -6747,7 +6749,7 @@ function drawRaid(view) {
     ${kruh(L(["Životy", "Health"]), p.health, p.max_health, "hp", String(p.health))}
     ${combat ? (p.stamina ? kruh(L(["Energie", "Energy"]), p.stamina[0], p.stamina[1], "st", String(p.stamina[0])) : "")
       : `${p.satiety != null ? kruh(L(["Hlad", "Hunger"]), 100 - p.satiety, 100, "jidlo zizen", Math.max(0, 100 - p.satiety) + "%") : ""}${p.hydration != null ? kruh(L(["Žízeň", "Thirst"]), 100 - p.hydration, 100, "voda zizen" + (p.hydration <= 25 ? " vysoka" : ""), Math.max(0, 100 - p.hydration) + "%") : ""}`}</div></div>`).join("");
-  const foe = combat ? `<div class="vfoe${e.boss ? " boss" : ""}">${IMG("bytosti/" + enemyArt(e.name))}</div>
+  const foe = combat ? `<div class="vfoe${e.boss ? " boss" : ""}">${IMG(e.img || ("bytosti/" + enemyArt(e.name)))}</div>
     <div class="vfoehud"><b>${e.boss ? "👑 " : ""}${esc(e.name.split(" — ")[0])}</b>${bar(e.health, e.max_health, "hp big")}<span class="vval">${e.health}/${e.max_health}</span>
       ${e.intent ? `<div class="vintent">${esc(e.intent)}</div>` : ""}
       ${e.pack && e.pack.length ? `<div class="vpack">${e.pack.map((p) => `<span>${esc(p.name.split(" — ")[0])}${p.health != null ? " · ❤️ " + p.health : ""}</span>`).join("")}</div>` : ""}</div>` : "";
@@ -6773,7 +6775,7 @@ function drawRaid(view) {
     const ak = view.querySelector(".vyp-akce");
     if (ak && combat) {
       if ((ovl || []).length) { const v = ak.offsetHeight; if (v > 40) { RAID.ctlH = v; try { store.set("vyp-ctl-h", String(v)); } catch { /* bez úložiště */ } } }
-      else ak.style.minHeight = (RAID.ctlH || +(store.get("vyp-ctl-h") || 0) || (jeMobil() ? 0 : 290)) + "px";
+      else ak.style.minHeight = (RAID.ctlH || +(store.get("vyp-ctl-h") || 0) || (jeMobil() ? 200 : 290)) + "px";
     }
   }
   const s = mountLive(view, { still: m.phase === "combat" });
@@ -6865,6 +6867,22 @@ function vypPergamen(el, m) {
   const p1 = vt.querySelector("p");
   if (p1) { tmp.innerHTML = p1.innerHTML.split(/<br/i)[0]; const b = tmp.querySelector("b");
     if (b && cist(b.textContent) === cist(tmp.textContent) && cist(b.textContent).length < 70) p1.innerHTML = p1.innerHTML.replace(/^\s*<b>(.*?)<\/b>\s*(<br\s*\/?>)?/i, '<span class="vyp-nadpis">$1</span>'); }
+  vypPergamenStyl(vt);
+}
+
+// 1.0-3-33: styl pergamenu z dobrodružství i na výpravě — přímá řeč „…“ zvýrazněná, hody kostkou jako štítky,
+// iniciála na začátku vyprávění
+function vypPergamenStyl(vt) {
+  vt.querySelectorAll("p").forEach((p) => {
+    const radky = p.innerHTML.split(/<br\s*\/?>/i).map((r) => {
+      const t = r.replace(/<[^>]+>/g, "").trim();
+      return /^(🎲|Šance|Obratnost:|Hod |k20)/.test(t) || /^<span class="dim small"/i.test(r.trim()) ? `<span class="vyp-hod">${r}</span>` : r;
+    });
+    p.innerHTML = radky.join("<br>").replace(/„([^“<]{1,400})“/g, '<q class="kp-rec">$1</q>');
+  });
+  const prvni = [...vt.querySelectorAll("p")].find((p) => { const t = p.textContent.trim();
+    return !p.querySelector(".vyp-nadpis, .vyp-hod") && /^[A-Za-zÀ-žÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/.test(t) && t.length > 40; });
+  if (prvni) prvni.classList.add("iniciala");
 }
 
 // r27-4: příprava výpravy na webu — sólo i družina, lokace bez map (mapu si koupíš u písaře), obtížnost, glejt a nosič
@@ -7055,7 +7073,7 @@ async function raidClick(id, values = [], el = null) {
     animateDiff(before, RAID.st);
     drawRaid($("#view"));
     miniSync(r.mini, r.panel, "raid");   // r27-6: minihry (páčení, rybaření, lov) v kresleném okně
-    if (!r.mission && before && before.mission) toast(L(["Výprava skončila. Kořist a zkušenosti máš u sebe.", "The expedition is over."]));
+    if (!r.mission && before && before.mission && !before.mission.kampan) toast(L(["Výprava skončila. Kořist a zkušenosti máš u sebe.", "The expedition is over."]));
   } catch { RAID.st = await raidLoad(); drawRaid($("#view")); }
   finally { RAID.busy = false; }
 }

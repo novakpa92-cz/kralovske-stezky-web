@@ -4371,6 +4371,7 @@ html.mobil .hk-schop .hk-vlastnost p{font-size:.95rem}
 .kp-skryto{font-style:italic;text-align:center;padding:20px 4px}
 .kp-vy-stav{position:absolute;top:10px;right:12px;background:#120c08cc;padding:3px 10px;border-radius:6px;font-size:.88rem}
 .kp-vy-tl{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.kp-vy-zak{margin:0 0 6px;font-size:.92rem}.kp-vy-udalost{border:1px solid var(--gold);border-radius:8px;padding:8px 10px;background:#2b2115}.kp-vy-udalost p{margin:0 0 6px}
 /* ulice */
 .kp-mesto{max-width:470px;margin:0 auto;display:grid;grid-template-columns:repeat(var(--w),1fr);gap:2px;border-radius:10px;padding:6px;background:linear-gradient(#1c160ee6,#1c160ee6),var(--obr) center/cover}
 .kp-pole{position:relative;aspect-ratio:1;border:0;border-radius:4px;padding:0;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
@@ -4517,8 +4518,14 @@ html.mobil #vyzvy-panel{bottom:76px;right:8px;left:8px;max-width:none}
 .kp-kus.shoreno{display:flex;align-items:center;justify-content:center;background:#2a1c0e;color:#8a6a36;font-style:normal}
 .kp-pult{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.kp-pult .kp-kus{width:auto;min-width:120px}
 .kp-kapitoly{list-style:none;margin:10px 0;padding:0;display:flex;flex-direction:column;gap:4px}
-.kp-kap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:6px 10px;border:1px solid var(--line2);border-radius:6px;background:#120c0899}
-.kp-kap small{color:var(--muted)}.kp-kap.hotovo small{color:var(--green)}.kp-kap.zamceno{opacity:.7}
+.kp-kap{display:grid;grid-template-columns:96px minmax(0,1fr) auto;align-items:center;gap:10px;padding:6px;border:1px solid var(--line2);border-radius:8px;background:#120c0899}
+.kp-kap-obr{width:96px;height:60px;border-radius:6px;overflow:hidden;display:block}.kp-kap-obr img{width:100%;height:100%;object-fit:cover;display:block}
+.kp-kap-txt{display:flex;flex-direction:column;gap:2px;min-width:0}.kp-kap-txt i{font-size:.85rem;color:var(--muted);line-height:1.3}
+.kp-kap>small{white-space:nowrap;padding-right:6px}
+.kp-kap:not(:has(.kp-kap-obr)){grid-template-columns:minmax(0,1fr) auto}
+@media (max-width:600px){.kp-kap{grid-template-columns:72px minmax(0,1fr)}.kp-kap-obr{width:72px;height:54px}.kp-kap>small{grid-column:2;padding:0}}
+.kp-kap small{color:var(--muted)}.kp-kap.hotovo small{color:var(--green)}.kp-kap.zamceno{opacity:.55;filter:grayscale(1);background:#0d0a07aa}
+.kp-kap:not(.zamceno):not(.hotovo){border-color:var(--gold);background:linear-gradient(90deg,#3a2a12cc,#1c140bcc)}
 
 /* 1.0-3-18: nemoci */
 .nm-telo{display:flex;flex-direction:column;gap:10px;max-width:880px}
@@ -4589,3 +4596,16 @@ html.mobil .hero-karty .hk-zalozky button{font-size:clamp(7px,2.05vw,11px)!impor
 .kp-nep-obr{display:block;width:100%;height:150px;border-radius:6px;overflow:hidden;background:#1a0f0a}
 .kp-nep-obr img{width:100%;height:100%;object-fit:cover;object-position:50% 18%}
 html.mobil .kp-nep-obr{height:96px}
+
+/* 1.0-3-33: výprava — pergamen jako v dobrodružství (iniciála, přímá řeč, hody jako štítky) */
+.vyp-pergamen .vtext{font-family:var(--serif);font-size:1.06rem;line-height:1.62}
+.vyp-pergamen .vtext p.iniciala::first-letter{float:left;font-size:2.5em;line-height:.9;padding:4px 6px 0 0;color:#7a2e12;font-weight:700}
+.vyp-pergamen .kp-rec{color:#3c2410;font-style:italic}
+.vyp-pergamen .vyp-hod{display:inline-block;font-family:var(--sans);font-size:.78rem;color:#4d3d22;background:#d3bf92;border:1px solid #b39a66;border-radius:12px;padding:0 9px;margin:2px 0;line-height:1.5}
+.vyp-pergamen .vyp-hod small,.vyp-pergamen .vyp-hod .dim{font-size:inherit;color:inherit!important;opacity:1}
+@media (max-width:760px){.vyp-pergamen .vtext{font-size:.95rem;line-height:1.5}}
+/* 1.0-3-33: boj na telefonu — pergamen má pevnou výšku (vyplní zbytek obrazovky) a text se posouvá uvnitř; nemění velikost po tahu */
+@media (max-width:760px){
+  html.mobil.bez-menu .vyp.v2.boj .vyp-pergamen{flex:1 1 0!important;min-height:90px!important;overflow-y:auto}
+  html.mobil.bez-menu .vyp.v2.boj .vyp-akce:not(:has(button,select)){display:block!important;visibility:hidden}
+}
