@@ -86,7 +86,7 @@ function kpUvod(s) {
   const nf = s.dalsi_faze;
   const kap = (s.kapitoly || []).map((k) => `<li class="kp-kap${k.hotovo ? " hotovo" : ""}${k.odemceno ? "" : " zamceno"}"><b>Kapitola ${k.n}</b> — ${esc(k.nazev)}
       <small>${k.hotovo ? "✔ odehráno" : k.odemceno ? (nf && nf.faze === k.n ? "▶ na řadě" : "odemčeno") : "🔒 odemkne se " + esc(k.kdy)}</small></li>`).join("")
-    + `<li class="kp-kap zamceno"><b>Další kapitoly</b> <small>připravují se — každý den jedna</small></li>`;
+    + `<li class="kp-kap zamceno"><b>Další kapitoly</b> <small>přepracovávají se — termíny ohlásíme</small></li>`;
   const admin = s.admin ? `<div class="panel kp-admin"><h3>⚙ Testeři dobrodružství</h3><p class="muted small">Dokud není dobrodružství pro všechny, vidí ho jen správce, zkušební postava a tihle testeři: <b>${esc((s.testeri || []).join(", ") || "nikdo")}</b></p>
     <form class="row" data-tester><input name="jm" placeholder="jméno postavy" required><button class="btn small" name="p" value="1">Přidat</button><button class="btn small" name="p" value="0">Odebrat</button></form></div>` : "";
   return `<div class="kp-uvod" style="--obr:url('${kobr("pribehy/pribeh-klaster")}')"><div class="kp-uvod-text"><small>Dobrodružství 1</small><h2>${esc(s.dil || "Falešné stříbro")}</h2>
