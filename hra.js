@@ -3324,6 +3324,7 @@ const SHOPS_UI = {   // obchodník: obrázek, ikona, věta
   "Vetešník": { img: "mesto-vetesnik", ic: "🧺", say: ["Vetešník: „Co jinej vyhodí, já prodám.“", "Junk dealer: \"What others throw away, I sell.\""] },
   "Mlynář": { img: "mesto-mlyn", ic: "🌾", say: ["Mlynář: „Obilí sem, mouka tam. Groš za pytel.“", "Miller: \"Grain in, flour out. A groschen a sack.\""] },
   "Dřevorubec": { img: "mesto-brana", ic: "🪓", say: ["Dřevorubec: „Suché bukové, hoří jak smola.“", "Woodcutter: \"Dry beech, burns like pitch.\""] },   // 1.0-3-18
+  "Starý lovčí": { img: "mesto-brana", ic: "🦌", say: ["Starý lovčí: „Zvěřina z rána, kůže vydělané po staru. Kdo chce víc, ať si dojde do lesa.“", "Old huntsman: \"Fresh game and hides.\""] },   // 1.0-3-29
   "Rolník": { img: "mesto-brana", ic: "🌾", say: ["Rolník: „Sazenice, srp a hnůj. Na jaře zlato.“", "Farmer: \"Seedlings, sickles and dung.\""] },
   "Hostinský": { img: "mesto-hostinec", ic: "🍺", say: ["Hostinský: „Pivo, chleba, a něco na cestu?“", "Innkeeper: \"Beer, bread, and something for the road?\""] },
 };
@@ -3478,6 +3479,7 @@ const PLACES = {
       { go: "lekce/drevorubec", ic: "🪵", obr: "domov/nahled-brana-drevorubec", n: ["Lekce dřevorubectví", "Woodcutting lessons"], d: ["Víc dřeva ze sekání, sekera vydrží déle", "More wood, less axe wear"] },
       { go: "obchod/Rolník", ic: "🌾", obr: "domov/nahled-brana-rolnik", n: ["Rolník", "Farmer"], d: ["Srpy, sazenice, osivo a hnůj na pole", "Sickles, seedlings, seed and manure"] },
       { go: "lekce/rolnik", ic: "🌱", obr: "domov/nahled-brana-rolnik", n: ["Lekce rolnictví", "Farming lessons"], d: ["Víc úrody srpem i na statku", "Bigger harvests"] },
+      { go: "obchod/Starý lovčí", ic: "🥩", obr: "domov/nahled-brana-lovci", n: ["Starý lovčí", "Old huntsman"], d: ["Maso, uzeniny, kůže a kožešiny, peří, šípy a návnady", "Meat, hides, furs, arrows and bait"] },   // 1.0-3-29 (Pavel)
       { go: "lekce/lovec", ic: "🦌", obr: "domov/nahled-lov-lekce", n: ["Lekce lovectví", "Hunting lessons"], d: ["Starý lovčí učí lovčí: klidnější muška, víc kůží a masa", "For huntsmen: steadier aim, more hides"] },   // 1.0-3-26 (Pavel): z hájovny na bránu
       { sect: ["Za hradbami", "Outside the walls"] },          // r27-4: vidět jsou vždy, otevřít jdou až po koupi
       ...PODNIK_KARTY.map((o) => ({ ...o, n: { podnikprace: ["Výroba na usedlosti", "Farm crafting"], podnikuloziste: ["Komora usedlosti", "Farm storage"], podnikstav: ["Stav usedlosti", "Farm upkeep"] }[o.go], when: (m) => m.origin === "sedlak" && m.business })),

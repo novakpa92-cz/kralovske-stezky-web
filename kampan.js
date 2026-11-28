@@ -3,8 +3,29 @@
 "use strict";
 const KAMP = { st: null, timer: null, v: -1, busy: false, pick: { vahy: null, cil: 0, kus: null }, anim: null, posledniLog: 0, zvuk: {} };
 
-function kmd(t) {          // **tučně**, *kurzíva*, odstavce
-  return esc(t || "").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>").split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+function kmd(t) {          // **tučně**, *kurzíva*, odstavce; 1.0-3-30: přímá řeč „…“ zvýrazněná
+  return esc(t || "").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>")
+    .replace(/„([^“]{1,400})“/g, '<q class="kp-rec">$1</q>')
+    .split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+}
+
+// 1.0-3-30: pergamen — deník scény rozdělený na kroky (každá volba začíná nový). Poslední krok je nahoře a celý,
+// starší jsou sbalené pod ním, ať se nemusí rolovat.
+function kpDenik(log) {
+  const kroky = [[]];
+  let pred = null;
+  for (const x of log || []) {
+    const novy = x.volba || (!x.hod && pred && !pred.volba && !pred.hod);   // volba, nebo další vyprávění po minihře / boji
+    if (novy && kroky[kroky.length - 1].length) kroky.push([]);
+    kroky[kroky.length - 1].push(x);
+    pred = x;
+  }
+  const radek = (x) => x.hod ? `<div class="kp-hod">${esc(x.t)}</div>` : x.volba ? `<div class="kp-txt volba">${esc(x.t)}</div>`
+    : `<div class="kp-txt">${kmd(x.t)}</div>`;
+  const posl = kroky.pop();
+  const novy = `<div class="kp-krok novy">${posl.map(radek).join("")}</div>`;
+  const stare = kroky.length ? `<details class="kp-drive"><summary>📜 Dříve v této scéně (${kroky.length})</summary>${kroky.map((k) => `<div class="kp-krok">${k.map(radek).join("")}</div>`).join("")}</details>` : "";
+  return novy + stare;
 }
 function kobr(o) { return o ? `${IMG_BASE}${o}.webp` : ""; }
 
@@ -46,7 +67,7 @@ function kampanKresli() {
   if (R && R.chat) wireChat(box, () => kampanNacti(true));
   if (R && R.mini) kpMiniPo(box, R.mini);
   const log = box.querySelector(".kp-log");
-  if (log && R && R.v !== KAMP.v) { log.scrollTop = log.scrollHeight; }
+  if (log && R && R.v !== KAMP.v) { log.scrollTop = 0; }
   if (R && R.v !== KAMP.v) { kpZvuky(R); KAMP.v = R.v; }
 }
 
@@ -111,7 +132,7 @@ function kpHlava(R) {
 }
 
 function kpHra(s, R) {
-  const log = (R.log || []).map((x) => `<div class="kp-txt${x.volba ? " volba" : ""}${x.hod ? " hod" : ""}">${kmd(x.t)}</div>`).join("");
+  const log = kpDenik(R.log);
   let akce = "";
   if (R.mini) akce = kpMini(R, R.mini);
   else if (R.boj) akce = kpBoj(R, R.boj);
@@ -127,7 +148,7 @@ function kpVolby(R) {
   const vudce = R.clenove.find((c) => c.vudce);
   const tecky = (i) => R.clenove.filter((c) => c.hlas === i).map((c) => `<i class="kp-hlas" style="--b:${c.barva}" title="${esc(c.jm)}"></i>`).join("");
   const btn = (v) => `<button class="kp-volba${v.ok ? "" : " sedy"}" data-volba="${v.i}"${v.ok ? "" : " disabled"}>
-      <span>${esc(v.t)}</span>${v.hod ? `<small>🎲 ${esc(v.hod.attr)} · šance ${v.hod.sance} %</small>` : ""}${v.cena ? `<small>🪙 ${v.cena} gr.</small>` : ""}${v.proc ? `<small>${esc(v.proc)}</small>` : ""}
+      <span>${esc(v.t)}</span>${v.hod ? `<small>🎲 ${esc(v.hod.attr)} · ${esc(v.hod.obtiznost || "")}</small>` : ""}${v.cena ? `<small>🪙 ${v.cena} gr.</small>` : ""}${v.proc ? `<small>${esc(v.proc)}</small>` : ""}
       <span class="kp-tecky">${R.solo ? "" : tecky(v.i)}</span></button>`;
   return `<div class="kp-volby">${(R.volby || []).map(btn).join("")}</div>
     ${!R.solo ? `<p class="muted small">${R.vudce ? "👑 Rozhoduješ ty — ostatní vidíš podle barevných teček." : `Tvůj klik je hlas — rozhoduje ${esc(vudce ? vudce.jm : "vůdce")}.`}</p>` : ""}`;
@@ -147,7 +168,8 @@ function kpZvoneni(R, M) {
   const g = M["groše"].map((z, i) => `<button class="kp-gros${z ? " " + z : ""}" data-mini='{"gros":${i}}'${M.nasel ? " disabled" : ""}>
       <img alt="" src="${kobr("predmety/ikony/sberatelsky-gros")}"><span>${z === "tupe" ? "ťuk…" : z === "jasne" ? "cink!" : ""}</span></button>`).join("");
   const ost = (M.ostatni || []).map((o) => `<span class="kp-ost${o.nasel ? " ok" : ""}">${esc(o.jm)} ${o.nasel ? "✔" : "…"}</span>`).join("");
-  return `<div class="kp-grose">${g}</div>${M.nasel ? `<p class="muted small">Ten tvůj je měděný. Čeká se na ostatní.</p>` : ""}${ost ? `<div class="kp-ostatni">${ost}</div>` : ""}`;
+  return `<div class="kp-grose">${g}</div><p class="muted small">${M.nasel ? (M.minul ? "Kupec ti mince sebral — falešný jsi nenašel." : "Ten tvůj je měděný.") + " Čeká se na ostatní." : `Zbývá klepnutí: <b>${M.klep}</b> — víc ti jich nedovolí.`}</p>`
+    + `${ost ? `<div class="kp-ostatni">${ost}</div>` : ""}`;
 }
 
 function kpVahy(R, M) {
@@ -172,10 +194,11 @@ function kpVahy(R, M) {
       </g></svg>
       <div class="kp-misky" style="--nl:${naklon}deg">${misku("l")}${misku("r")}</div></div>
     <div class="kp-tray">${tray}</div>
-    <p class="kp-vahy-stav">${ja ? `<b>Jsi na tahu.</b> Klepni na groš a pak na misku (nebo ho přetáhni). ` : `Na tahu je <b>${esc(M.tah_jm)}</b>. `}Vážení ${M.vazeni.length}/${M.max === 3 ? "2 (+1)" : M.max}.${M.napoveda ? ` <span class="muted">Nápověda: ${esc(M.napoveda)}</span>` : ""}</p>
+    <p class="kp-vahy-stav">${ja ? `<b>Jsi na tahu.</b> Klepni na groš a pak na misku (nebo ho přetáhni). ` : `Na tahu je <b>${esc(M.tah_jm)}</b>. `}Vážení ${M.vazeni.length}/${M.max}. Falešný může být lehčí i těžší.${M.napoveda ? ` <span class="muted">Nápověda: ${esc(M.napoveda)}</span>` : ""}</p>
     ${ja ? `<p class="row"><button class="btn small" data-vmis="l">← Na levou</button><button class="btn small" data-vmis="r">Na pravou →</button><button class="btn small" data-vmis="x">Zpět na pult</button>
       <button class="btn small primary" data-mini='{"vazit":1}'${M.misky.l.length && M.misky.r.length && M.vazeni.length < M.max ? "" : " disabled"}>⚖ Vážit</button>
-      <button class="btn small" data-vukaz${M.vazeni.length && KAMP.pick.vahy != null && !M.misky.l.includes(KAMP.pick.vahy) && !M.misky.r.includes(KAMP.pick.vahy) ? "" : " disabled"}>👉 Tenhle je falešný${KAMP.pick.vahy != null ? " (č. " + (KAMP.pick.vahy + 1) + ")" : ""}</button></p>` : ""}
+      <button class="btn small" data-vukaz${M.vazeni.length && KAMP.pick.vahy != null && !M.misky.l.includes(KAMP.pick.vahy) && !M.misky.r.includes(KAMP.pick.vahy) ? "" : " disabled"}>👉 Falešný a lehčí${KAMP.pick.vahy != null ? " (č. " + (KAMP.pick.vahy + 1) + ")" : ""}</button>
+      <button class="btn small" data-vukaz="tezsi"${M.vazeni.length && KAMP.pick.vahy != null && !M.misky.l.includes(KAMP.pick.vahy) && !M.misky.r.includes(KAMP.pick.vahy) ? "" : " disabled"}>👉 Falešný a těžší</button></p>` : ""}
     ${hist ? `<ol class="kp-hist">${hist}</ol>` : ""}`;
 }
 
@@ -183,7 +206,7 @@ function kpPaceni(R, M) {
   const volny = M.koliky.findIndex((x) => !x.drzi);
   const k = M.koliky.map((x, i) => `<div class="kp-kolik${x.drzi ? " drzi" : ""}${i === volny ? " aktivni" : ""}" data-kol="${i}"><div class="kp-dra"><i class="kp-uchyt" style="left:${x.a}%;width:${x.b - x.a}%"></i>${i === volny ? `<i class="kp-jaz"></i>` : `<i class="kp-jaz klid" style="left:${x.drzi ? (x.a + x.b) / 2 : 0}%"></i>`}</div>
       <small>kolík ${i + 1} ${x.drzi ? "✔ drží" : ""}</small></div>`).join("");
-  const ticho = [0, 1, 2].map((i) => `<i class="${i < M.ticho ? "on" : ""}"></i>`).join("");
+  const ticho = [...Array(M.ticho_max || 3).keys()].map((i) => `<i class="${i < M.ticho ? "on" : ""}"></i>`).join("");
   return `<div class="kp-zamek" style="--obr:url('${kobr("kampan/kp-chodba-noc")}')"><div class="kp-ticho">Ticho ${ticho}</div>${k}</div>
     <p>${M.tah ? `<b>Jsi na tahu.</b> Zvedni kolík ${volny + 1} — klepni na <b>Pustit</b>, když je jazýček ve světlém úchytu.` : `Kolík zvedá <b>${esc(M.tah_jm)}</b>…`}</p>
     ${M.tah ? `<p><button class="btn primary kp-pustit" data-pustit="${volny}">🔓 Pustit</button></p>` : ""}`;
@@ -202,7 +225,7 @@ function kpVyhen(R, M) {
   const role = M.role || [];
   const barva = (p) => p == null ? "#333" : p < 35 ? "#5a1a10" : p < 58 ? "#b2321a" : p <= 82 ? "#f3c232" : "#fff6d8";
   const zar = M.zar == null ? `<div class="kp-skryto">žár vidí ${esc(M.kdo.mech || "")}</div>` : `<div class="kp-zar"><i class="pas"></i><i class="hod" style="height:${M.zar}%"></i></div><small>žár ${M.zar}</small>`;
-  const pruh = M.pruh == null ? `<div class="kp-skryto">železo vidí ${esc(M.kdo.kladivo || "")}</div>` : `<div class="kp-pruh" style="--c:${barva(M.pruh)}"></div><small>${M.pruh < 58 ? "studené" : M.pruh <= 82 ? "žluté — bij!" : "přehřáté"}</small>`;
+  const pruh = M.pruh == null ? `<div class="kp-skryto">železo vidí ${esc(M.kdo.kladivo || "")}</div>` : `<div class="kp-pruh" style="--c:${barva(M.pruh)}"></div><small>${M.pruh < (M.od || 62) ? "studené" : M.pruh <= (M.do || 78) ? "žluté — bij!" : "přehřáté"}</small>`;
   const tl = [];
   if (role.includes("mech")) tl.push(`<span class="row">Měch${M.zvoleno.mech ? " ✔" : ""}: <button class="btn small" data-mini='{"mech":"silne"}'>💨 Silně</button><button class="btn small" data-mini='{"mech":"slabe"}'>Slabě</button><button class="btn small" data-mini='{"mech":"nic"}'>Nechat</button></span>`);
   if (role.includes("kladivo")) tl.push(`<span class="row">Kladivo${M.zvoleno.kladivo ? " ✔" : ""}: <button class="btn small primary" data-mini='{"kladivo":"uder"}'>🔨 Udeřit</button><button class="btn small" data-mini='{"kladivo":"cekat"}'>Počkat</button></span>`);
@@ -227,7 +250,7 @@ function kpUlice(R, M) {
     cells += `<button class="kp-pole p-${c === "#" ? "dum" : c === "u" ? "ukryt" : c === "B" ? "brana" : "ulice"}${vidi.has(k) ? " videno" : ""}${M.cil && M.cil[0] === x && M.cil[1] === y ? " cil" : ""}${muj ? " muj" : ""}${lze ? " lze" : ""}" data-pole="${x},${y}"${lze ? "" : " disabled"}>${c === "u" ? "<s class=\"sud\"></s>" : c === "B" ? "<s class=\"brana\">brána</s>" : ""}${vojta}${kdo}</button>`;
   }
   const vedle = M.vojta && M.hraci.some((p) => Math.abs(p.p[0] - M.vojta[0]) + Math.abs(p.p[1] - M.vojta[1]) <= 1);
-  const oko = `<span class="kp-oko">${[0, 1, 2].map((i) => `<i class="${i < M.oko ? "on" : ""}"></i>`).join("")}</span>`;
+  const oko = `<span class="kp-oko">${[0, 1].map((i) => `<i class="${i < M.oko ? "on" : ""}"></i>`).join("")}</span>`;
   return `<div class="kp-mesto" style="--w:${W};--obr:url('${kobr("kampan/kp-ctvrt-mapa")}')">${cells}</div>
     <p class="row">Podezření ${oko} ${M.muj_tah ? "· tah zadán, čeká se na ostatní" : "· klepni na pole, kam jdeš (nejvýš 2 po ulici)"}
       ${vedle ? `<button class="btn small primary" data-mini='{"chytit":1}'>✋ Chytit ho!</button>` : ""}</p>
@@ -267,7 +290,7 @@ function kpVyslech(R, M) {
   const kola = M.kola.map((k) => `<li class="kp-vs-kolo"><b>„${esc(k.t)}“</b><span>${esc(M.kdo)}: „${esc(k.a)}“</span>
       ${k.tik ? `<em class="kp-tik">👁 ${esc(M.kdo)} ${esc(k.tik)}.</em>` : M.vidi_tik ? `<em class="kp-tik klid">👁 Klidný.</em>` : ""}
       ${k.soud ? `<small class="kp-soud ${k.soud}">${k.soud === "lez" ? "✋ Lže!" : "✔ Věříte"}</small>` : ""}</li>`).join("");
-  const duv = [0, 1, 2].map((i) => `<i class="${i < M.duvera ? "on" : ""}"></i>`).join("");
+  const duv = [0, 1].map((i) => `<i class="${i < M.duvera ? "on" : ""}"></i>`).join("");
   let tl = "";
   if (M.tazatel && M.ceka_soud) tl = `<p class="row"><b>Lže?</b><button class="btn small primary" data-mini='{"soud":"lez"}'>✋ Lže!</button><button class="btn small" data-mini='{"soud":"pravda"}'>✔ Věřím</button></p>`;
   else if (M.tazatel) tl = `<div class="kp-vs-otazky">${M.otazky.map((q) => `<button class="kp-volba" data-mini='{"otazka":${q.i}}'><span>„${esc(q.t)}“</span></button>`).join("")}</div>`;
@@ -307,19 +330,19 @@ function kpPlizeni(R, M) {
     const muj = M.muj_tah && M.muj_tah[0] === x && M.muj_tah[1] === y;
     cells += `<button class="kp-pole p-${c === "#" ? "dum" : c === "u" ? "ukryt" : "ulice"}${vidi.has(k) ? " videno" : ""}${M.cil[0] === x && M.cil[1] === y ? " cil" : ""}${muj ? " muj" : ""}${lze ? " lze" : ""}" data-pole="${x},${y}"${lze ? "" : " disabled"}>${c === "u" ? "<s class=\"sud\"></s>" : ""}${st ? `<i class="kp-straz">${sipka[st.smer]}</i>` : ""}${kdo}</button>`;
   }
-  const pop = `<span class="kp-oko">${[0, 1, 2].map((i) => `<i class="${i < M.poplach ? "on" : ""}"></i>`).join("")}</span>`;
+  const pop = `<span class="kp-oko">${[0, 1].map((i) => `<i class="${i < M.poplach ? "on" : ""}"></i>`).join("")}</span>`;
   return `<div class="kp-mesto kp-tvrz" style="--w:${W}">${cells}</div>
-    <p class="row">Poplach ${pop} · kolo ${M.kolo + 1}/${M.max} ${M.doma ? "· jsi u cíle, čekáš na ostatní" : M.muj_tah ? "· tah zadán" : "· klepni na sousední pole (nebo na sebe = stát)"}</p>
+    <p class="row">Poplach ${pop} · kolo ${M.kolo + 1}/${M.max} ${M.doma ? "· jsi u cíle, čekáš na ostatní" : M.muj_tah ? "· tah zadán" : "· šipky ukazují, kam se stráže dívají teď — po tahu se otočí podle své obchůzky"}</p>
     <p class="muted small">Červeně je, kam se stráže podívají po vašem tahu (šipka = směr). Ve stínu za sudy (▢) tě neuvidí.</p>`;
 }
 
 function kpBoj(R, B) {
-  const nep = B.nep.map((e) => `<button class="kp-nep${e.hp <= 0 ? " padl" : ""}${KAMP.pick.cil === e.i ? " cil" : ""}" data-cil="${e.i}"${e.hp <= 0 ? " disabled" : ""}>${e.img ? `<span class="kp-nep-obr">${IMG(e.img)}</span>` : ""}<b>${esc(e.jm)}</b>
+  const nep = B.nep.map((e) => `<button class="kp-nep${e.hp <= 0 ? " padl" : ""}${KAMP.pick.cil === e.i ? " cil" : ""}" data-cil="${e.i}"${e.hp <= 0 ? " disabled" : ""}>${e.img ? `<span class="kp-nep-obr">${IMG(e.img)}</span>` : ""}<b>${e.boss ? "👑 " : ""}${esc(e.jm)}</b>${e.chysta ? `<em class="kp-chysta">⚠️ napřahuje se!</em>` : ""}
       <span class="kp-hp"><i style="width:${Math.round(100 * e.hp / e.max)}%"></i></span><small>${e.hp}/${e.max}</small></button>`).join("");
   const hr = B.hraci.map((p) => `<div class="kp-bh${p.hp <= 0 ? " padl" : ""}" style="--b:${p.barva}"><b>${esc(p.jm)}${p.zvolil ? " ✔" : ""}</b><span class="kp-hp ja"><i style="width:${Math.round(100 * p.hp / p.max)}%"></i></span><small>${p.hp <= 0 ? "omráčený" : p.hp + "/" + p.max}</small></div>`).join("");
   const padli = B.hraci.filter((p) => p.hp <= 0 && !p.ja);
   const tl = !B.stojim ? `<p class="muted">Jsi omráčený — někdo tě musí ošetřit.</p>` : B.zvolil ? `<p class="muted">Čeká se na ostatní…</p>` :
-    `<p class="row"><button class="btn primary" data-boj="utok">⚔️ Útok</button><button class="btn" data-boj="silny">💥 Silný úder</button><button class="btn" data-boj="kryti">🛡️ Krytí</button>
+    `<p class="row"><button class="btn primary" data-boj="utok">⚔️ Útok</button><button class="btn" data-boj="silny">💥 Silný úder</button><button class="btn${B.nep.some((e) => e.chysta) ? " primary" : ""}" data-boj="kryti">🛡️ Krytí</button>${B.lek ? `<button class="btn" data-boj="lek" title="Použít z batohu">🧴 ${esc(B.lek)}</button>` : ""}
       ${padli.map((p) => `<button class="btn" data-boj="osetrit" data-komu="${esc(p.id)}">🩹 Ošetřit ${esc(p.jm)}</button>`).join("")}</p>`;
   return `<div class="kp-boj"><div class="kp-mini-hl"><b>⚔️ ${esc(B.nazev)} · kolo ${B.kolo}</b>${kpCas(B)}</div><div class="kp-nepratele">${nep}</div><div class="kp-hraci">${hr}</div>
     ${tl}<ul class="kp-mini-log">${B.log.slice(-5).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
@@ -354,8 +377,7 @@ function wireKp(box) {
     const i = KAMP.pick.vahy; KAMP.pick.vahy = null; Zvuk.sfx("mince");
     kampanAkce("kampan_mini", { data: { miska: b.dataset.vmis === "x" ? null : b.dataset.vmis, gros: i } });
   });
-  const vuk = box.querySelector("[data-vukaz]");
-  if (vuk) vuk.onclick = () => { const i = KAMP.pick.vahy; KAMP.pick.vahy = null; kampanAkce("kampan_mini", { data: { ukazat: i } }); };
+  box.querySelectorAll("[data-vukaz]").forEach((vuk) => vuk.onclick = () => { const i = KAMP.pick.vahy; KAMP.pick.vahy = null; kampanAkce("kampan_mini", { data: { ukazat: i, smer: vuk.dataset.vukaz === "tezsi" ? "tezsi" : "lehci" } }); });
   box.querySelectorAll("[data-pole]").forEach((b) => b.onclick = () => { const [x, y] = b.dataset.pole.split(",").map(Number); Zvuk.sfx("klik"); kampanAkce("kampan_mini", { data: { x, y } }); });
   box.querySelectorAll("[data-cil]").forEach((b) => b.onclick = () => { KAMP.pick.cil = Number(b.dataset.cil); kampanKresli(); });
   box.querySelectorAll("[data-boj]").forEach((b) => b.onclick = () => {
