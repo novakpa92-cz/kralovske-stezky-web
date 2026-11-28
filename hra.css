@@ -4484,3 +4484,22 @@ html.mobil #vyzvy-panel{bottom:76px;right:8px;left:8px;max-width:none}
 .ob-ik{display:inline-flex;cursor:help;border-radius:8px;outline:none}
 .ob-ik:hover,.ob-ik:focus-visible{box-shadow:0 0 0 2px var(--gold)}
 #uc-tip p{margin:.35em 0 .2em}
+/* 1.0-3-19: dobrodružství fáze 2 — stavidla a skládačka */
+.kp-stavidla{position:relative;aspect-ratio:3/2;border-radius:10px;background:linear-gradient(#120c0899,#120c0899),var(--obr) center/cover;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:end;padding:56px 18px 18px}
+.kp-st-nadrz{position:relative;height:150px;border:2px solid #6b5631;border-top:0;border-radius:0 0 10px 10px;background:#1c140acc;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;align-items:center;padding:4px}
+.kp-st-nadrz span{position:relative;z-index:1;font-size:.78rem;color:var(--gold2);text-align:center}
+.kp-st-nadrz b{position:relative;z-index:1;font-size:1.3rem;text-shadow:0 1px 4px #000}
+.kp-st-nadrz.plna{border-color:#c0503a;box-shadow:0 0 14px #c0503a88}
+.kp-voda{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#5aa0e0cc,#1f4f7acc);transition:height .7s}
+.kp-st-brana{position:absolute;top:10px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;background:#120c08dd;border:1px solid var(--line2);border-radius:6px;padding:2px 8px;font-size:.75rem}
+.kp-st-brana.otev{border-color:#5aa0e0;color:#9fd0ff}.kp-st-brana.zav{color:var(--muted)}
+.kp-skladacka{display:grid;grid-template-columns:repeat(var(--sl),minmax(0,1fr));gap:6px;padding:10px;border-radius:10px;background:#d9c08a;box-shadow:inset 0 0 30px #7a5a2a}
+.kp-slot{min-height:56px;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:var(--k-klik)}
+.kp-slot.prazdny{border:2px dashed #7a5a2a88;color:#7a5a2a;font-weight:700}
+.kp-kus{width:100%;min-height:52px;border:1px solid #8a6a36;border-radius:3px;background:#efe0b8;color:#2a1c0e;font-family:inherit;font-style:italic;font-size:.95rem;padding:6px;cursor:var(--k-klik);clip-path:polygon(0 4%,8% 0,30% 5%,55% 0,80% 6%,100% 2%,97% 50%,100% 96%,70% 100%,40% 95%,12% 100%,2% 94%,4% 50%)}
+.kp-kus.vybrany{background:#ffe9a8;box-shadow:0 0 0 3px var(--gold2)}.kp-kus.cizi{opacity:.75;cursor:default}
+.kp-kus.shoreno{display:flex;align-items:center;justify-content:center;background:#2a1c0e;color:#8a6a36;font-style:normal}
+.kp-pult{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.kp-pult .kp-kus{width:auto;min-width:120px}
+.kp-kapitoly{list-style:none;margin:10px 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.kp-kap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:6px 10px;border:1px solid var(--line2);border-radius:6px;background:#120c0899}
+.kp-kap small{color:var(--muted)}.kp-kap.hotovo small{color:var(--green)}.kp-kap.zamceno{opacity:.7}

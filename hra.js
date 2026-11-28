@@ -3298,7 +3298,8 @@ const PLACES = {
     opts: [
       { sect: ["Ven z města · Stezky", "Out of town · Trails"] },                 // r27-41: dlaždice s náhledem a krátkým popisem
       { go: "vyprava", ic: "🗺️", obr: "vypravy/rataje-01", n: ["Výprava", "Expedition"], d: ["Sám nebo s družinou do lesů, dolů a na hrad. Boje, truhly, kořist — vrať se, než vyprší čas.", "Solo or with a party into woods, mines, camps and castles."] },
-      { soon: true, ic: "📜", obr: "pribehy/pribeh-klaster", n: ["Dobrodružství", "Adventure"], d: ["Příběhová kampaň na pokračování — rozhovory, hádanky, volby s následky pro celé město. Už brzy.", "A story campaign with choices and consequences. Coming soon."] },
+      { go: "kampan", soon: (m) => !(m.kampan || (typeof kpJeAdmin === "function" && kpJeAdmin())), ic: "📜", obr: "pribehy/pribeh-klaster", n: ["Dobrodružství", "Adventure"],   // 1.0-3-19: odemyká se po kapitolách
+        d: ["Falešné stříbro — příběh po kapitolách: rozhovory, hádanky, minihry a volby s následky. Sám, nebo se skupinou.", "False Silver — a story in chapters: talks, riddles, mini-games and choices with consequences."] },
       { panel: "trails", ic: "🗡️", obr: "situace/sit-setkani", oddel: true, n: ["Na stezkách", "On the trails"], d: ["Po stopách cizí výpravy: přepadnout, obchodovat, nebo minout. Od 4. úrovně.", "Follow another expedition: ambush, trade or pass by."] },
       { sect: ["Za hradbami", "Outside the walls"] },          // r27-4: vidět jsou vždy, otevřít jdou až po koupi
       ...PODNIK_KARTY.map((o) => ({ ...o, n: { podnikprace: ["Výroba na usedlosti", "Farm crafting"], podnikuloziste: ["Komora usedlosti", "Farm storage"], podnikstav: ["Stav usedlosti", "Farm upkeep"] }[o.go], when: (m) => m.origin === "sedlak" && m.business })),
@@ -3528,14 +3529,15 @@ VIEWS.misto = (view) => {
       return `<button class="opt" data-go="${esc(o.go)}"><span class="ic">${u.ic || "⚖️"}</span><b>${esc(nm)}</b></button>`;
     }
     if (o.obr) {                                              // r27-41: dlaždice s malovaným náhledem a krátkým popisem
-      const zam = o.lock && o.lock(S.me), pozdeji = o.soon;
+      const zam = o.lock && o.lock(S.me), pozdeji = typeof o.soon === "function" ? o.soon(S.me) : o.soon;
       const target = zam ? `data-zamek="${esc(L(o.why(S.me)))}"` : pozdeji ? "data-soon" : o.act ? `data-act="${esc(o.act)}"` : o.panel ? `data-panel="${esc(o.panel)}"` : o.cid ? `data-pcid="${esc(o.cid)}"` : `data-go="${esc(o.go)}"`;
       return `<button class="opt obr-karta${zam ? " zamceno" : ""}${pozdeji ? " vyvoj" : ""}${o.oddel ? " oddel" : ""}" ${target}><span class="ok-obr">${IMG(typeof o.obr === "function" ? o.obr() : o.obr)}${zam || pozdeji ? `<i class="ok-zamek">🔒 ${esc(pozdeji ? L(["Už brzy", "Coming soon"]) : L(["Zamčeno", "Locked"]))}</i>` : ""}</span>
         <span class="ok-txt"><b>${esc(L(o.n))}</b><small>${esc(L(o.d))}</small></span></button>`;
     }
     if (o.lock && o.lock(S.me)) return `<button class="opt zamceno" data-zamek="${esc(L(o.why(S.me)))}"><span class="ic">${o.ic}</span><b>${esc(L(o.n))}</b><small>${esc(L(["Zamčeno — ", "Locked — "]) + L(o.d))}</small></button>`;
-    const target = o.soon ? "data-soon" : o.act ? `data-act="${esc(o.act)}"` : o.panel ? `data-panel="${esc(o.panel)}"` : o.cid ? `data-pcid="${esc(o.cid)}"` : `data-go="${esc(o.go)}"`;
-    return `<button class="opt${o.soon ? " later" : ""}" ${target}><span class="ic">${o.ic}</span><b>${esc(L(o.n))}</b><small>${esc(o.soon ? t("soon_short") : L(o.d))}</small></button>`;
+    const brzy = typeof o.soon === "function" ? o.soon(S.me) : o.soon;
+    const target = brzy ? "data-soon" : o.act ? `data-act="${esc(o.act)}"` : o.panel ? `data-panel="${esc(o.panel)}"` : o.cid ? `data-pcid="${esc(o.cid)}"` : `data-go="${esc(o.go)}"`;
+    return `<button class="opt${brzy ? " later" : ""}" ${target}><span class="ic">${o.ic}</span><b>${esc(L(o.n))}</b><small>${esc(brzy ? t("soon_short") : L(o.d))}</small></button>`;
   };
   const opts = p.opts.filter((o) => !o.when || o.when(S.me));
   let mriz = "", skup = [];                                   // r27-4: volby po oddílech (sect)

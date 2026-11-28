@@ -1,7 +1,7 @@
 // 1.0-3: Dobrodružství — příběhová kampaň „Falešné stříbro“ (server kampan.py). Načítá se před hra.js;
 // používá jeho pomocníky (h, esc, call, go, IMG_BASE, chatRebuild, chatHtml, wireChat, Zvuk, toast) až při běhu.
 "use strict";
-const KAMP = { st: null, timer: null, v: -1, busy: false, pick: { vahy: null, cil: 0 }, anim: null, posledniLog: 0, zvuk: {} };
+const KAMP = { st: null, timer: null, v: -1, busy: false, pick: { vahy: null, cil: 0, kus: null }, anim: null, posledniLog: 0, zvuk: {} };
 
 function kmd(t) {          // **tučně**, *kurzíva*, odstavce
   return esc(t || "").replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\*(.+?)\*/g, "<i>$1</i>").split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
@@ -61,13 +61,20 @@ function kpZvuky(R) {
 function kpUvod(s) {
   const poz = (s.pozvanky || []).map((p) => `<div class="kp-pozvanka"><span>📜 <b>${esc(p.vudce)}</b> tě zve do skupiny${p.clenove.length > 1 ? " (" + esc(p.clenove.join(", ")) + ")" : ""}.</span>
     <span class="row"><button class="btn small primary" data-kp="kampan_odpoved" data-rid="${esc(p.id)}" data-ano="1">Přidat se</button><button class="btn small" data-kp="kampan_odpoved" data-rid="${esc(p.id)}" data-ano="0">Odmítnout</button></span></div>`).join("");
-  const kron = s.kronika_f1 ? `<div class="panel kp-kronika"><h3>📖 Tvoje kronika — Groš, který nezvoní</h3><ul>${s.kronika_f1.map((x) => `<li>${esc(x)}</li>`).join("")}</ul><p class="muted small">Fáze 2 — Kaňk se připravuje.</p></div>` : "";
+  const kron = (s.kroniky || []).map((k) => `<div class="panel kp-kronika"><h3>📖 Tvoje kronika — kapitola ${k.faze}: ${esc(k.nazev)}</h3><ul>${k.kronika.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+  const nf = s.dalsi_faze;
+  const kap = (s.kapitoly || []).map((k) => `<li class="kp-kap${k.hotovo ? " hotovo" : ""}${k.odemceno ? "" : " zamceno"}"><b>Kapitola ${k.n}</b> — ${esc(k.nazev)}
+      <small>${k.hotovo ? "✔ odehráno" : k.odemceno ? (nf && nf.faze === k.n ? "▶ na řadě" : "odemčeno") : "🔒 odemkne se " + esc(k.kdy)}</small></li>`).join("")
+    + `<li class="kp-kap zamceno"><b>Další kapitoly</b> <small>připravují se — každý den jedna</small></li>`;
   const admin = s.admin ? `<div class="panel kp-admin"><h3>⚙ Testeři dobrodružství</h3><p class="muted small">Dokud není dobrodružství pro všechny, vidí ho jen správce, zkušební postava a tihle testeři: <b>${esc((s.testeri || []).join(", ") || "nikdo")}</b></p>
     <form class="row" data-tester><input name="jm" placeholder="jméno postavy" required><button class="btn small" name="p" value="1">Přidat</button><button class="btn small" name="p" value="0">Odebrat</button></form></div>` : "";
-  return `<div class="kp-uvod" style="--obr:url('${kobr("pribehy/pribeh-klaster")}')"><div class="kp-uvod-text"><small>Díl 1</small><h2>Falešné stříbro</h2>
+  return `<div class="kp-uvod" style="--obr:url('${kobr("pribehy/pribeh-klaster")}')"><div class="kp-uvod-text"><small>Dobrodružství 1</small><h2>${esc(s.dil || "Falešné stříbro")}</h2>
       <p>V Kutné Hoře se objevují groše, které nezvoní — měď pod tenkou vrstvou stříbra. A jeden z nich máš i ty v měšci.</p>
-      <p class="muted small">Příběh na pokračování: rozhovory, hádanky, minihry a volby s následky pro tvou postavu (vztahy ve městě, pověst, ceny). Hraje se sám, nebo ve skupině — o všem se hlasuje, rozhoduje vůdce. Od ${s.min_uroven}. úrovně, každý díl jednou za postavu.</p>
-      ${s.hotovo ? `<p><b>Fázi 1 máš odehranou.</b></p>` : `<p class="row"><button class="btn primary" data-kp="kampan_zalozit" data-solo="1">▶ Hrát sám</button><button class="btn" data-kp="kampan_zalozit" data-solo="0">👥 Založit skupinu</button></p>`}
+      <p class="muted small">Příběh na pokračování: rozhovory, hádanky, minihry a volby s následky pro tvou postavu (vztahy ve městě, pověst, ceny). Hraje se sám, nebo ve skupině — o všem se hlasuje, rozhoduje vůdce. Od ${s.min_uroven}. úrovně, každá kapitola jednou za postavu a navazuje na předchozí.</p>
+      <ol class="kp-kapitoly">${kap}</ol>
+      ${!nf ? `<p><b>Všechny připravené kapitoly máš odehrané.</b> Další přibude brzy.</p>` : !nf.odemceno ? `<p><b>Kapitola ${nf.faze} — ${esc(nf.nazev)}</b> se odemkne ${esc(nf.kdy)}.</p>`
+        : `${nf.faze > 1 ? `<p><b>Kapitola ${nf.faze}: ${esc(nf.nazev)}</b> — navazuje na tvoje rozhodnutí z minulé kapitoly. Do skupiny můžeš pozvat ty, kdo mají odehranou kapitolu ${nf.faze - 1}.</p>` : ""}
+        <p class="row"><button class="btn primary" data-kp="kampan_zalozit" data-solo="1">▶ Hrát sám — kapitola ${nf.faze}</button><button class="btn" data-kp="kampan_zalozit" data-solo="0">👥 Založit skupinu</button></p>`}
     </div></div>${poz}${kron}${admin}<p><button class="btn" data-zpet>← Na bránu</button></p>`;
 }
 
@@ -86,18 +93,20 @@ function kpLobby(s, R) {
     ${R.chat ? chatHtml("kampan:" + R.id, R.chat) : ""}</div>`;
 }
 
-// ------------------------------------------------------------------ konec fáze
+// ------------------------------------------------------------------ konec kapitoly
 function kpKonec(s, R) {
   const o = R.odmena || {};
   return `<div class="kp-hra">${kpHlava(R)}<div class="panel kp-konec"><div class="kp-log">${R.log.slice(-3).map((x) => `<div class="kp-txt">${kmd(x.t)}</div>`).join("")}</div>
-    <h3>📖 Kronika fáze</h3><ul>${(R.kronika || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
-    <p class="kp-odmena">Odměna: <b>${o.zk || 0} ZK</b> a <b>${o.gr || 0} gr.</b> pro každého. Fáze 2 — Kaňk se připravuje.</p>
-    <p><button class="btn primary" data-kp="kampan_ukoncit">Zavřít kroniku</button></p></div></div>`;
+    <h3>📖 Kronika kapitoly</h3><ul>${(R.kronika || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+    <p class="kp-odmena">Odměna: <b>${o.zk || 0} ZK</b> a <b>${o.gr || 0} gr.</b> pro každého.${R.dalsi ? "" : " Další kapitola se připravuje."}</p>
+    <p class="row">${R.dalsi ? (!R.dalsi.odemceno ? `<span class="muted">Kapitola ${R.dalsi.faze} — ${esc(R.dalsi.nazev)} se odemkne ${esc(R.dalsi.kdy)}.</span>`
+      : R.vudce ? `<button class="btn primary" data-kp="kampan_pokracovat">▶ Pokračovat: kapitola ${R.dalsi.faze} — ${esc(R.dalsi.nazev)}</button>` : `<span class="muted">Na pokračování kapitolou ${R.dalsi.faze} rozhoduje vůdce.</span>`) : ""}
+      <button class="btn${R.dalsi && R.dalsi.odemceno ? "" : " primary"}" data-kp="kampan_ukoncit">${R.dalsi && R.dalsi.odemceno ? "Teď ne, dohraju později" : "Zavřít kroniku"}</button></p></div></div>`;
 }
 
 // ------------------------------------------------------------------ hra
 function kpHlava(R) {
-  return `<div class="kp-hlava" style="--obr:url('${kobr(R.obr)}')"><div><small>${esc(R.dil)} · fáze ${R.faze}: ${esc(R.faze_nazev)}</small>
+  return `<div class="kp-hlava" style="--obr:url('${kobr(R.obr)}')"><div><small>Dobrodružství 1: ${esc(R.dil)} · kapitola ${R.faze}: ${esc(R.faze_nazev)}</small>
     <h2>${R.scena_c ? R.scena_c + "/" + R.scen + " · " : ""}${esc(R.scena_nazev || "")}</h2></div>${R.solo ? "" : kpClenove(R)}</div>`;
 }
 
@@ -130,7 +139,7 @@ function kpCas(M) { return M.zbyva != null ? `<span class="kp-cas${M.zbyva < 15 
 function kpMini(R, M) {
   const hl = `<div class="kp-mini-hl"><b>${esc(M.nazev)}</b>${kpCas(M)}</div><p class="kp-navod">${esc(M.navod)}</p>`;
   const log = M.log && M.log.length ? `<ul class="kp-mini-log">${M.log.slice(-4).map((x) => `<li>${kmd(x).replace(/<\/?p>/g, "")}</li>`).join("")}</ul>` : "";
-  const f = { zvoneni: kpZvoneni, vahy: kpVahy, paceni: kpPaceni, prohledavani: kpPokoj, vyhen: kpVyhen, ulice: kpUlice }[M.typ];
+  const f = { zvoneni: kpZvoneni, vahy: kpVahy, paceni: kpPaceni, prohledavani: kpPokoj, vyhen: kpVyhen, ulice: kpUlice, stavidla: kpStavidla, skladacka: kpSkladacka }[M.typ];
   return `<div class="kp-mini kp-${M.typ}">${hl}${f ? f(R, M) : ""}${log}</div>`;
 }
 
@@ -225,6 +234,34 @@ function kpUlice(R, M) {
     ${!M.vojta ? `<p class="muted small">Vojtu teď nevidíš — je moc daleko!</p>` : ""}`;
 }
 
+// 1.0-3-19: stavidla — šachta, odvodní štola, potok; každý tah jedno ovládání
+function kpStavidla(R, M) {
+  const hlad = (v, max) => `<i class="kp-voda" style="height:${Math.min(100, Math.round(100 * v / max))}%"></i>`;
+  const brana = (k, x) => `<div class="kp-st-brana ${M.otevreno[k] ? "otev" : "zav"}" style="left:${x}%"><b>${M.otevreno[k] ? "▲" : "▬"}</b><small>${esc({ nahon: "náhon", sachta: "šachta", potok: "potok" }[k])}</small></div>`;
+  const jm = { nahon: "Náhon", sachta: "Šachta → štola", potok: "Štola → potok", rumpal: "Rumpál" };
+  const tl = (M.moje || []).map((o) => o === "rumpal" ? `<button class="btn small" data-mini='{"akce":"rumpal"}'>⚙ Točit rumpálem</button>`
+    : `<button class="btn small${M.otevreno[o] ? "" : " primary"}" data-mini='{"akce":"${o}"}'>${M.otevreno[o] ? "Zavřít" : "Otevřít"}: ${esc(jm[o])}</button>`).join("");
+  return `<div class="kp-stavidla" style="--obr:url('${kobr("vypravy/kanek-04")}')">
+      <div class="kp-st-nadrz sachta"><span>Šachta</span>${hlad(M.S, 10)}<b>${M.S}</b></div>
+      <div class="kp-st-nadrz stola${M.O >= M.O_max ? " plna" : ""}"><span>Odvodní štola (havíři)</span>${hlad(M.O, M.O_max)}<b>${M.O}/${M.O_max}</b></div>
+      ${brana("nahon", 8)}${brana("sachta", 40)}${brana("potok", 74)}</div>
+    <p class="row">Tah ${M.kolo + 1}/${M.max} · přetečení k havířům: <b>${M.pretekl}</b>${M.pretekl ? " ⚠" : ""}</p>
+    ${M.zvolil ? `<p class="muted">Tah zadán${M.ceka.length ? " — čeká se na: " + esc(M.ceka.join(", ")) : ""}.</p>`
+      : tl ? `<p class="row">${tl}<button class="btn small" data-mini='{"akce":"nic"}'>Počkat</button></p>` : ""}
+    ${R.solo ? "" : `<p class="muted small">${Object.entries(M.kdo).map(([o, j]) => esc(jm[o]) + ": " + esc(j)).join(" · ")}</p>`}`;
+}
+
+// 1.0-3-19: skládačka — kusy dopisu na pult a do mřížky
+function kpSkladacka(R, M) {
+  const kus = (k, kde) => k.shoreno ? `<span class="kp-kus shoreno">— spáleno —</span>`
+    : `<button class="kp-kus${k.moje ? "" : " cizi"}${KAMP.pick.kus === k.i ? " vybrany" : ""}" data-kus="${k.i}" data-kde="${kde}"${k.moje ? "" : " disabled"}>${k.t ? esc(k.t) : `<i>kus drží ${esc(k.kdo)}</i>`}</button>`;
+  const sloty = M.sloty.map((k, j) => `<div class="kp-slot${k ? "" : " prazdny"}" data-slot="${j}">${k ? kus(k, "slot") : `<span>${j + 1}</span>`}</div>`).join("");
+  return `<div class="kp-skladacka" style="--sl:${M.sloupcu}">${sloty}</div>
+    <div class="kp-pult">${M.pult.map((k) => kus(k, "pult")).join("") || `<span class="muted small">Všechny kusy leží na stole.</span>`}</div>
+    <p class="row">Kontroly: <b>${M.kontroly}</b>${M.posledni != null ? ` · naposledy sedělo <b>${M.posledni}</b>` : ""}
+      <button class="btn small primary" data-mini='{"kontrola":1}'${M.plno ? "" : " disabled"}>📜 Přečíst dopis</button></p>`;
+}
+
 function kpBoj(R, B) {
   const nep = B.nep.map((e) => `<button class="kp-nep${e.hp <= 0 ? " padl" : ""}${KAMP.pick.cil === e.i ? " cil" : ""}" data-cil="${e.i}"${e.hp <= 0 ? " disabled" : ""}><b>${esc(e.jm)}</b>
       <span class="kp-hp"><i style="width:${Math.round(100 * e.hp / e.max)}%"></i></span><small>${e.hp}/${e.max}</small></button>`).join("");
@@ -273,6 +310,18 @@ function wireKp(box) {
   box.querySelectorAll("[data-boj]").forEach((b) => b.onclick = () => {
     const a = b.dataset.boj; Zvuk.sfx(a === "kryti" ? "odrazeno" : a === "osetrit" ? "klik" : "mec");
     kampanAkce("kampan_boj", { data: { akce: a, cil: a === "osetrit" ? b.dataset.komu : KAMP.pick.cil } });
+  });
+  // skládačka: klepnout na kus, pak na místo (klepnutí na položený kus ho vybere; druhé klepnutí na místo ho vrátí)
+  box.querySelectorAll("[data-kus]").forEach((b) => b.onclick = (ev) => {
+    ev.stopPropagation();
+    const i = Number(b.dataset.kus);
+    KAMP.pick.kus = KAMP.pick.kus === i ? null : i; Zvuk.sfx("stranka"); kampanKresli();
+  });
+  box.querySelectorAll("[data-slot]").forEach((sl) => sl.onclick = () => {
+    const j = Number(sl.dataset.slot);
+    if (KAMP.pick.kus == null) { if (!sl.classList.contains("prazdny")) kampanAkce("kampan_mini", { data: { zpet: j } }); return; }
+    const i = KAMP.pick.kus; KAMP.pick.kus = null; Zvuk.sfx("klik");
+    kampanAkce("kampan_mini", { data: { kus: i, slot: j } });
   });
   const pus = box.querySelector("[data-pustit]");
   if (pus) pus.onclick = () => { const i = Number(pus.dataset.pustit); Zvuk.sfx("klik"); kampanAkce("kampan_mini", { data: { kolik: i, pos: kpJazPoz() } }); };
