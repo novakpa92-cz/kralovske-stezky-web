@@ -6697,6 +6697,7 @@ function bar(v, max, cls) {
 async function raidLoad(quiet = true) {
   try {
     const r = await call("raid", {}, quiet);
+    if (r && r.vzkazy && r.vzkazy.length) vzkazyUkaz(r.vzkazy);   // 1.0-3-22: oznámení o pádu na výpravě hned
     return r;
   } catch { return null; }
 }

@@ -2090,7 +2090,8 @@ body.mh-otevreno{overflow:hidden}
 
 .velin .adm-hrac{background:#1c130c;border-color:#3a2a18}
 .velin .muted{color:#bfae8a}
-@media(max-width:760px){.velin{grid-template-columns:1fr}.vl-menu{flex-direction:row;overflow-x:auto}.vl-logo{display:none}}
+@media(max-width:760px){.velin{grid-template-columns:1fr}.vl-menu{flex-direction:row;overflow-x:visible;flex-wrap:wrap;gap:4px;padding:8px;border-right:0;border-bottom:1px solid #3a2a18}.vl-logo{display:none}
+  .vl-menu button{border:1px solid #3a2a18;border-radius:6px;padding:6px 10px;font-size:.92rem}.vl-menu button.on{border-color:#e8c46a}}   /* 1.0-3-22: na telefonu všechny sekce vidět (zalomené), ne posouvání do strany */
 .vl-sez{display:inline-block;font-style:normal;font-size:.7rem;padding:1px 7px;border-radius:8px;background:#3a2a14;color:#f3d382;margin-bottom:4px}
 
 /* r27-6: hřbitov zvířátek a zdraví mazlíčka */
