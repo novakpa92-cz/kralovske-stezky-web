@@ -1037,7 +1037,7 @@ async function admPostava(uid) {
 VIEWS.admin = async (view) => {
   view.innerHTML = `<div class="velin"><div class="panel empty">…</div></div>`;
   let r; try { r = await call("admin", { action: "stav" }); } catch { go("mesto"); return; }
-  const S_ = [["prehled", "Přehled"], ["hraci", "Hráči"], ["sprava", "Správa hráče"], ["cas", "Datum a čas"], ["pocasi", "Počasí"], ["udalosti", "Události"], ["zk", "Zkušební režim"], ["spravci", "Správci"], ["verze", "Verze a nasazení"], ["hosp", "Hospodářství"]];
+  const S_ = [["prehled", "Přehled"], ["hraci", "Hráči"], ["sprava", "Správa hráče"], ["cas", "Datum a čas"], ["pocasi", "Počasí"], ["udalosti", "Události"], ["zk", "Zkušební režim"], ["spravci", "Správci"], ["verze", "Verze a nasazení"], ["hosp", "Hospodářství"], ["diag", "Diagnostika"]];
   const K = r.kalendar || {}, Pc = r.pocasi || {}, U = r.udalosti || {};
   const msg = (x) => toast(noEmoji(x.text || "").replace(/\*\*/g, ""));
   const obnov = async () => { await call("me").catch(() => {}); render(); };
@@ -1091,6 +1091,7 @@ VIEWS.admin = async (view) => {
           <span class="prep-stav"><b>${S.me.zk_vse ? "Zapnuto" : "Vypnuto"}</b><small>${S.me.zk_vse ? "vše odemčené" : "kliknutím odemkneš vše"}</small></span></label></div>
         <h4 class="vl-kat">Testování domova</h4><p class="muted small">Zkušební postava se přestěhuje do vybraného domu se vším nábytkem, co se vejde, a plnými zásobami.</p>
         <div class="vl-mriz">${[["chalupa", "Chalupa"], ["dum", "Měšťanský dům"]].map(([k, n]) => `<button class="vl-volba" data-zkdum="${k}">${esc(n)}</button>`).join("")}</div>` : ""}`,
+    diag: () => `<div id="adm-diag"><div class="panel empty">Měřím data…</div></div>`,   // 1.0-3-21: načte se zvlášť (může chvíli trvat)
     verze: () => `<div class="vl-form"><button class="btn" data-adm="info">Zjistit verzi na GitHubu</button>
         <button class="btn primary" data-adm="nova" data-q="Nasadit novou verzi z GitHubu a restartovat bota?">Nasadit novou verzi</button>
         <button class="btn" data-adm="restart" data-q="Restartovat bota? Hráči budou chvíli offline.">Restartovat bota</button>
@@ -1226,6 +1227,35 @@ VIEWS.admin = async (view) => {
   view.querySelectorAll("[data-spr-pryc]").forEach((b) => b.onclick = async () => { try { msg(await call("admin", { action: "admin_odebrat", data: { uid: b.dataset.sprPryc } })); render(); } catch {} });
   view.querySelectorAll("[data-pocasi]").forEach((b) => b.onclick = async () => { try { msg(await call("admin", { action: "pocasi", data: { pocasi: b.dataset.pocasi, hodin: $("#a-poc-h")?.value } })); await obnov(); } catch {} });
   view.querySelectorAll("[data-ud]").forEach((b) => b.onclick = async () => { try { msg(await call("admin", { action: "udalost", data: { klic: b.dataset.ud, hodin: $("#a-ud-h")?.value } })); await obnov(); } catch {} });
+  const diagBox = view.querySelector("#adm-diag");
+  if (diagBox) {                                           // 1.0-3-21: Admin → Diagnostika
+    const f = (n) => Number(n || 0).toLocaleString("cs-CZ");
+    const kresli = (x) => { const d = x.diag || {};
+      diagBox.innerHTML = `${x.text ? `<div class="panel notice">${esc(noEmoji(x.text).replace(/\*\*/g, ""))}</div>` : ""}
+        <div class="vl-radek hs-dl">
+          <div class="vl-box"><small>Stav hry</small><b>${f(d.kb)} kB</b><em>databáze ${d.db_kb != null ? f(d.db_kb) + " kB" : "—"}</em></div>
+          <div class="vl-box"><small>Jeden zápis</small><b>${f(d.dump_ms)} ms</b><em>${d.odlozene ? "sloučené ukládání zapnuto" : "ukládá se hned"} · zápisů ${f(d.zapisu)}</em></div>
+          <div class="vl-box"><small>Hráčů</small><b>${f(d.hracu)}</b><em>hrobů ${f(d.hrobu)} · přihlášení ${f(d.tokenu)}</em></div>
+          <div class="vl-box"><small>Výpravy</small><b>${f(Object.values(d.vyprav || {}).reduce((a, b) => a + b, 0))}</b><em>${esc(Object.entries(d.vyprav || {}).map(([k, v]) => k + " " + v).join(" · "))}</em></div>
+          <div class="vl-box"><small>Zálohy</small><b>${f(d.zalohy)}</b><em>${d.posledni_zaloha ? "poslední " + new Date(d.posledni_zaloha * 1000).toLocaleString("cs-CZ") : "žádná"}</em></div>
+          <div class="vl-box${d.chyb ? " zle" : ""}"><small>Nalezené chyby</small><b>${f(d.chyb)}</b><em>${d.chyb ? "seznam níž" : "data jsou v pořádku"}</em></div></div>
+        <div class="hs-sloupce">
+          <section class="vl-box"><h4>Co zabírá místo</h4><table class="hs-tab"><tr><th>Část</th><th>kB</th></tr>${(d.casti || []).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${f(v)}</td></tr>`).join("")}</table></section>
+          <section class="vl-box"><h4>Největší hráči</h4><table class="hs-tab"><tr><th>Hrdina</th><th>kB</th><th>Nejvíc</th></tr>${(d.nejvetsi || []).map((h_) => `<tr><td>${esc(h_.jm)} <small>úr. ${h_.level}</small></td><td>${f(h_.kb)}</td><td><small>${esc(h_.pole.join(" · "))}</small></td></tr>`).join("")}</table></section></div>
+        <section class="vl-box"><h4>Bezpečný úklid <span>${(d.uklid || []).length ? "uvolní ~" + f((d.uklid || []).reduce((a, z) => a + z.usetri_kb, 0)) + " kB" : "není co uklízet"}</span></h4>
+          ${(d.uklid || []).length ? `<ul>${d.uklid.map((z) => `<li>${esc(z.co)}: <b>${f(z.pocet)}</b>${z.usetri_kb ? " · " + f(z.usetri_kb) + " kB" : ""}</li>`).join("")}</ul>` : ""}
+          <p class="muted small">Postavy, groše ani věci hráčů se nemažou. Před úklidem se vždy uloží záloha. Jednou denně se uklízí samo.</p>
+          <div class="vl-form"><button class="btn primary" data-diag="diag_uklid"${(d.uklid || []).length ? "" : " disabled"} data-q="Uložit zálohu a provést bezpečný úklid?">Uklidit</button>
+            <button class="btn" data-diag="diag_zaloha">Uložit zálohu teď</button><button class="btn" data-diag="diag">Změřit znovu</button></div></section>
+        ${d.chyb ? `<section class="vl-box"><h4>Nalezené chyby <span>${f(d.chyb)}</span></h4><table class="hs-tab"><tr><th>Druh</th><th>Kdo</th><th>Co</th></tr>
+          ${(d.chyby || []).map((c) => `<tr><td>${esc(c.druh)}</td><td>${esc(c.kdo)}</td><td>${esc(c.co)}</td></tr>`).join("")}</table>
+          <p class="muted small">Chyby se samy neopravují — oprav je ve Správě hráče, nebo mi je pošli.</p></section>` : ""}`;
+      diagBox.querySelectorAll("[data-diag]").forEach((b) => b.onclick = async () => {
+        if (b.dataset.q && !confirm(b.dataset.q)) return;
+        b.disabled = true;
+        try { kresli(await call("admin", { action: b.dataset.diag })); } catch { b.disabled = false; } }); };
+    call("admin", { action: "diag" }).then(kresli).catch(() => { diagBox.innerHTML = `<div class="panel empty">Diagnostika se nenačetla.</div>`; });
+  }
   view.querySelectorAll("[data-adm]").forEach((b) => b.onclick = async () => {
     if (b.dataset.q && !confirm(b.dataset.q)) return;
     b.disabled = true;

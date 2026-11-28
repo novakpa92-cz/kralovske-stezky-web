@@ -4536,3 +4536,4 @@ button.dv-kruh{border:0;padding:0;cursor:help;font:inherit;position:relative;ove
 @media (max-width:760px){.pr2-hlava picture img{height:140px}.pr2-karty{grid-template-columns:1fr}}
 .nm-sluzby.jeden{grid-template-columns:1fr}   /* 1.0-3-18: důl a lekce — jedna služba na řádek */
 .nm-sluzba.hotovo{border-color:#6f8f3c88}
+.vl-box.zle{border-color:#a33;background:rgba(170,50,40,.08)}   /* 1.0-3-21: diagnostika — chyby */
