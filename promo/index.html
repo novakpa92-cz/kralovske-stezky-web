@@ -125,12 +125,12 @@ a{color:#e2bf6a}a:hover{color:#f3d68e}
 /* Počítadlo návštěvníků: prohlížeč se ohlásí jako nový nejvýš jednou denně; číslo drží bot hry. */
 (function () {
   var den = new Date().toISOString().slice(0, 10), novy = false;
-  try { novy = localStorage.getItem("ks-promo-den") !== den; } catch (e) { novy = true; }
+  try { novy = localStorage.getItem("ks-promo-navsteva") !== den; } catch (e) { novy = true; }
   fetch("https://libricivitatis.eu/stezky-api.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ op: "promo", novy: novy }) })
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (!d || !d.ok) return;
-      if (novy) { try { localStorage.setItem("ks-promo-den", den); } catch (e) { /* bez úložiště */ } }   // započítáno až po úspěšné odpovědi
+      if (novy) { try { localStorage.setItem("ks-promo-navsteva", den); } catch (e) { /* bez úložiště */ } }   // započítáno až po úspěšné odpovědi
       if (!d.celkem) return;
       var n = d.celkem, c = n.toLocaleString("cs-CZ");
       var t = n === 1 ? "nahlédl už " + c + " dobrodruh" : (n >= 2 && n <= 4) ? "nahlédli už " + c + " dobrodruzi" : "nahlédlo už " + c + " dobrodruhů";
