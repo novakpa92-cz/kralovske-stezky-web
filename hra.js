@@ -2404,6 +2404,7 @@ VIEWS.dul = async (view) => {
 // 1.0-3-18: lekce u mistrů mimo hostinec — havíř (důl), dřevorubec a rolník (brána)
 const LEKCE_MISTR = { dul: ["mesto-dul", ["Havíř", "Miner"], ["Havíř: „Žíla se nečte očima, ale uchem. Poslouchej skálu.“", "\"Listen to the rock.\""], "domov/nahled-dul-havir", "misto/dul"],
   drevorubec: ["mesto-brana", ["Dřevorubec", "Woodcutter"], ["Dřevorubec: „Sekeru nenes, nech ji padat. Zbytek udělá dřevo.“", "\"Let the axe fall.\""], "domov/nahled-brana-drevorubec", "misto/brana"],
+  lovec: ["mesto-brana", ["Starý lovčí", "Old huntsman"], ["Lovčí: „Vítr ti řekne víc než oči. Kdo ho neposlouchá, loví jen vlastní stín.“", "\"Listen to the wind.\""], "domov/nahled-lov-lekce", "misto/brana"],   // 1.0-3-26
   rolnik: ["mesto-brana", ["Rolník", "Farmer"], ["Rolník: „Půda vrátí, co jí dáš. Hnůj, pot a trpělivost.“", "\"The soil returns what you give.\""], "domov/nahled-brana-rolnik", "misto/brana"] };
 VIEWS.lekce = async (view) => {
   const kde = LEKCE_MISTR[S.arg] ? S.arg : "dul", M = LEKCE_MISTR[kde];
@@ -2416,7 +2417,8 @@ VIEWS.lekce = async (view) => {
       return `<div class="nm-sluzba"><span class="nm-obr">${IMG(M[3])}</span><div><b>${esc(k.jm + " " + k.lvl + "/" + k.max)}</b>
         <p class="muted small">${esc(k.co)}</p><div class="dv-praxe"><i style="width:${pr.toFixed(1)}%"></i></div><p class="muted small">${esc(stav)}</p></div>
         <button class="btn small primary" data-lk="${esc(k.key)}"${!k.lekci_konec && k.plna && !k.dnes && (r.coins || 0) >= k.cena ? "" : " disabled"}>${esc(k.lekci_konec ? "—" : L(["Lekce · ", "Lesson · "]) + k.cena + " gr.")}</button></div>`; }).join("")}</div>
-      <p class="muted small">${esc(L(["Praxi sbíráš prací (kopání krumpáčem, sekání sekerou, sklizeň srpem a na statku). Body 1–3 potvrdí lekce, dál rostou samy — nejvýš o bod za herní den.", "Practice by working; lessons confirm points 1–3."]))}</p>`;
+      <p class="muted small">${esc(kde === "lovec" ? L(["Praxi sbíráš lovem na výpravách (zásah a stahování úlovku). Body 1–3 potvrdí lekce, dál rostou samy — nejvýš o bod za herní den.", "Practice by hunting; lessons confirm points 1–3."])
+        : L(["Praxi sbíráš prací (kopání krumpáčem, sekání sekerou, sklizeň srpem a na statku). Body 1–3 potvrdí lekce, dál rostou samy — nejvýš o bod za herní den.", "Practice by working; lessons confirm points 1–3."]))}</p>`;
     box.querySelectorAll("[data-lk]").forEach((b) => b.onclick = async () => { b.disabled = true;
       try { const x = await call("lekce", { key: b.dataset.lk, kde }); Zvuk.sfx("mince"); kresli(x, x.text); } catch { b.disabled = false; } });
   };
@@ -3476,6 +3478,7 @@ const PLACES = {
       { go: "lekce/drevorubec", ic: "🪵", obr: "domov/nahled-brana-drevorubec", n: ["Lekce dřevorubectví", "Woodcutting lessons"], d: ["Víc dřeva ze sekání, sekera vydrží déle", "More wood, less axe wear"] },
       { go: "obchod/Rolník", ic: "🌾", obr: "domov/nahled-brana-rolnik", n: ["Rolník", "Farmer"], d: ["Srpy, sazenice, osivo a hnůj na pole", "Sickles, seedlings, seed and manure"] },
       { go: "lekce/rolnik", ic: "🌱", obr: "domov/nahled-brana-rolnik", n: ["Lekce rolnictví", "Farming lessons"], d: ["Víc úrody srpem i na statku", "Bigger harvests"] },
+      { go: "lekce/lovec", ic: "🦌", obr: "domov/nahled-lov-lekce", n: ["Lekce lovectví", "Hunting lessons"], d: ["Starý lovčí učí lovčí: klidnější muška, víc kůží a masa", "For huntsmen: steadier aim, more hides"] },   // 1.0-3-26 (Pavel): z hájovny na bránu
       { sect: ["Za hradbami", "Outside the walls"] },          // r27-4: vidět jsou vždy, otevřít jdou až po koupi
       ...PODNIK_KARTY.map((o) => ({ ...o, n: { podnikprace: ["Výroba na usedlosti", "Farm crafting"], podnikuloziste: ["Komora usedlosti", "Farm storage"], podnikstav: ["Stav usedlosti", "Farm upkeep"] }[o.go], when: (m) => m.origin === "sedlak" && m.business })),
       { go: "statek", ic: "🌾", obr: "domov/podnik-usedlost", n: ["Usedlost", "Farmstead"], d: ["Statek sedláka: pole, chlév, dvůr a výroba.", "The peasant's farm: fields, barn, yard"],
@@ -6651,7 +6654,7 @@ const VYP_DRUH = (id, boj) => {
   if (/^(extract|return)$/.test(a)) return "domu";
   if (a === "withdraw" || a === "lpgive") return "ustup";
   if (/^na-boss$|^boss$/.test(a)) return "vyzva";
-  if (/^na-(hunt|stalk|skin|gather|fish|dig|learn_hunt)$|^lp\d+$/.test(a)) return "dovednost";
+  if (/^na-(hunt|stalk|skin|gather|fish|dig)$|^lp\d+$/.test(a)) return "dovednost";
   if (/^(useitem|gift|journal|abilities|panel)$/.test(a) || /^ks:party:/.test(id)) return "drobne";
   return "akce";
 };
