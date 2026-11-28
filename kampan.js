@@ -139,7 +139,7 @@ function kpCas(M) { return M.zbyva != null ? `<span class="kp-cas${M.zbyva < 15 
 function kpMini(R, M) {
   const hl = `<div class="kp-mini-hl"><b>${esc(M.nazev)}</b>${kpCas(M)}</div><p class="kp-navod">${esc(M.navod)}</p>`;
   const log = M.log && M.log.length ? `<ul class="kp-mini-log">${M.log.slice(-4).map((x) => `<li>${kmd(x).replace(/<\/?p>/g, "")}</li>`).join("")}</ul>` : "";
-  const f = { zvoneni: kpZvoneni, vahy: kpVahy, paceni: kpPaceni, prohledavani: kpPokoj, vyhen: kpVyhen, ulice: kpUlice, stavidla: kpStavidla, skladacka: kpSkladacka }[M.typ];
+  const f = { zvoneni: kpZvoneni, vahy: kpVahy, paceni: kpPaceni, prohledavani: kpPokoj, vyhen: kpVyhen, ulice: kpUlice, stavidla: kpStavidla, skladacka: kpSkladacka, vyslech: kpVyslech, sifra: kpSifra, plizeni: kpPlizeni }[M.typ];
   return `<div class="kp-mini kp-${M.typ}">${hl}${f ? f(R, M) : ""}${log}</div>`;
 }
 
@@ -262,6 +262,57 @@ function kpSkladacka(R, M) {
       <button class="btn small primary" data-mini='{"kontrola":1}'${M.plno ? "" : " disabled"}>📜 Přečíst dopis</button></p>`;
 }
 
+// 1.0-3-22: výslech — otázky, odpovědi, tiky (vidí pozorovatel), soud „Lže / Věřím“
+function kpVyslech(R, M) {
+  const kola = M.kola.map((k) => `<li class="kp-vs-kolo"><b>„${esc(k.t)}“</b><span>${esc(M.kdo)}: „${esc(k.a)}“</span>
+      ${k.tik ? `<em class="kp-tik">👁 ${esc(M.kdo)} ${esc(k.tik)}.</em>` : M.vidi_tik ? `<em class="kp-tik klid">👁 Klidný.</em>` : ""}
+      ${k.soud ? `<small class="kp-soud ${k.soud}">${k.soud === "lez" ? "✋ Lže!" : "✔ Věříte"}</small>` : ""}</li>`).join("");
+  const duv = [0, 1, 2].map((i) => `<i class="${i < M.duvera ? "on" : ""}"></i>`).join("");
+  let tl = "";
+  if (M.tazatel && M.ceka_soud) tl = `<p class="row"><b>Lže?</b><button class="btn small primary" data-mini='{"soud":"lez"}'>✋ Lže!</button><button class="btn small" data-mini='{"soud":"pravda"}'>✔ Věřím</button></p>`;
+  else if (M.tazatel) tl = `<div class="kp-vs-otazky">${M.otazky.map((q) => `<button class="kp-volba" data-mini='{"otazka":${q.i}}'><span>„${esc(q.t)}“</span></button>`).join("")}</div>`;
+  else tl = `<p class="muted">Ptá se <b>${esc(M.role.tazatel)}</b>${M.vidi_tik ? " — ty sleduj tvář a řekni mu, kdy lže." : "."}</p>`;
+  return `<div class="kp-vyslech"><div class="kp-vs-hl">${esc(M.kdo)} · otázka ${Math.min(M.kola.length + (M.ceka_soud ? 0 : 1), M.max)}/${M.max} · trpělivost <span class="kp-oko">${duv}</span></div>
+    <ol class="kp-vs-kola">${kola}</ol>${tl}
+    ${R.solo ? "" : `<p class="muted small">Ptá se ${esc(M.role.tazatel)}, tvář sleduje ${esc(M.role.pozorovatel)}.</p>`}</div>`;
+}
+
+// 1.0-3-22: šifra — značky, známý klíč, doplnit neznámé
+function kpSifra(R, M) {
+  const pis = "AÁBCČDĎEÉĚFGHIÍJKLMNŇOÓPRŘSŠTŤUÚŮVYÝZŽ".split("");
+  const zn = M.znaky.map((x) => x.mezera ? `<span class="kp-si-mezera">${x.c === " " ? "" : esc(x.c)}</span>`
+    : `<span class="kp-si-z${x.neznama ? " nez" : ""}"><i>${esc(x.z)}</i><b>${esc(x.c || x.tip || "·")}</b></span>`).join("");
+  const nez = M.nezname.map((z) => `<label class="kp-si-vol"><i>${esc(z)}</i><select data-sifra="${esc(z)}"><option value="">?</option>${pis.map((c) => `<option${(M.znaky.find((x) => x.z === z) || {}).tip === c ? " selected" : ""}>${c}</option>`).join("")}</select></label>`).join("");
+  const klic = M.muj_klic.map(([c, z]) => `<span><i>${esc(z)}</i>=${esc(c)}</span>`).join("");
+  return `<div class="kp-sifra">${zn}</div>
+    <p class="muted small">${R.solo ? "Klíč znáš skoro celý — doplň písmena k neznámým značkám podle slov, která už dávají smysl." : "Každý zná jen kus klíče (vidíš jen svá písmena). Řekněte si, co víte, a doplňte neznámé značky."}</p>
+    ${R.solo ? "" : `<div class="kp-si-klic">Tvůj kus klíče: ${klic || "—"}</div>`}
+    <div class="kp-si-nez">${nez}</div>
+    <p class="row">Kontroly: <b>${M.kontroly}</b>${M.posledni != null ? ` · naposledy sedělo <b>${M.posledni}</b>` : ""}
+      <button class="btn small primary" data-mini='{"kontrola":1}'${M.plno ? "" : " disabled"}>📜 Přečíst</button></p>`;
+}
+
+// 1.0-3-22: plížení — mřížka se strážemi a jejich pohledem v příštím kole
+function kpPlizeni(R, M) {
+  const ja = (M.hraci || []).find((x) => x.ja) || { p: [0, 0] };
+  const vidi = new Set(M.vidi.map((p) => p.join(",")));
+  const H = M.mapa.length, W = M.mapa[0].length;
+  const sipka = { l: "◀", p: "▶", n: "▲", d: "▼" };
+  let cells = "";
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const c = M.mapa[y][x], k = x + "," + y;
+    const st = M.straze.find((s) => s.p[0] === x && s.p[1] === y);
+    const kdo = M.hraci.filter((p) => p.p[0] === x && p.p[1] === y).map((p) => `<i class="kp-fig" style="--b:${p.barva}" title="${esc(p.jm)}"></i>`).join("");
+    const lze = !M.doma && !M.muj_tah && c !== "#" && !st && Math.abs(x - ja.p[0]) + Math.abs(y - ja.p[1]) <= 1;
+    const muj = M.muj_tah && M.muj_tah[0] === x && M.muj_tah[1] === y;
+    cells += `<button class="kp-pole p-${c === "#" ? "dum" : c === "u" ? "ukryt" : "ulice"}${vidi.has(k) ? " videno" : ""}${M.cil[0] === x && M.cil[1] === y ? " cil" : ""}${muj ? " muj" : ""}${lze ? " lze" : ""}" data-pole="${x},${y}"${lze ? "" : " disabled"}>${c === "u" ? "<s class=\"sud\"></s>" : ""}${st ? `<i class="kp-straz">${sipka[st.smer]}</i>` : ""}${kdo}</button>`;
+  }
+  const pop = `<span class="kp-oko">${[0, 1, 2].map((i) => `<i class="${i < M.poplach ? "on" : ""}"></i>`).join("")}</span>`;
+  return `<div class="kp-mesto kp-tvrz" style="--w:${W}">${cells}</div>
+    <p class="row">Poplach ${pop} · kolo ${M.kolo + 1}/${M.max} ${M.doma ? "· jsi u cíle, čekáš na ostatní" : M.muj_tah ? "· tah zadán" : "· klepni na sousední pole (nebo na sebe = stát)"}</p>
+    <p class="muted small">Červeně je, kam se stráže podívají po vašem tahu (šipka = směr). Ve stínu za sudy (▢) tě neuvidí.</p>`;
+}
+
 function kpBoj(R, B) {
   const nep = B.nep.map((e) => `<button class="kp-nep${e.hp <= 0 ? " padl" : ""}${KAMP.pick.cil === e.i ? " cil" : ""}" data-cil="${e.i}"${e.hp <= 0 ? " disabled" : ""}><b>${esc(e.jm)}</b>
       <span class="kp-hp"><i style="width:${Math.round(100 * e.hp / e.max)}%"></i></span><small>${e.hp}/${e.max}</small></button>`).join("");
@@ -323,6 +374,7 @@ function wireKp(box) {
     const i = KAMP.pick.kus; KAMP.pick.kus = null; Zvuk.sfx("klik");
     kampanAkce("kampan_mini", { data: { kus: i, slot: j } });
   });
+  box.querySelectorAll("[data-sifra]").forEach((sel) => sel.onchange = () => kampanAkce("kampan_mini", { data: { znak: sel.dataset.sifra, pismeno: sel.value } }));
   const pus = box.querySelector("[data-pustit]");
   if (pus) pus.onclick = () => { const i = Number(pus.dataset.pustit); Zvuk.sfx("klik"); kampanAkce("kampan_mini", { data: { kolik: i, pos: kpJazPoz() } }); };
 }

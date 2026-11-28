@@ -4537,3 +4537,17 @@ button.dv-kruh{border:0;padding:0;cursor:help;font:inherit;position:relative;ove
 .nm-sluzby.jeden{grid-template-columns:1fr}   /* 1.0-3-18: důl a lekce — jedna služba na řádek */
 .nm-sluzba.hotovo{border-color:#6f8f3c88}
 .vl-box.zle{border-color:#a33;background:rgba(170,50,40,.08)}   /* 1.0-3-21: diagnostika — chyby */
+/* 1.0-3-22: výslech, šifra, plížení */
+.kp-vyslech{display:flex;flex-direction:column;gap:8px}.kp-vs-hl{display:flex;gap:8px;align-items:center;color:var(--muted)}
+.kp-vs-kola{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.kp-vs-kolo{display:flex;flex-direction:column;gap:2px}.kp-vs-kolo span{font-style:italic}
+.kp-tik{color:#f0a060;font-size:.9rem}.kp-tik.klid{color:var(--muted)}
+.kp-soud{font-weight:700}.kp-soud.lez{color:#e07a5a}.kp-soud.pravda{color:var(--green)}
+.kp-vs-otazky{display:flex;flex-direction:column;gap:6px}
+.kp-sifra{display:flex;flex-wrap:wrap;gap:4px 2px;padding:12px;border-radius:8px;background:#e9d6a8;color:#2a1c0e}
+.kp-si-z{display:flex;flex-direction:column;align-items:center;min-width:20px}.kp-si-z i{font-style:normal;font-size:1.15rem;line-height:1}
+.kp-si-z b{font-size:.85rem;min-height:1em;color:#5e1a10}.kp-si-z.nez i{color:#9a2a1a}.kp-si-mezera{width:12px}
+.kp-si-klic{display:flex;flex-wrap:wrap;gap:8px;font-size:.85rem;color:var(--muted)}.kp-si-klic i{font-style:normal;color:var(--gold2)}
+.kp-si-nez{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.kp-si-vol{display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--line2);border-radius:6px}
+.kp-si-vol i{font-style:normal;font-size:1.2rem;color:var(--gold2)}.kp-si-vol select{min-height:36px}
+.kp-tvrz{background:#1a140e}.kp-straz{font-style:normal;color:#ff9a7a;font-size:1rem;text-shadow:0 0 6px #000}
